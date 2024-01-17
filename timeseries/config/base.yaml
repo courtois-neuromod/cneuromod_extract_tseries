@@ -1,0 +1,6 @@
+inpath: ../data
+outpath: ../output
+
+defaults:
+  - extraction: base
+  - dataset: null
