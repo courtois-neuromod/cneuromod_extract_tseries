@@ -1,3 +1,4 @@
+from typing import List, Tuple, Dict, Union
 import argparse
 import glob
 import os
@@ -5,15 +6,10 @@ from pathlib import Path
 
 import h5py
 import nibabel as nib
-from giga_connectome import (
-    __version__,
-    get_denoise_strategy,
-    utils,
-)
-from giga_connectome.connectome import generate_timeseries_connectomes
+
 from giga_connectome.denoise import denoise_nifti_voxel, is_ica_aroma
 from giga_connectome.mask import _check_mask_affine, _get_consistent_masks
-from nilearn.connectome import ConnectivityMeasure
+
 from nilearn.image import (
     get_data,
     math_img,
@@ -22,8 +18,193 @@ from nilearn.image import (
 )
 from nilearn.maskers import NiftiLabelsMasker, NiftiMapsMasker
 from nilearn.masking import compute_multi_epi_mask
+from omegaconf import DictConfig
 from scipy.ndimage import binary_closing
 from tqdm import tqdm
+
+from utils import (
+    generate_timeseries,
+    get_denoise_strategy,
+    get_subject_list,
+    parse_standardize_options,
+    _check_mask_affine,
+    _get_consistent_masks,
+)
+
+
+class ExtractionAnalysis:
+    """ExtractionAnalysis.
+
+    This class performs the timeseries extraction on a specified
+    CNeuromod dataset within a specified set of parcels using
+    a specified denoising strategy.
+    """
+
+    def __init__(
+        self: "ExtractionAnalysis",
+        config: DictConfig,
+    ) -> None:
+        """.
+
+        Extracts paths and timeseries extraction parameters from the
+        Hydra configuration file(s).
+        """
+        self.config: DictConfig = config
+        self.set_params()
+
+
+    def set_params(self: "ExtractionAnalysis") -> None):
+        """.
+
+        Define analysis parameters.
+        """
+        self.set_paths()
+        # define subject list
+        self.subjects = get_subject_list(
+            self.bids_dir,
+            self.config.subject_list,
+        )
+        # define analysis params
+        # TODO: update standardization, see nilearn warning
+        self.standardize = parse_standardize_options(
+            self.config.standardize,
+        )
+        self.strategy = get_denoise_strategy(
+            self.config.denoise_strategy,
+            self.config.strategy_dir,
+        )
+        # set compression parameters
+        self.set_compression()
+
+
+    def set_paths(self: "ExtractionAnalysis") -> None:
+        """.
+
+        Set all analysis paths.
+        """
+        # Set input paths
+        self.bids_dir = Path(
+            f"{self.config.data_dir}/{self.config.dataset}.fmriprep"
+        ).resolve()
+        # grey-matter mask in MNI-space, probability segmentation
+        # NEEDED? probably not needed in native space
+        self.mni_gm_path = Path(
+            f"{self.config.template_dir}/tpl-{self.config.template}/"
+            f"tpl-{self.config.template}_res-{self.config.gm_res}_label-GM_probseg.nii.gz",
+        ).resolve()
+        # define path to parcellation atlas
+        # TODO: update
+        self.parcellation_path = Path(
+            f"{self.config.template_dir}/tpl-MNI152NLin2009bAsym/"
+            "tpl-MNI152NLin2009bAsym_res-03_atlas-BASC_desc"
+            f"-{self.desc}_{self.atlas_type}.nii.gz"
+        ).resolve()
+
+        # Set output paths
+        self.timeseries_dir = Path(
+            f"{self.config.output_dir}/{self.config.dataset}/timeseries"
+        ).resolve()
+        self.timeseries_dir.mkdir(parents=True, exist_ok=True)
+        # NEEDED? save subject-specific grey matter mask and parcel atlas
+        self.mask_dir = Path(
+            f"{self.config.output_dir}/{self.config.dataset}/subject_masks"
+        ).resolve()
+        self.mask_dir.mkdir(exist_ok=True, parents=True)
+
+
+    def set_compression(self: "ExtractionAnalysis") -> None:
+        """.
+
+        Set compression parameters for timeseries exported in .h5 file
+        """
+        if self.config.compression is None:
+            self.comp_args = {}
+        elif self.config.compression not in ["gzip", "lzf"]:
+            raise ValueError(
+                "Select 'gzip', 'lzf' or 'None' as valid compression."
+            )
+        else:
+            self.comp_args = {
+                "compression": self.config.compression,
+            }
+            if self.config.compression == "gzip":
+                if self.config.compression_opts not in range(1, 10):
+                    raise ValueError(
+                        "Select compression_opts in [0, 10] for gzip compression."
+                    )
+                self.comp_args["compression_opts"] = self.config.compression_opts
+
+
+    def extract(self: "ExtractionAnalysis") -> None):
+        """.
+
+        Extract denoised timeseries from individual subject datasets.
+        """
+        for subject in self.subjects:
+            bold_list, mask_list = self.compile_bold_list(subject)
+
+            subject_mask_nii, subject_mask_path = make_subjectGM_mask(
+                subject,
+                mask_list,
+                sp,
+            )
+            subject_parcel_nii, subject_parcel_path = make_subject_parcel(
+                subject,
+                subject_mask_nii,
+                sp,
+            )
+            atlas_masker, subj_tseries_path, processed_episodes = prep_subject(
+                subject,
+                subject_parcel_path,
+                sp,
+            )
+            extract_subject_timeseries(
+                bold_list,
+                processed_episodes,
+                subject_mask_path,
+                atlas_masker,
+                subj_tseries_path,
+                sp,
+            )
+
+
+    def compile_bold_list(
+        self: "ExtractionAnalysis",
+        subject: str,
+    ) -> Tuple[list, list]:
+        """.
+
+        Compile list of subject's bold and functional brain mask files.
+        """
+        found_mask_list = sorted(
+            glob.glob(
+                f"{self.bids_dir}/sub-{subject}/"
+                f"ses-0*/func/*{self.config.template}_"
+                "desc-brain_mask.nii.gz",
+                ),
+            )
+        if exclude := _check_mask_affine(found_mask_list, verbose=2):
+            found_mask_list, __annotations__ = _get_consistent_masks(
+                found_mask_list,
+                exclude,
+                )
+            print(f"Remaining: {len(found_mask_list)} masks")
+
+        bold_list = []
+        mask_list = []
+        for fm in found_mask_list:
+            sub, ses, task, space, _, _ = fm.split('/')[-1].split('_')
+            bpath = (
+                f"{sp.args.bids_dir}/{sub}/{ses}/func/"
+                f"{sub}_{ses}_{task}_{space}_desc-preproc_bold.nii.gz"
+            )
+
+            if Path(bpath).exists():
+                bold_list.append(bpath)
+                mask_list.append(fm)
+
+        return bold_list, mask_list
+
 
 """
 This script is a custom adapatation of the giga_connectome library

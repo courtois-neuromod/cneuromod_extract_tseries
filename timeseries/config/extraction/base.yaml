@@ -1,0 +1,20 @@
+# @package _global_
+
+data_dir: ../data
+dataset: null
+output_dir: ../output
+template_dir: ../atlases
+strategy_dir: null
+subject_list: null
+denoise_strategy: simple+gsr
+standardize: zscore
+smoothing_fwhm: 5.0
+compression: gzip
+compression_opts: 4
+
+template: MNI152NLin2009cAsym
+gm_res: 02
+n_iter: 2
+desc: 444
+atlas_name: MIST
+atlas_type: dseg

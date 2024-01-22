@@ -1,5 +1,5 @@
 import hydra
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 
 
 @hydra.main(
@@ -13,6 +13,8 @@ def run(config: DictConfig) -> None:
     Args:
         config (DictConfig): .
     """
+    print(OmegaConf.to_yaml(config))
+
     from timeseries.extract import ExtractionAnalysis
 
     analysis = ExtractionAnalysis(config)
