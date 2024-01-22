@@ -1,15 +1,9 @@
 from typing import List, Tuple, Dict, Union
-import argparse
 import glob
-import os
 from pathlib import Path
 
 import h5py
 import nibabel as nib
-
-from giga_connectome.denoise import denoise_nifti_voxel, is_ica_aroma
-from giga_connectome.mask import _check_mask_affine, _get_consistent_masks
-
 from nilearn.image import (
     get_data,
     math_img,
@@ -19,13 +13,15 @@ from nilearn.image import (
 from nilearn.maskers import NiftiLabelsMasker, NiftiMapsMasker
 from nilearn.masking import compute_multi_epi_mask
 from omegaconf import DictConfig
-from scipy.ndimage import binary_closing
 from tqdm import tqdm
 
 from utils import (
+    denoise_nifti_voxel,
     generate_timeseries,
     get_denoise_strategy,
     get_subject_list,
+    merge_masks,
+    parse_bids_name,
     parse_standardize_options,
     _check_mask_affine,
     _get_consistent_masks,
@@ -35,8 +31,8 @@ from utils import (
 class ExtractionAnalysis:
     """ExtractionAnalysis.
 
-    This class performs the timeseries extraction on a specified
-    CNeuromod dataset within a specified set of parcels using
+    This class performs the extraction of timeseries from a
+    CNeuromod dataset within a custom set of parcels using
     a specified denoising strategy.
     """
 
@@ -59,7 +55,6 @@ class ExtractionAnalysis:
         Define analysis parameters.
         """
         self.set_paths()
-        # define subject list
         self.subjects = get_subject_list(
             self.bids_dir,
             self.config.subject_list,
@@ -73,39 +68,44 @@ class ExtractionAnalysis:
             self.config.denoise_strategy,
             self.config.strategy_dir,
         )
-        # set compression parameters
         self.set_compression()
 
 
     def set_paths(self: "ExtractionAnalysis") -> None:
         """.
 
-        Set all analysis paths.
+        Set all analysis input and output paths.
         """
-        # Set input paths
+        # Input paths
         self.bids_dir = Path(
             f"{self.config.data_dir}/{self.config.dataset}.fmriprep"
         ).resolve()
         # grey-matter mask in MNI-space, probability segmentation
-        # NEEDED? probably not needed in native space
-        self.mni_gm_path = Path(
-            f"{self.config.template_dir}/tpl-{self.config.template}/"
-            f"tpl-{self.config.template}_res-{self.config.gm_res}_label-GM_probseg.nii.gz",
-        ).resolve()
+        if self.config.template == "MNI152NLin2009cAsym":
+            self.template_gm_path = Path(
+                f"{self.config.template_gm_path}",
+            ).resolve()
+            if not self.template_gm_path.exists():
+                raise ValueError(
+                    "Template grey matter mask not found."
+                )
         # define path to parcellation atlas
-        # TODO: update
-        self.parcellation_path = Path(
-            f"{self.config.template_dir}/tpl-MNI152NLin2009bAsym/"
-            "tpl-MNI152NLin2009bAsym_res-03_atlas-BASC_desc"
-            f"-{self.desc}_{self.atlas_type}.nii.gz"
-        ).resolve()
+        # TODO: update depending on template vs native parcellation
+        if self.config.template_parcellation is not None:
+            self.parcellation_path = Path(
+                f"{self.config.template_parcellation}"
+            ).resolve()
+            if not self.parcellation_path.exists():
+                raise ValueError(
+                    "Template parcellation not found."
+                )
 
         # Set output paths
         self.timeseries_dir = Path(
             f"{self.config.output_dir}/{self.config.dataset}/timeseries"
         ).resolve()
         self.timeseries_dir.mkdir(parents=True, exist_ok=True)
-        # NEEDED? save subject-specific grey matter mask and parcel atlas
+        # save subject-specific grey matter mask and parcel atlas
         self.mask_dir = Path(
             f"{self.config.output_dir}/{self.config.dataset}/subject_masks"
         ).resolve()
@@ -143,28 +143,15 @@ class ExtractionAnalysis:
         for subject in self.subjects:
             bold_list, mask_list = self.compile_bold_list(subject)
 
-            subject_mask_nii, subject_mask_path = make_subjectGM_mask(
+            subject_parcellation, subject_mask = self.make_subject_parcel(
                 subject,
                 mask_list,
-                sp,
             )
-            subject_parcel_nii, subject_parcel_path = make_subject_parcel(
+            self.extract_subject_timeseries(
                 subject,
-                subject_mask_nii,
-                sp,
-            )
-            atlas_masker, subj_tseries_path, processed_episodes = prep_subject(
-                subject,
-                subject_parcel_path,
-                sp,
-            )
-            extract_subject_timeseries(
                 bold_list,
-                processed_episodes,
-                subject_mask_path,
-                atlas_masker,
-                subj_tseries_path,
-                sp,
+                subject_parcellation,
+                subject_mask,
             )
 
 
@@ -176,11 +163,16 @@ class ExtractionAnalysis:
 
         Compile list of subject's bold and functional brain mask files.
         """
+        if self.config.template not in ["MNI152NLin2009cAsym", "T1w"]:
+            raise ValueError(
+                "Select 'MNI152NLin2009cAsym' or 'T1w' as template."
+            )
+
         found_mask_list = sorted(
             glob.glob(
                 f"{self.bids_dir}/sub-{subject}/"
-                f"ses-0*/func/*{self.config.template}_"
-                "desc-brain_mask.nii.gz",
+                f"ses-*/func/*{self.config.template}"
+                "*_mask.nii.gz",
                 ),
             )
         if exclude := _check_mask_affine(found_mask_list, verbose=2):
@@ -193,522 +185,245 @@ class ExtractionAnalysis:
         bold_list = []
         mask_list = []
         for fm in found_mask_list:
-            sub, ses, task, space, _, _ = fm.split('/')[-1].split('_')
-            bpath = (
-                f"{sp.args.bids_dir}/{sub}/{ses}/func/"
-                f"{sub}_{ses}_{task}_{space}_desc-preproc_bold.nii.gz"
-            )
+            identifier = fm.split('/')[-1].split('_space')[0]
+            sub, ses = identifier.split('_')[:2]
+            bpath = sorted(glob.glob(
+                f"{self.bids_dir}/{sub}/{ses}/func/"
+                f"{identifier}*_desc-preproc_*bold.nii.gz"
+            ))
 
-            if Path(bpath).exists():
-                bold_list.append(bpath)
+            if len(bpath) == 1 and Path(bpath[0]).exists():
+                bold_list.append(bpath[0])
                 mask_list.append(fm)
 
         return bold_list, mask_list
 
 
-"""
-This script is a custom adapatation of the giga_connectome library
-which extracts denoised time series and computes connectomes from
-fMRI BOLD data using brain parcellations.
+    def make_subject_parcel(
+        self: "ExtractionAnalysis",
+        subject: str,
+        mask_list: list,
+    ) -> (nib.nifti1.Nifti1Image, nib.nifti1.Nifti1Image):
+        """.
 
-It requires giga_connectome insalled as a library.
-
-Source:
-https://github.com/SIMEXP/giga_connectome/tree/main
-"""
-# grey matter group mask is only supplied in MNI152NLin2009c(A)sym
-STUDY_PARAMETERS = {
-    "template": "MNI152NLin2009cAsym",
-    "gm_res": "02",
-    "n_iter": 2,
-    "desc": "444",
-    "atlas_name": "MIST",
-    "atlas_type": "dseg",
-    "calcul_avgcorr": False,
-}
-
-
-def get_arguments(argv=None) -> argparse.Namespace:
-    """Entry point."""
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawTextHelpFormatter,
-        description=(
-            "Generate denoised timeseries in subject-specific atlas-defined "
-            "parcels from fmriprep processed dataset."
-        ),
-    )
-    parser.add_argument(
-        "--bids_dir",
-        action="store",
-        type=Path,
-        help="The directory with the input dataset (fMRIPrep derivatives).",
-    )
-    parser.add_argument(
-        "--template_dir",
-        action="store",
-        type=Path,
-        help="The directory with the grey matter template and parcellation "
-        "atlas.",
-    )
-    parser.add_argument(
-        "--output_dir",
-        action="store",
-        type=Path,
-        help="The directory where the output files should be stored.",
-    )
-    parser.add_argument(
-        "-v", "--version", action="version", version=__version__
-    )
-    parser.add_argument(
-        "--participant_label",
-        help="The label(s) of the participant(s) that should be analyzed. The "
-        "label corresponds to sub-<participant_label> from the BIDS spec (so "
-        "it does not include 'sub-'). If this parameter is not provided all "
-        "subjects will be analyzed. Multiple participants can be specified "
-        "with a space separated list.",
-        nargs="+",
-    )
-    parser.add_argument(
-        "--denoise-strategy",
-        help="The choice of post-processing for denoising. The default "
-        "choices are: 'simple', 'simple+gsr', 'scrubbing.2', "
-        "'scrubbing.2+gsr', 'scrubbing.5', 'scrubbing.5+gsr', 'acompcor50', "
-        "'icaaroma'. User can pass a path to a json file containing "
-        "configuration for their own choice of denoising strategy. The default"
-        "is 'simple'.",
-        default="simple",
-    )
-    parser.add_argument(
-        "--standardize",
-        help="The choice of signal standardization. The choices are z score "
-        "or percent signal change (psc). The default is 'zscore'.",
-        choices=["zscore", "psc"],
-        default="zscore",
-    )
-    parser.add_argument(
-        "--smoothing_fwhm",
-        help="Size of the full-width at half maximum in millimeters of "
-        "the spatial smoothing to apply to the signal. The default is 5.0.",
-        type=float,
-        default=5.0,
-    )
-    parser.add_argument(
-        "--compression",
-        type=str,
-        default=None,
-        choices=[None, "gzip", "lzf"],
-        help="Lossless compression applied to time series in .h5 file. "
-        "Default is None.",
-    )
-    parser.add_argument(
-        "--compression_opts",
-        type=int,
-        default=4,
-        choices=range(0, 10),
-        help="Frame compression level in .h5 file. Value = [0-9]. "
-        "Only for lossless gzip compression.",
-    )
-
-    return parser.parse_args(argv)
-
-
-@dataclass
-class Study_Params:
-    """.
-
-    Dataclass for paths and analysis parameters.
-    """
-
-    args: argparse.Namespace
-    template: str
-    gm_res: int
-    n_iter: int
-    desc: str
-    atlas_name: str
-    atlas_type: str
-    calcul_avgcorr: bool
-
-    def __post_init__(self):
-        # define subject list
-        self.subjects = utils.get_subject_lists(
-            self.args.participant_label,
-            self.args.bids_dir,
+        Return subject-specific parcellation.
+        """
+        subject_mask = self.make_subjectGM_mask(
+            subject,
+            mask_list,
         )
-        # define analysis params
-        self.standardize = utils.parse_standardize_options(
-            self.args.standardize,
-        )
-        self.strategy = get_denoise_strategy(
-            self.args.denoise_strategy,
-        )
-        self.correlation_measure = ConnectivityMeasure(
-            kind="correlation", vectorize=False, discard_diagonal=False
+        subject_parcel_path = Path(
+            f"{self.mask_dir}/sub-{subject}_{self.config.template}_"
+            f"{self.config.parcel_name}.nii.gz"
         )
 
-        # create output directory
-        self.args.output_dir.mkdir(parents=True, exist_ok=True)
+        if subject_parcel_path.exists():
+            subject_parcel = nib.load(subject_parcel_path)
+        else:
+            """
+            Generate subject grey matter mask from task runs EPI masks,
+            then resample parcellation atlas to the EPI space.
+            """
+            template_parcellation = nib.load(self.parcellation_path)
+            subject_parcel = resample_to_img(
+                template_parcellation, subject_mask, interpolation="nearest"
+            )
+            nib.save(subject_parcel, subject_parcel_path)
 
-        # path to MNI-space grey matter mask
-        # currently, giga_connectome only supports the fmriprep defaults
-        self.mni_gm_path = (
-            f"{self.args.template_dir}/tpl-{self.template}/"
-            f"tpl-{self.template}_res-{self.gm_res}_label-GM_probseg.nii.gz",
+        return subject_parcel, subject_mask
+
+
+    def make_subjectGM_mask(
+        self: "ExtractionAnalysis",
+        subject: str,
+        mask_list: list,
+    ) -> nib.nifti1.Nifti1Image:
+        """.
+
+        Generate subject-specific EPI grey matter mask from all task runs.
+
+        If template is MNI152NLin2009cAsym (analysis in normalized space),
+        overlay task-derived EPI grey matter mask with a MNI grey
+        matter template (MNI152NLin2009cAsym template to match the template).
+        """
+        subject_mask_path = (
+            f"{self.mask_dir}/sub-{subject}_{self.config.template}_"
+            "res-dataset_label-GM_desc_mask.nii.gz"
+        )
+
+        if Path(subject_mask_path).exists():
+            print(
+                "Loading existing subject grey matter mask."
+            )
+            return nib.load(subject_mask_path)
+
+        else:
+            """
+            Generate multi-session grey matter subject mask in MNI152NLin2009cAsym
+            Parameters from
+            https://github.com/SIMEXP/giga_connectome/blob/main/giga_connectome/mask.py
+            """
+            subject_epi_mask = compute_multi_epi_mask(
+                mask_list,
+                lower_cutoff=0.2,
+                upper_cutoff=0.85,
+                connected=True,
+                opening=False,  # we should be using fMRIPrep masks
+                threshold=0.5,
+                target_affine=None,
+                target_shape=None,
+                exclude_zeros=False,
+                n_jobs=1,
+                memory=None,
+                verbose=0,
+            )
+            print(
+                f"Group EPI mask affine:\n{subject_epi_mask.affine}"
+                f"\nshape: {subject_epi_mask.shape}"
             )
 
-        # create dir to save subject-specific grey matter mask and parcel atlas
-        self.mask_dir = Path(
-            f"{self.args.output_dir}/subject_masks/tpl-{self.template}"
-        )
-        self.mask_dir.mkdir(exist_ok=True, parents=True)
+            if self.config.template == "MNI152NLin2009cAsym":
+                # merge mask from subject's epi files w MNI template grey matter mask
+                subject_epi_mask = merge_masks(
+                    subject_epi_mask,
+                    self.template_gm_path,
+                    self.config.n_iter,
+                )
 
-        # create dir to save subject-specific timeseries
-        self.timeseries_dir = f"{self.args.output_dir}/timeseries"
-        Path(self.timeseries_dir).mkdir(parents=True, exist_ok=True)
+            nib.save(subject_epi_mask, subject_mask_path)
 
-        # define path to parcellation atlas
-        self.parcellation_path = (
-            f"{self.args.template_dir}/tpl-MNI152NLin2009bAsym/"
-            "tpl-MNI152NLin2009bAsym_res-03_atlas-BASC_desc"
-            f"-{self.desc}_{self.atlas_type}.nii.gz"
-        )
-
-        # define compression parameters for timeseries saved in .h5 file
-        self.comp_args = {}
-        if self.args.compression is not None:
-            self.comp_args["compression"] = self.args.compression
-            if self.args.compression == "gzip":
-                self.comp_args["compression_opts"] = self.args.compression_opts
+            return subject_epi_mask
 
 
-def compile_bold_list(
-    subject: str,
-    sp: Study_Params,
-) -> (list, list):
-    """.
+    def prep_subject(
+        self: "ExtractionAnalysis",
+        subject: str,
+        subject_parcellation: nib.nifti1.Nifti1Image,
+    ) -> (NiftiLabelsMasker, str, list):
+        """.
 
-    Compile list of subject's bold and brain mask files.
-    """
-    found_mask_list = sorted(
-        glob.glob(
-            f"{sp.args.bids_dir}/sub-{subject}/"
-            f"ses-0*/func/*{sp.template}_"
-            "desc-brain_mask.nii.gz",
-            ),
-        )
-    if exclude := _check_mask_affine(found_mask_list, verbose=2):
-        found_mask_list, __annotations__ = _get_consistent_masks(
-            found_mask_list,
-            exclude,
+        Prepare subject-specific params.
+        """
+        if self.config.atlas_type == "dseg":
+            atlas_masker = NiftiLabelsMasker(
+                labels_img=subject_parcellation,
+                standardize=False,
             )
-        print(f"Remaining: {len(found_mask_list)} masks")
+        elif self.config.atlas_type == "probseg":
+            atlas_masker = NiftiMapsMasker(
+                maps_img=subject_parcellation,
+                standardize=False,
+            )
 
-    bold_list = []
-    mask_list = []
-    for fm in found_mask_list:
-        sub, ses, task, space, _, _ = fm.split('/')[-1].split('_')
-        bpath = (
-            f"{sp.args.bids_dir}/{sub}/{ses}/func/"
-            f"{sub}_{ses}_{task}_{space}_desc-preproc_bold.nii.gz"
+        subj_tseries_path = (
+            f"{self.timeseries_dir}/"
+            f"sub-{subject}_{self.conf.dataset}_{self.conf.template}"
+            f"_BOLDtimeseries_{self.conf.parcel_name}"
+            f"_{self.strategy["name"]}.h5"
         )
 
-        if Path(bpath).exists():
-            bold_list.append(bpath)
-            mask_list.append(fm)
+        processed_run_list = []
+        if Path(subj_tseries_path).exists():
+            with h5py.File(subj_tseries_path, 'r') as f:
+                sessions = [g for g in f.keys()]
+                for g in sessions:
+                    processed_run_list += [r for r in f[g].keys()]
 
-    return bold_list, mask_list
-
-
-def merge_masks(
-    subject_epi_mask: nib.nifti1.Nifti1Image,
-    mni_gm_path: str,
-    n_iter: int,
-)-> nib.nifti1.Nifti1Image:
-    """.
-
-    Combine both subject's epi mask and template mask into one GM mask.
-    """
-    # resample MNI grey matter template mask to subject's grey matter mask
-    mni_gm = nib.squeeze_image(
-        resample_to_img(
-            source_img=mni_gm_path,
-            target_img=subject_epi_mask,
-            interpolation="continuous",
-        ),
-    )
-
-    # steps adapted from nilearn.images.fetch_icbm152_brain_gm_mask
-    mni_gm_mask = (get_data(mni_gm) > 0.2).astype("int8")
-    mni_gm_mask = binary_closing(mni_gm_mask, iterations=n_iter)
-    mni_gm_mask_nii = new_img_like(mni_gm, mni_gm_mask)
-
-    # combine both subject and template masks into one
-    subject_mask_nii = math_img(
-        "img1 & img2",
-        img1=subject_epi_mask,
-        img2=mni_gm_mask_nii,
-    )
-
-    return subject_mask_nii
+        return atlas_masker, subj_tseries_path, processed_run_list
 
 
-def make_subjectGM_mask(
-    subject: str,
-    mask_list: list,
-    sp: Study_Params,
-) -> (nib.nifti1.Nifti1Image, str):
-    """.
+    def extract_subject_timeseries(
+        self: "ExtractionAnalysis",
+        subject: str,
+        bold_list: list,
+        subject_parcellation: nib.nifti1.Nifti1Image,
+        subject_mask: nib.nifti1.Nifti1Image,
+    ) -> None:
+        """.
 
-    Generate subject-specific grey matter mask from all runs.
-    """
-    # generate multi-session grey matter subject mask in MNI152NLin2009cAsym
-    subject_epi_mask = compute_multi_epi_mask(
-        mask_list,
-        lower_cutoff=0.2,
-        upper_cutoff=0.85,
-        connected=True,
-        opening=False,  # we should be using fMRIPrep masks
-        threshold=0.5,
-        target_affine=None,
-        target_shape=None,
-        exclude_zeros=False,
-        n_jobs=1,
-        memory=None,
-        verbose=0,
-    )
-
-    print(
-        f"Group EPI mask affine:\n{subject_epi_mask.affine}"
-        f"\nshape: {subject_epi_mask.shape}"
-    )
-
-    # merge mask from subject's epi files w template grey matter mask
-    subject_mask_nii = merge_masks(
-        subject_epi_mask,
-        sp.mni_gm_path,
-        sp.n_iter,
-    )
-
-    # save subject grey matter mask
-    subject_mask_path = (
-        f"{sp.mask_dir}/tpl-{sp.template}_"
-        f"res-dataset_label-GM_desc-sub-{subject}_mask.nii.gz"
-    )
-    nib.save(subject_mask_nii, subject_mask_path)
-
-    return subject_mask_nii, subject_mask_path
-
-
-def make_subject_parcel(
-    subject: str,
-    subject_mask_nii: nib.nifti1.Nifti1Image,
-    sp: Study_Params,
-) -> (nib.nifti1.Nifti1Image, str):
-    """.
-
-    Resample parcellation atlas to subject grey matter mask.
-    """
-    parcellation = nib.load(sp.parcellation_path)
-    subject_parcel_nii = resample_to_img(
-        parcellation, subject_mask_nii, interpolation="nearest"
-    )
-    subject_parcel_path = (
-        f"{sp.mask_dir}/tpl-{sp.template}_"
-        f"atlas-{sp.atlas_name}_"
-        "res-dataset_"
-        f"desc-{sp.desc}_"
-        f"{sp.atlas_type}_sub-{subject}.nii.gz"
-    )
-    nib.save(subject_parcel_nii, subject_parcel_path)
-
-    return subject_parcel_nii, subject_parcel_path
-
-
-def prep_subject(
-    subject: str,
-    subject_parcel_path: str,
-    sp: Study_Params,
-) -> (NiftiLabelsMasker, str, list):
-    """.
-
-    Prepare subject-specific params.
-    """
-    atlas_path = Path(subject_parcel_path)
-
-    if sp.atlas_type == "dseg":
-        atlas_masker = NiftiLabelsMasker(
-            labels_img=atlas_path, standardize=False
-        )
-    elif sp.atlas_type == "probseg":
-        atlas_masker = NiftiMapsMasker(maps_img=atlas_path, standardize=False)
-
-    subj_tseries_path = (
-        f"{sp.timeseries_dir}/"
-        f"sub-{subject}_friends_BOLDtimeseries_atlas-"
-        f"{sp.atlas_name}{sp.desc}"
-        f"_desc-{sp.strategy["name"]}.h5"
-    )
-
-    if Path(subj_tseries_path).exists():
-        with h5py.File(subj_tseries_path, 'r') as f:
-            processed_episode_list = [f for f in f.keys()]
-    else:
-        processed_episode_list = []
-
-    return atlas_masker, subj_tseries_path, processed_episode_list
-
-
-def get_tseries(
-    img: str,
-    subject_mask_path: str,
-    atlas_masker: NiftiLabelsMasker,
-    sp: Study_Params,
-) -> (np.array, np.array):
-    """.
-
-    Extract timeseries and connectome from denoised volume.
-    """
-    denoised_img = denoise_nifti_voxel(
-        sp.strategy,
-        subject_mask_path,
-        sp.standardize,
-        sp.args.smoothing_fwhm,
-        img,
-    )
-
-    if not denoised_img:
-        print(f"{img} : no volume after scrubbing")
-        return None, None
-
-    else:
-        (
-            correlation_matrix,
-            time_series,
-        ) = generate_timeseries_connectomes(
-            atlas_masker,
-            denoised_img,
-            subject_mask_path,
-            sp.correlation_measure,
-            sp.calcul_avgcorr,
+        Generate subject's run-level time series.
+        """
+        atlas_masker, subj_tseries_path, processed_runs = self.prep_subject(
+            subject,
+            subject_parcellation,
         )
 
-        # hack: remove last TR from run that stopped one run short for sub-06
-        if f"{task.split('-')[-1]}" == 's01e12a':
-            time_series = time_series[:471, :]
+        for img in tqdm(bold_list):
+            try:
+                session, specifier = parse_bids_name(img)
+                print(specifier)
 
-        return time_series, correlation_matrix
+                if not f"{specifier}_timeseries" in processed_runs:
+                    time_series = self.get_tseries(
+                        img,
+                        subject_mask,
+                        atlas_masker,
+                    )
+
+                    if time_series is not None:
+                        self.save_tseries(
+                            subj_tseries_path,
+                            session,
+                            specifier,
+                            time_series,
+                        )
+
+            except:
+                print(f"could not process file {img}" )
+
+        return
 
 
-def save_tseries(
-    subj_tseries_path: str,
-    task: str,
-    time_series: np.array,
-    comp_args: dict,
-) -> None:
-    """.
+    def get_tseries(
+        self: "ExtractionAnalysis",
+        img: str,
+        subject_mask: nib.nifti1.Nifti1Image,
+        atlas_masker: Union[NiftiLabelsMasker, NiftiMapsMasker],
+    ) -> np.array:
+        """.
 
-    Save episode's time series in .h5 file.
-    """
-    flag =  "a" if Path(subj_tseries_path).exists() else "w"
-    with h5py.File(subj_tseries_path, flag) as f:
-        if not f"{task.split('-')[-1]}" in f.keys():
-            group = f.create_group(f"{task.split('-')[-1]}")
+        Extract timeseries from denoised volume.
+        """
+        denoised_img = denoise_nifti_voxel(
+            self.strategy,
+            subject_mask,
+            self.standardize,
+            self.conf.smoothing_fwhm,
+            img,
+        )
+
+        if not denoised_img:
+            print(f"{img} : no volume after scrubbing")
+            return None, None
+
+        else:
+            time_series = generate_timeseries(
+                atlas_masker,
+                denoised_img,
+            )
+
+            return time_series
+
+
+    def save_tseries(
+        self: "ExtractionAnalysis",
+        subj_tseries_path: str,
+        session: str,
+        specifier: str,
+        time_series: np.array,
+        comp_args: Dict,
+    ) -> None:
+        """.
+
+        Save episode's time series in .h5 file.
+        """
+        flag =  "a" if Path(subj_tseries_path).exists() else "w"
+        with h5py.File(subj_tseries_path, flag) as f:
+
+            group = f.create_group(session) if not session in f else f[session]
 
             timeseries_dset = group.create_dataset(
-                "timeseries",
+                f"{specifier}_timeseries",
                 data=time_series,
                 **comp_args,
             )
-            timeseries_dset.attrs["RepetitionTime"] = 1.49
-
-
-def extract_subject_timeseries(
-    bold_list: list,
-    processed_episodes: list,
-    subject_mask_path: str,
-    atlas_masker: NiftiLabelsMasker,
-    subj_tseries_path: str,
-    sp: Study_Params,
-) -> None:
-    """.
-
-    Generate subject's run-level time series.
-    """
-    for img in tqdm(bold_list):
-        try:
-            # parse file name
-            sub, ses, task, space, _, _ = img.split('/')[-1].split('_')
-            print(sub, task)
-
-            if not f"{task.split('-')[-1]}" in processed_episodes:
-                # process timeseries
-                time_series, _ = get_tseries(
-                    img,
-                    subject_mask_path,
-                    atlas_masker,
-                    sp,
-                )
-
-                if time_series is not None:
-                    save_tseries(
-                        subj_tseries_path,
-                        task,
-                        time_series,
-                        sp.comp_args,
-                    )
-
-        except:
-            print(f"could not process file {img}" )
-
-    return
-
-
-def extract_timeseries(
-    args: argparse.Namespace,
-) -> None:
-    """.
-
-    Extract time series from atlas parcels.
-    """
-
-    print(vars(args))
-
-    # set up path and analysis parameters
-    sp = Study_Params(args, **STUDY_PARAMETERS)
-
-    for subject in sp.subjects:
-        bold_list, mask_list = compile_bold_list(subject, sp)
-
-        subject_mask_nii, subject_mask_path = make_subjectGM_mask(
-            subject,
-            mask_list,
-            sp,
-        )
-        subject_parcel_nii, subject_parcel_path = make_subject_parcel(
-            subject,
-            subject_mask_nii,
-            sp,
-        )
-        atlas_masker, subj_tseries_path, processed_episodes = prep_subject(
-            subject,
-            subject_parcel_path,
-            sp,
-        )
-        extract_subject_timeseries(
-            bold_list,
-            processed_episodes,
-            subject_mask_path,
-            atlas_masker,
-            subj_tseries_path,
-            sp,
-        )
-
-
-if __name__ == "__main__":
-    """
-    Process subject-specific fMRIPrep outputs into denoised timeseries
-    using MIST parcellation atlas.
-    """
-    args = get_arguments()
-    print(vars(args))
-
-    extract_timeseries(args)
