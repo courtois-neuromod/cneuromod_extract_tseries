@@ -1,19 +1,9 @@
 # @package _global_
 
-subject_list: null
-data_dir: ../data
-dataset: null
-output_dir: ../output
+template: MNI152NLin2009cAsym
 template_gm_path: ../atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_label-GM_probseg.nii.gz
+n_iter: 2
+
 template_parcellation: ../atlases/tpl-MNI152NLin2009bAsym/tpl-MNI152NLin2009bAsym_res-03_atlas-BASC_desc-444_dseg.nii.gz
 parcel_name: atlas-MIST_desc-444_dseg
-strategy_dir: null
-denoise_strategy: simple+gsr
-standardize: zscore
-smoothing_fwhm: 5.0
-compression: gzip
-compression_opts: 4
-
-template: MNI152NLin2009cAsym
-n_iter: 2
-atlas_type: dseg
+parcel_type: dseg

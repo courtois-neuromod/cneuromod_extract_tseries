@@ -1,11 +1,9 @@
 from typing import List, Tuple, Dict, Union, Optional
 from pathlib import Path
-from nilearn.interfaces.bids import parse_bids_filename
-from bids.layout import Query
-from bids import BIDSLayout
 
 from nibabel import Nifti1Image
 from nilearn.interfaces import fmriprep
+from nilearn.interfaces.bids import parse_bids_filename
 from nilearn.image import (
     get_data,
     load_img,
@@ -14,7 +12,7 @@ from nilearn.image import (
     resample_to_img,
 )
 from nilearn.maskers import NiftiMasker
-from omegaconf import DictConfig
+import numpy as np
 import pandas as pd
 from scipy.ndimage import binary_closing
 
@@ -99,28 +97,25 @@ def parse_standardize_options(
         return True
 
 
-def get_denoise_strategy(
-    strategy: str,
-    strategy_dir: str = None,
+def prep_denoise_strategy(
+    benchmark_strategy: Dict,
 ) -> dict:
     """
-    Select denoise strategies and associated parameters.
-    The strategy parameters are designed to pass to load_confounds_strategy.
+    Add load confound function to dictionary of parameters
+    that specify the denoise strategy. These parameters are
+    designed to pass to load_confounds_strategy.
 
     Parameters
     ---------
-    strategy : str
-        Name of the provided denoising strategy options: \
+    benchmark_strategy : Dict
+        Denoising strategy parameters specified in
+        ./config/denoise/<strategy_name>.yaml config files.
+        Strategy choices include:
         simple, simple+gsr, scrubbing.5, scrubbing.5+gsr, \
         scrubbing.2, scrubbing.2+gsr, acompcor50, icaaroma.
 
-        For custom parameterization, save your own configuration json file \
-        as {strategy}.json under {strategy_dir}.
-        https://giga-connectome.readthedocs.io/en/stable/usage.html#denoising-strategy
-
-    strategy_dir (optional): str
-        Path to directory with denoise strategy .json file  \
-        Default strategies are saved under ../denoise
+        For custom parameterization, save your own strategy config file \
+        as ./config/denoise/{my_strategy}.yaml.
 
     Return
     ------
@@ -128,21 +123,6 @@ def get_denoise_strategy(
     dict
         Denosing strategy parameter to pass to load_confounds_strategy.
     """
-    if strategy in PRESET_STRATEGIES:
-        config_path = Path(
-            f"../denoise/{strategy}.json"
-        ).resolve()
-    else:
-        config_path = Path(
-            f"{strategy_dir}/{strategy}.json"
-        ).resolve()
-
-    if not config_path.exists():
-        raise ValueError(f"No {strategy} strategy config file found.")
-
-    with open(config_path, "r") as file:
-        benchmark_strategy = json.load(file)
-
     lc_function = getattr(fmriprep, benchmark_strategy["function"])
     benchmark_strategy.update({"function": lc_function})
 

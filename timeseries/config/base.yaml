@@ -1,3 +1,15 @@
 
+subject_list: null
+
 defaults:
-  - extraction: base
+  - _self_
+  - dataset: null
+  - parcellation: null
+  - denoise: simple+gsr
+
+standardize: zscore
+smoothing_fwhm: 5.0
+
+output_dir: ../output
+compression: gzip
+compression_opts: 4

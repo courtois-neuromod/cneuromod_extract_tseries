@@ -1,7 +1,9 @@
 cneuromod_extract_tseries
 ==============================
 
-timeseries extraction for Courtois-Neuromod fMRI dataset
+Timeseries extraction for Courtois-Neuromod fMRI datasets.
+
+Documentation on how to use this tool can be found [here](https://github.com/courtois-neuromod/cneuromod_extract_tseries/blob/dev/docs/overview.rst)
 
 Project Organization
 ------------
@@ -17,20 +19,32 @@ Project Organization
     │                         generated with `pip freeze > requirements.txt`
     │
     ├── output             <- Where extracted timeseries are saved
-    ├── sub-masks          <- Where individual subject masks are saved
     ├── setup.py           <- makes project pip installable (pip install -e .) so timeseries can be imported
     ├── timeseries         <- Scripts to denoise and extract fMRI timeseries.
     │   ├── __init__.py    <- Makes timeseries a Python module
     │   │
     │   ├── config         <- Where hydra config files (.yaml) are saved
-    │   │   ├── extraction
+    │   │   ├── dataset
+    │   │   │   ├── friends.yaml
+    │   │   │   ├── mario3.yaml
+    │   │   │   ├── movie10.yaml
+    │   │   │   └── shinobi.yaml
+    │   │   │   
+    │   │   ├── denoise
+    │   │   │   ├── simple.yaml
+    │   │   │   ├── simple+gsr.yaml
+    │   │   │   ├── scrubbing.2.yaml
+    │   │   │   └── scrubbing.2+gsr.yaml
+    │   │   │       
+    │   │   ├── parcellation
     │   │   │   ├── vision.yaml
     │   │   │   ├── audio.yaml
     │   │   │   ├── language.yaml
-    │   │   │   └── base.yaml
-    │   │   │   
+    │   │   │   └── mist444.yaml
+    │   │   │
     │   │   └── base.yaml
     │   │
+    │   ├── extract.py
     │   ├── run.py
     │   └── utils.py
     │

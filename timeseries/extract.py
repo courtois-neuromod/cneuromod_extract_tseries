@@ -12,13 +12,14 @@ from nilearn.image import (
 )
 from nilearn.maskers import NiftiLabelsMasker, NiftiMapsMasker
 from nilearn.masking import compute_multi_epi_mask
+import numpy as np
 from omegaconf import DictConfig
 from tqdm import tqdm
 
 from utils import (
     denoise_nifti_voxel,
     generate_timeseries,
-    get_denoise_strategy,
+    prep_denoise_strategy,
     get_subject_list,
     merge_masks,
     parse_bids_name,
@@ -49,7 +50,7 @@ class ExtractionAnalysis:
         self.set_params()
 
 
-    def set_params(self: "ExtractionAnalysis") -> None):
+    def set_params(self: "ExtractionAnalysis") -> None:
         """.
 
         Define analysis parameters.
@@ -64,9 +65,8 @@ class ExtractionAnalysis:
         self.standardize = parse_standardize_options(
             self.config.standardize,
         )
-        self.strategy = get_denoise_strategy(
-            self.config.denoise_strategy,
-            self.config.strategy_dir,
+        self.strategy = prep_denoise_strategy(
+            dict(self.config.denoise),
         )
         self.set_compression()
 
@@ -78,7 +78,7 @@ class ExtractionAnalysis:
         """
         # Input paths
         self.bids_dir = Path(
-            f"{self.config.data_dir}/{self.config.dataset}.fmriprep"
+            f"{self.config.data_dir}/{self.config.dset_name}.fmriprep"
         ).resolve()
         # grey-matter mask in MNI-space, probability segmentation
         if self.config.template == "MNI152NLin2009cAsym":
@@ -102,12 +102,12 @@ class ExtractionAnalysis:
 
         # Set output paths
         self.timeseries_dir = Path(
-            f"{self.config.output_dir}/{self.config.dataset}/timeseries"
+            f"{self.config.output_dir}/{self.config.dset_name}/timeseries"
         ).resolve()
         self.timeseries_dir.mkdir(parents=True, exist_ok=True)
         # save subject-specific grey matter mask and parcel atlas
         self.mask_dir = Path(
-            f"{self.config.output_dir}/{self.config.dataset}/subject_masks"
+            f"{self.config.output_dir}/{self.config.dset_name}/subject_masks"
         ).resolve()
         self.mask_dir.mkdir(exist_ok=True, parents=True)
 
@@ -135,7 +135,7 @@ class ExtractionAnalysis:
                 self.comp_args["compression_opts"] = self.config.compression_opts
 
 
-    def extract(self: "ExtractionAnalysis") -> None):
+    def extract(self: "ExtractionAnalysis") -> None:
         """.
 
         Extract denoised timeseries from individual subject datasets.
@@ -247,8 +247,8 @@ class ExtractionAnalysis:
         matter template (MNI152NLin2009cAsym template to match the template).
         """
         subject_mask_path = (
-            f"{self.mask_dir}/sub-{subject}_{self.config.template}_"
-            "res-dataset_label-GM_desc_mask.nii.gz"
+            f"{self.mask_dir}/sub-{subject}_{self.conf.dset_name}"
+            f"_{self.config.template}_res-dataset_label-GM_desc_mask.nii.gz"
         )
 
         if Path(subject_mask_path).exists():
@@ -304,12 +304,12 @@ class ExtractionAnalysis:
 
         Prepare subject-specific params.
         """
-        if self.config.atlas_type == "dseg":
+        if self.config.parcel_type == "dseg":
             atlas_masker = NiftiLabelsMasker(
                 labels_img=subject_parcellation,
                 standardize=False,
             )
-        elif self.config.atlas_type == "probseg":
+        elif self.config.parcel_type == "probseg":
             atlas_masker = NiftiMapsMasker(
                 maps_img=subject_parcellation,
                 standardize=False,
@@ -317,9 +317,9 @@ class ExtractionAnalysis:
 
         subj_tseries_path = (
             f"{self.timeseries_dir}/"
-            f"sub-{subject}_{self.conf.dataset}_{self.conf.template}"
+            f"sub-{subject}_{self.conf.dset_name}_{self.conf.template}"
             f"_BOLDtimeseries_{self.conf.parcel_name}"
-            f"_{self.strategy["name"]}.h5"
+            f"_{self.strategy['name']}.h5"
         )
 
         processed_run_list = []
