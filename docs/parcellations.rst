@@ -35,8 +35,12 @@ otherwise omit this field from the config file or set it to ``null``.
 probabilistic. Choices = [``dseg``, ``probseg``].
 * ``parcel_name``. The name of the parcellation. Custom subject-specific
 parcellations (in T1w or MNI space) directly under
-``<output_dir>/<dset_name>/subject_masks/<subject>_<template>_<parcel_name>.nii.gz``.
-E.g., ``cneuromod_extract_tseries/output/friends/subject_masks/sub-01_T1w_<parcel_name>.nii.gz``
+::
+  <output_dir>/<dset_name>/subject_masks/<subject>_<template>_<parcel_name>.nii.gz
+
+E.g.,
+::
+  cneuromod_extract_tseries/output/friends/subject_masks/sub-01_T1w_<parcel_name>.nii.gz
 
 # TODO: list provided parcellations
 
