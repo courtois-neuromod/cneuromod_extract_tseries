@@ -14,7 +14,6 @@ You can apply for access to the CNeuroMod datasets `here <https://www.cneuromod.
 
 You will receive login credentials to access the NeuroMod git and the
 NeuroMod Amazon S3 fileserver so you can download the data.
-
 `See here <https://docs.cneuromod.ca/en/latest/ACCESS.html#downloading-the-dataset/>`_ for additional information on accessing the data.
 
 
@@ -42,15 +41,16 @@ Clone the current code repository from GitHub.
 4. Installing the dataset(s)
 ----------------------------
 Specify your CNeuroMod login credentials as environment variables in your
-`bash` console to download data from the S3 file server.
+``bash`` console to download data from the S3 file server.
 
 You will receive an **access_key** and a **secret_key** when granted access
 to the dataset.
 ::
   export AWS_ACCESS_KEY_ID=<s3_access_key>  AWS_SECRET_ACCESS_KEY=<s3_secret_key>
 
-Install the dataset repositery as <dataset_name>.fmriprep.
+Install the dataset repositery as ``<dataset_name>.fmriprep``.
 The default location is within ``cneuromod_extract_tseries/data``
+
 E.g.,
 :: 
   cd data
@@ -64,11 +64,11 @@ to the appropriate tag/branch.
   git checkout rel/2022
 
 Pull the dataset repository's data from the server.
-To download the entire dataset recursively, do.
+To download the entire dataset recursively, do
 ::
   datalad get -r *
 
-To download a single subject's preprocessed data (e.g., sub-01), do.
+To download a single subject's preprocessed data (e.g., sub-01)
 ::
   datalad get -r sub-01/*
 
