@@ -2,7 +2,7 @@ Workflow Overview
 =================
 
 This library supports the extraction of denoised fMRI timeseries datasets from
-the `Courtois Project on Neuronal Modelling (CNeuroMod) <https://www.cneuromod.ca/>`.
+the `Courtois Project on Neuronal Modelling (CNeuroMod) <https://www.cneuromod.ca/>`_.
 
 The datasets are described `here <https://docs.cneuromod.ca/en/latest/DATASETS.html/>`.
 
