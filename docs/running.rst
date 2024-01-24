@@ -81,8 +81,7 @@ the `compression level can be set <https://docs.h5py.org/en/stable/high/dataset.
 The default is ``gzip`` with a compression level of ``4``. To export uncompressed timeseries,
 you can override the compression parameters like this.
 ::
-    python run.py dataset=movie10 parcellation=mist444 compression=null
-
+  python run.py dataset=movie10 parcellation=mist444 compression=null
 
 
 3. Subject List
@@ -96,4 +95,4 @@ parameter in ``cneuromod_extract_tseries/timeseries/config/base.yaml`` when
 launching the script.
 
 ::
-    python run.py dataset=friends subject_list=[01,02,03] parcellation=mist444
+  python run.py dataset=friends subject_list=[01,02,03] parcellation=mist444
