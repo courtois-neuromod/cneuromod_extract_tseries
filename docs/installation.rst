@@ -15,7 +15,7 @@ You can apply for access to the CNeuroMod datasets `here <https://www.cneuromod.
 You will receive login credentials to access the NeuroMod git and the
 NeuroMod Amazon S3 fileserver so you can download the data.
 
-See `here <https://docs.cneuromod.ca/en/latest/ACCESS.html#downloading-the-dataset/>`_ for additional information on accessing the data.
+`See here <https://docs.cneuromod.ca/en/latest/ACCESS.html#downloading-the-dataset/>`_ for additional information on accessing the data.
 
 
 2. Installing DataLad
