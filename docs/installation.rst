@@ -76,8 +76,9 @@ To download a single subject's preprocessed data (e.g., sub-01)
 5. Setting up the virtual environment
 -------------------------------------
 Install the required libraries within a virtual environment.
-
 ::
   pip install -r requirements.txt
+
+
 
 TODO : add alternative instructions to run code inside aptainer image
