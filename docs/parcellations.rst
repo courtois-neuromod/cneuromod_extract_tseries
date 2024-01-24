@@ -7,49 +7,6 @@ TODO: describe available subject-specific parcellations (MNI and T1w)
 
 
 
-3. Subject List
----------------
-
-By default, the script will process all subjects whose data are found under
-``<data_dir>/<dset_name>.fmriprep``
-
-To limit the analysis to a subset of subjects, override the ``subject_list: null``
-parameter in ``cneuromod_extract_tseries/timeseries/config/base.yaml`` when
-launching the script.
-E.g.,
-::
-    python run.py dataset=friends subject_list=[01,02,03] parcellation=mist444
-
-
-4. Denoising strategy
----------------------
-This script uses ``nilearn.interfaces.fmriprep.load_confounds`` to retrieve
-noise confounds from fmri.prep output to denoise the BOLD data.
-
-Choices of denoising strategies are saved under
-``cneuromod_extract_tseries/timeseries/config/denoise/<denoise_strategy>.yaml``
-
-Each denoise .yaml file contains parameters designed to pass to
-`nilearn's load_confounds_strategy <https://nilearn.github.io/dev/modules/generated/nilearn.interfaces.fmriprep.load_confounds_strategy.html>`_.
-
-By default, the `simple+gsr` strategy is called from the base config file
-``cneuromod_extract_tseries/timeseries/config/base.yaml``. You can override this choice
-at the command line.
-E.g.,
-:
-    python run.py dataset=friends parcellation=mist444 denoise=scrubbing.5+gsr
-
-You can also create a custom strategy by generating your own
-``<my_denoise_strategy>.yaml`` config file and save it in
-``cneuromod_extract_tseries/timeseries/config/denoise``
-
-In a .yaml file, define the custom strategy in the following format:
-:
-    name: <name_of_the_strategy>
-    function: <load_confounds_strategy>
-    parameters:
-        <function_parameters>: <options>
-        ....
 
 
 5. Standarization and smoothing
