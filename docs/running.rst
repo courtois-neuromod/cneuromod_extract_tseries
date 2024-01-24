@@ -231,7 +231,6 @@ otherwise omit this field from the config file or set it to ``null``.
 probabilistic. Choices = [``dseg``, ``probseg``].
 6.  ``parcel_name``. The name of the parcellation. Custom subject-specific
 parcellations (in T1w or MNI space) directly under
-
 ::
   <output_dir>/<dset_name>/subject_masks/<subject>_<template>_<parcel_name>.nii.gz
 
