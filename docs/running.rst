@@ -143,3 +143,53 @@ The default smoothing kernel size is set to 5.0 in the base config file.
 You can specify a different value.
 ::
     python run.py dataset=friends parcellation=mist444 smoothing_fwhm=3.0
+
+
+
+
+
+
+6. Parcellation
+---------------
+
+Config files that specify the timeseries parcellation parameters are saved under
+``cneuromod_extract_tseries/timeseries/config/parcellation/<parcelation_name>.yaml``
+
+The parcellation must be specified when launching the script.
+::
+    python run.py dataset=mario3 parcellation=parcelation_name
+
+Custom parcellations can be added by creating <parcelation_name>.yaml files in
+``cneuromod_extract_tseries/timeseries/config/parcellation`` and saving the atlas
+needed to mask the signal (see below).
+
+
+To use a *standard template atlas* (e.g., MIST, Schaefer 7 networks, DiFuMo),
+the following parameters need to be specified in the parcellation .yaml file:
+
+1. ``template``. This field specifies whether to process fMRI data in native (T1w)
+or in normalized (MNI) space. Specify ``template = MNI152NLin2009cAsym`` when
+using a standard template.
+2. ``template_gm_path``. The path to a normalized grey matter mask. Grey matter
+masks from the MNI152NLin2009cAsym template, which match the normalized
+CNeuroMod data, are saved under
+``cneuromod_extract_tseries/atlases/tpl-MNI152NLin2009cAsym``.
+Recommended = ``tpl-MNI152NLin2009cAsym_res-02_label-GM_probseg.nii.gz``
+3. ``n_iter``. The number of iterations to perform a binary closing to merge the
+template grey matter mask (specified with ``template_gm_path``) with a grey matter
+mask derived from the subject's functional runs (recommended ``n_iter = 2``).
+4. ``parcel_name``. The name given to the parcellation. For each subject, a
+subject-specific parcellation will be generated and saved as
+<output_dir>/<dset_name>/subject_masks/<subject>_<template>_<parcel_name>.nii.gz.
+5. ``parcel_type``. Whether the specified template parcellation is discrete or
+probabilistic. Choices = [``dseg``, ``probseg``]
+6. ``template_parcellation``. The full path to a standard atlas / parcellation
+that specifies the ROI(s) from which to extract the timeseries.
+Template parcellations should be saved under
+ ``cneuromod_extract_tseries/atlases/tpl-<space>/tpl-<space>_<parcel_descript>.nii.gz``
+
+For example,
+``cneuromod_extract_tseries/atlases/tpl-MNI152NLin2009bAsym/tpl-MNI152NLin2009bAsym_res-03_atlas-BASC_desc-444_dseg.nii.gz``
+
+
+#TODO: look into templateflow...? save and pull options from repo?
