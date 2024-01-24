@@ -50,7 +50,7 @@ to the dataset.
   export AWS_ACCESS_KEY_ID=<s3_access_key>  AWS_SECRET_ACCESS_KEY=<s3_secret_key>
 
 Install the dataset repositery as <dataset_name>.fmriprep.
-The default location is within `cneuromod_extract_tseries/data`
+The default location is within ``cneuromod_extract_tseries/data``
 E.g.,
 :: 
   cd data
@@ -75,7 +75,7 @@ To download a single subject's preprocessed data (e.g., sub-01), do.
 
 5. Setting up the virtual environment
 -------------------------------------
-Install the required libraries Within a virtual environment.
+Install the required libraries within a virtual environment.
 
 ::
   pip install -r requirements.txt
