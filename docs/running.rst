@@ -95,7 +95,7 @@ parameter in ``cneuromod_extract_tseries/timeseries/config/base.yaml`` when
 launching the script.
 
 ::
-  python run.py dataset=friends subject_list=[01,02,03] parcellation=mist444
+  python run.py dataset=friends subject_list=/[01,02,03/] parcellation=mist444
 
 4. Denoising strategy
 ---------------------
