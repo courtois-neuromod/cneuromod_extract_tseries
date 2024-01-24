@@ -98,8 +98,6 @@ launching the script.
   python run.py dataset=friends subject_list=[01,02,03] parcellation=mist444
 
 
-
-
 4. Denoising strategy
 ---------------------
 The script uses ``nilearn.interfaces.fmriprep.load_confounds`` to retrieve
@@ -123,7 +121,7 @@ You can also create a custom strategy by generating your own
 ``<my_denoise_strategy>.yaml`` config file and save it in
 ``cneuromod_extract_tseries/timeseries/config/denoise``
 
-In a .yaml file, define the custom strategy in the following format:
+In a .yaml file, define your custom strategy in the following format:
 ::
   name: <name_of_the_strategy>
     function: <load_confounds_strategy>
