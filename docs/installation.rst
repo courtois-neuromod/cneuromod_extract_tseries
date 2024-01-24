@@ -34,7 +34,7 @@ where the dataset will be installed and adding it to Github. See the
 ---------------------------------
 
 Clone the current code repository from GitHub.
-.. code-block:: bash
+:: 
   datalad clone git@github.com:courtois-neuromod/cneuromod_extract_tseries.git
   cd cneuromod_extract_tseries
 
@@ -46,44 +46,38 @@ Specify your CNeuroMod login credentials as environment variables in your
 
 You will receive an **access_key** and a **secret_key** when granted access
 to the dataset.
-```bash
-export AWS_ACCESS_KEY_ID=<s3_access_key>  AWS_SECRET_ACCESS_KEY=<s3_secret_key>
-```
+::
+  export AWS_ACCESS_KEY_ID=<s3_access_key>  AWS_SECRET_ACCESS_KEY=<s3_secret_key>
 
 Install the dataset repositery as <dataset_name>.fmriprep.
 The default location is within `cneuromod_extract_tseries/data`
 E.g.,
-```bash
-cd data
-datalad install git@github.com:courtois-neuromod/friends.fmriprep.git
-cd friends.fmriprep
-```
+:: 
+  cd data
+  datalad install git@github.com:courtois-neuromod/friends.fmriprep.git
+  cd friends.fmriprep
 
 By default, the latest stable (recommended) release will be installed.
 If you need another version (e.g., to reproduce a result), you can switch
 to the appropriate tag/branch.
-```bash
-git checkout rel/2022
-```
+::
+  git checkout rel/2022
 
 Pull the dataset repository's data from the server.
 To download the entire dataset recursively, do.
-```bash
-datalad get -r *
-```
+::
+  datalad get -r *
 
 To download a single subject's preprocessed data (e.g., sub-01), do.
-```bash
-datalad get -r sub-01/*
-```
+::
+  datalad get -r sub-01/*
 
 
 5. Setting up the virtual environment
 -------------------------------------
 Install the required libraries Within a virtual environment.
 
-```bash
-pip install -r requirements.txt
-```
+::
+  pip install -r requirements.txt
 
 TODO : add alternative instructions to run code inside aptainer image
