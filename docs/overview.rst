@@ -15,10 +15,9 @@ To request access to the datasets, please `apply here <https://www.cneuromod.ca/
 The current code takes functional BOLD data preprocessed by fmri.prep as input, and
 exports arrays of denoised timeseries as .HDF5 (one file per subject).
 
-* :doc:`Install the code repository and dataset(s) <../installation.rst>`
 
-* `test <https://github.com/courtois-neuromod/cneuromod_extract_tseries/blob/dev/docs/installation.rst/>`_
-
-* `Create custom parcellations <https://github.com/courtois-neuromod/cneuromod_extract_tseries/blob/dev/docs/parcellation.rst/>`_
+* `Install the code repository and dataset(s) <https://github.com/courtois-neuromod/cneuromod_extract_tseries/blob/dev/docs/installation.rst/>`_
 
 * `Run the code <https://github.com/courtois-neuromod/cneuromod_extract_tseries/blob/dev/docs/running.rst/>`_
+
+* `Create custom parcellations <https://github.com/courtois-neuromod/cneuromod_extract_tseries/blob/dev/docs/parcellations.rst/>`_
