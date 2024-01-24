@@ -4,7 +4,7 @@ Running the code
 The code to extract timeseries from a given CNeuroMod dataset can be run with
 a simple command line that specifies the dataset and the extraction parameters.
 
-E.g.,
+For example,
 ::
     python run.py dataset=shinobi parcellation=mist444
 
@@ -28,7 +28,6 @@ Dataset config files are saved under
 
 When launching the script, you must specify the name of an input dataset.
 The name must correspond to one of the ``<dset_name>.yaml`` files.
-E.g.,
 ::
     python run.py dataset=movie10 parcellation=mist444
 
@@ -36,9 +35,9 @@ The script will look for the input data under
 ``<data_dir>/<dset_name>.fmriprep``
 
 By default, ``<data_dir>`` corresponds to ``cneuromod_extract_tseries/data``.
-This default can be overriden at the command line to match another dataset location.
+This default can be overriden at the command line to match another dataset location,
+like this.
 
-E.g.,
 ::
     python run.py dataset=movie10 data_dir=/home/user/project/my_data_dir parcellation=mist444
 
@@ -54,8 +53,6 @@ The **default output directory** (``../output``) is specified as ``output_dir`` 
 ``cneuromod_extract_tseries/timeseries/config/base.yaml``.
 
 If needed, this default can simply be overriden at the command line when launching the code.
-
-E.g.,
 ::
     python run.py dataset=friends parcellation=mist444 output_dir=/home/user/project/results/my_analysis
 
@@ -66,7 +63,7 @@ A subject's timeseries will be exported as
 ::
   <output_dir>/<dset_name>/timeseries/<subject>_<dset_name>_<template>_BOLDtimeseries_<parcel_name>_<denoising_strategy>.h5
 
-E.g.,
+For example,
 ::
   cneuromod_extract_tseries/output/friends/timeseries/sub-01_friends_MNI152NLin2009cAsym_BOLDtimeseries_atlas-MIST_desc-444_dseg_simple+gsr.h5
 
@@ -85,3 +82,18 @@ The default is ``gzip`` with a compression level of ``4``. To export uncompresse
 you can override the compression parameters like this.
 ::
     python run.py dataset=movie10 parcellation=mist444 compression=null
+
+
+
+3. Subject List
+---------------
+
+By default, the script will process all subjects whose data are found under
+``<data_dir>/<dset_name>.fmriprep``
+
+To limit the analysis to a subset of subjects, override the ``subject_list: null``
+parameter in ``cneuromod_extract_tseries/timeseries/config/base.yaml`` when
+launching the script.
+
+::
+    python run.py dataset=friends subject_list=[01,02,03] parcellation=mist444
