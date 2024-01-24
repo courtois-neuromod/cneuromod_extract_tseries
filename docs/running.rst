@@ -112,7 +112,6 @@ Each denoise .yaml file contains parameters designed to pass to
 By default, the `simple+gsr` strategy is called from the base config file
 ``cneuromod_extract_tseries/timeseries/config/base.yaml``. You can override this choice
 at the command line.
-
 ::
   python run.py dataset=friends parcellation=mist444 denoise=scrubbing.5+gsr
 
