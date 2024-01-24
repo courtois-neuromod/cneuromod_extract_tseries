@@ -1,12 +1,22 @@
-from typing import List, Tuple, Dict, Union
+from typing import List, Tuple, Dict, Union, Optional
 from pathlib import Path
 from nilearn.interfaces.bids import parse_bids_filename
 from bids.layout import Query
 from bids import BIDSLayout
 
-from omegaconf import DictConfig
+from nibabel import Nifti1Image
 from nilearn.interfaces import fmriprep
-
+from nilearn.image import (
+    get_data,
+    load_img,
+    math_img,
+    new_img_like,
+    resample_to_img,
+)
+from nilearn.maskers import NiftiMasker
+from omegaconf import DictConfig
+import pandas as pd
+from scipy.ndimage import binary_closing
 
 """
 The following functions are adapted for the CNeuroMod datasets
@@ -143,7 +153,7 @@ def generate_timeseries(
     masker: NiftiMasker,
     denoised_img: Nifti1Image,
 ) -> np.ndarray:
-    """Generate denoised timeseries from CNeuroMod subject's fMRI data.
+    """Generate denoised timeseries for one run of CNeuroMod fMRI data.
 
     Parameters
     ----------
@@ -263,3 +273,116 @@ def _check_mask_affine(
         "different affine matrix. Ignore when creating group mask."
     )
     return sorted(exclude)
+
+
+def merge_masks(
+    subject_epi_mask: Nifti1Image,
+    mni_gm_path: str,
+    n_iter: int,
+)-> Nifti1Image:
+    """.
+
+    Combine task-derived subject epi mask and MNI template mask into one GM mask.
+    Adapted from https://github.com/SIMEXP/giga_connectome/blob/22a4ae09f647870d576ead2a73799007c1f8159d/giga_connectome/mask.py#L65
+    """
+    # resample MNI grey matter template mask to subject's grey matter mask
+    mni_gm = nib.squeeze_image(
+        resample_to_img(
+            source_img=mni_gm_path,
+            target_img=subject_epi_mask,
+            interpolation="continuous",
+        ),
+    )
+
+    # steps adapted from nilearn.images.fetch_icbm152_brain_gm_mask
+    mni_gm_mask = (get_data(mni_gm) > 0.2).astype("int8")
+    mni_gm_mask = binary_closing(mni_gm_mask, iterations=n_iter)
+    mni_gm_mask_nii = new_img_like(mni_gm, mni_gm_mask)
+
+    # combine both subject and template masks into one
+    subject_mask_nii = math_img(
+        "img1 & img2",
+        img1=subject_epi_mask,
+        img2=mni_gm_mask_nii,
+    )
+
+    return subject_mask_nii
+
+
+def denoise_nifti_voxel(
+    strategy: dict,
+    subject_mask: Nifti1Image, #Union[str, Path],
+    standardize: Union[str, bool],
+    smoothing_fwhm: float,
+    img: str,
+) -> Nifti1Image:
+    """Denoise voxel level data per nifti image.
+    Adapted from https://github.com/SIMEXP/giga_connectome/blob/22a4ae09f647870d576ead2a73799007c1f8159d/giga_connectome/denoise.py#L91C1-L138C1
+
+    Parameters
+    ----------
+    strategy : dict
+        Denoising strategy parameter to pass to load_confounds_strategy.
+    subject_masker : Union[str, Path, Nifti1Image]
+        Subject EPI grey matter mask or Path to it.
+    standardize : Union[str, bool]
+        TODO: update based on nilearn normalizing warning
+        Standardize the data. If 'zscore', zscore the data. If 'psc', convert
+        the data to percent signal change. If False, do not standardize.
+    smoothing_fwhm : float
+        Smoothing kernel size in mm.
+    img : str
+        Path to the nifti image to denoise.
+
+    Returns
+    -------
+    Nifti1Image
+        Denoised nifti image.
+    """
+    cf, sm = strategy["function"](img, **strategy["parameters"])
+    if _check_exclusion(cf, sm):
+        return None
+
+    # if high pass filter is not applied through cosines regressors,
+    # then detrend
+    detrend = "cosine00" not in cf.columns
+    subject_masker = NiftiMasker(
+        mask_img=subject_mask,
+        detrend=detrend,
+        standardize=standardize,
+        smoothing_fwhm=smoothing_fwhm,
+    )
+
+    time_series_voxel = subject_masker.fit_transform(
+        img, confounds=cf, sample_mask=sm
+    )
+    denoised_img = subject_masker.inverse_transform(time_series_voxel)
+    return denoised_img
+
+
+def _check_exclusion(
+    reduced_confounds: pd.DataFrame, sample_mask: Optional[np.ndarray]
+) -> bool:
+    """For scrubbing based strategy, check if regression can be performed."""
+    if sample_mask is not None:
+        kept_vol = len(sample_mask)
+    else:
+        kept_vol = reduced_confounds.shape[0]
+    # if more noise regressors than volume, this data is not denoisable
+    remove = kept_vol < reduced_confounds.shape[1]
+    return remove
+
+
+def parse_bids_name(img: str) -> str:
+    """Get subject, session, and specifier for a fMRIPrep output."""
+    reference = parse_bids_filename(img)
+    session = reference.get("ses", None)
+    run = reference.get("run", None)
+    specifier = f"task-{reference['task']}"
+    if isinstance(session, str):
+        session = f"ses-{session}"
+        specifier = f"{session}_{specifier}"
+
+    if isinstance(run, str):
+        specifier = f"{specifier}_run-{run}"
+    return session, specifier
