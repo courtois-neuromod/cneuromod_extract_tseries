@@ -1,7 +1,7 @@
 Installation
 ============
 
-All CNeuroMod data are made available as a DataLad collection on `github <https://github.com/courtois-neuromod/>`_.
+All CNeuroMod data are made available as a `DataLad collection on github <https://github.com/courtois-neuromod/>`_.
 The released datasets are described `here <https://docs.cneuromod.ca/en/latest/DATASETS.html/>`_.
 They can be explored without downloading the data, and it is easy
 to download only the subset of data needed for a project.
@@ -15,7 +15,7 @@ You can apply for access to the CNeuroMod datasets `here <https://www.cneuromod.
 You will receive login credentials to access the NeuroMod git and the
 NeuroMod Amazon S3 fileserver so you can download the data.
 
-See `here <https://docs.cneuromod.ca/en/latest/ACCESS.html#downloading-the-dataset/>` for additional information on accessing the data.
+See `here <https://docs.cneuromod.ca/en/latest/ACCESS.html#downloading-the-dataset/>`_ for additional information on accessing the data.
 
 
 2. Installing DataLad
@@ -34,7 +34,7 @@ where the dataset will be installed and adding it to Github. See the
 ---------------------------------
 
 Clone the current code repository from GitHub.
-.. code-block::
+.. code-block:: bash
   datalad clone git@github.com:courtois-neuromod/cneuromod_extract_tseries.git
   cd cneuromod_extract_tseries
 
