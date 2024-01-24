@@ -128,3 +128,19 @@ In a .yaml file, define your custom strategy in the following format:
     parameters:
       <function_parameters>: <options>
       ....
+
+
+5. Standarization and smoothing
+-------------------------------
+
+Options for data standardization include ``zscore`` and ``psc``.
+By default, the ``zscore`` standardization is called from the base config file
+``cneuromod_extract_tseries/timeseries/config/base.yaml``. You can override this choice
+at the command line.
+::
+    python run.py dataset=friends parcellation=mist444 standardize=psc
+
+The default smoothing kernel size is set to 5.0 in the base config file.
+You can specify a different value.
+::
+    python run.py dataset=friends parcellation=mist444 smoothing_fwhm=3.0
