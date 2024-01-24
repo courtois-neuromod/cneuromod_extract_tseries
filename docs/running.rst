@@ -97,7 +97,6 @@ launching the script.
 ::
   python run.py dataset=friends subject_list=[01,02,03] parcellation=mist444
 
-
 4. Denoising strategy
 ---------------------
 The script uses ``nilearn.interfaces.fmriprep.load_confounds`` to retrieve
@@ -143,9 +142,6 @@ The default smoothing kernel size is set to 5.0 in the base config file.
 You can specify a different value.
 ::
     python run.py dataset=friends parcellation=mist444 smoothing_fwhm=3.0
-
-
-
 
 
 
