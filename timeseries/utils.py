@@ -1,4 +1,5 @@
 from typing import List, Tuple, Dict, Union, Optional
+import logging
 from pathlib import Path
 
 from nibabel import Nifti1Image
@@ -14,6 +15,7 @@ from nilearn.image import (
 from nilearn.maskers import NiftiMasker
 import numpy as np
 import pandas as pd
+from rich.logging import RichHandler
 from scipy.ndimage import binary_closing
 
 """
@@ -97,7 +99,7 @@ def parse_standardize_options(
     #    return True
     else:
         return standardize
-        
+
 
 def prep_denoise_strategy(
     benchmark_strategy: Dict,
@@ -212,6 +214,8 @@ def _check_mask_affine(
         the same affine matrix.
     """
     # save all header and affine info in hashable type
+    gc_log = gc_logger()
+
     header_info = {"affine": []}
     key_to_header = {}
     for this_mask in mask_imgs:
@@ -368,3 +372,20 @@ def parse_bids_name(img: str) -> str:
     if isinstance(run, str):
         specifier = f"{specifier}_run-{run}"
     return session, specifier
+
+
+def gc_logger(log_level: str = "INFO") -> logging.Logger:
+    """
+    From https://github.com/SIMEXP/giga_connectome/blob/main/giga_connectome/logger.py
+    """
+    # FORMAT = '\n%(asctime)s - %(name)s - %(levelname)s\n\t%(message)s\n'
+    FORMAT = "%(message)s"
+
+    logging.basicConfig(
+        level=log_level,
+        format=FORMAT,
+        datefmt="[%X]",
+        handlers=[RichHandler()],
+    )
+
+    return logging.getLogger("giga_connectome")

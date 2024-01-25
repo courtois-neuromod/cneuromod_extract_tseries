@@ -175,13 +175,13 @@ class ExtractionAnalysis:
                 "*_mask.nii.gz",
                 ),
             )
-        if exclude := _check_mask_affine(found_mask_list, verbose=2):
+        if exclude := _check_mask_affine(found_mask_list):
             found_mask_list, __annotations__ = _get_consistent_masks(
                 found_mask_list,
                 exclude,
                 )
             print(f"Remaining: {len(found_mask_list)} masks")
-
+        
         bold_list = []
         mask_list = []
         for fm in found_mask_list:
@@ -196,6 +196,8 @@ class ExtractionAnalysis:
                 bold_list.append(bpath[0])
                 mask_list.append(fm)
 
+        print(bold_list)
+        print(mask_list)
         return bold_list, mask_list
 
 
@@ -247,7 +249,7 @@ class ExtractionAnalysis:
         matter template (MNI152NLin2009cAsym template to match the template).
         """
         subject_mask_path = (
-            f"{self.mask_dir}/sub-{subject}_{self.conf.dset_name}"
+            f"{self.mask_dir}/sub-{subject}_{self.config.dset_name}"
             f"_{self.config.template}_res-dataset_label-GM_desc_mask.nii.gz"
         )
 
@@ -317,8 +319,8 @@ class ExtractionAnalysis:
 
         subj_tseries_path = (
             f"{self.timeseries_dir}/"
-            f"sub-{subject}_{self.conf.dset_name}_{self.conf.template}"
-            f"_BOLDtimeseries_{self.conf.parcel_name}"
+            f"sub-{subject}_{self.config.dset_name}_{self.config.template}"
+            f"_BOLDtimeseries_{self.config.parcel_name}"
             f"_{self.strategy['name']}.h5"
         )
 
@@ -388,7 +390,7 @@ class ExtractionAnalysis:
             self.strategy,
             subject_mask,
             self.standardize,
-            self.conf.smoothing_fwhm,
+            self.config.smoothing_fwhm,
             img,
         )
 
