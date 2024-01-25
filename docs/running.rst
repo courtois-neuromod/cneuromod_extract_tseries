@@ -93,7 +93,6 @@ By default, the script will process all subjects whose data are found under
 To limit the analysis to a subset of subjects, override the ``subject_list: null``
 parameter in ``cneuromod_extract_tseries/timeseries/config/base.yaml`` when
 launching the script.
-
 ::
    python run.py dataset=friends subject_list=[01,02,03] parcellation=mist444
 
@@ -163,15 +162,9 @@ needed to mask the signal (see below).
 To use a **standard template atlas** (e.g., MIST, Schaefer 7 networks, DiFuMo),
 the following parameters need to be specified in the parcellation .yaml file:
 
-1. ``template``. This field specifies whether to process fMRI data in native (T1w)
-or in normalized (MNI) space. Specify ``template = MNI152NLin2009cAsym`` when
-using a standard template.
-
-2. ``template_gm_path``. The path to a normalized grey matter mask. Grey matter
-masks from the MNI152NLin2009cAsym template, which match the normalized
-CNeuroMod data, are saved under
-``cneuromod_extract_tseries/atlases/tpl-MNI152NLin2009cAsym``.
-Recommended = ``tpl-MNI152NLin2009cAsym_res-02_label-GM_probseg.nii.gz``
+* ``template``. This field specifies whether to process fMRI data in native (T1w) or in normalized (MNI) space. Specify ``template = MNI152NLin2009cAsym`` when using a standard template.
+* ``template_gm_path``. The path to a normalized grey matter mask. Grey matter masks from the MNI152NLin2009cAsym template, which match the normalized
+CNeuroMod data, are saved under ``cneuromod_extract_tseries/atlases/tpl-MNI152NLin2009cAsym``. Recommended = ``tpl-MNI152NLin2009cAsym_res-02_label-GM_probseg.nii.gz``
 
 3. ``n_iter``. The number of iterations to perform a binary closing to merge the
 template grey matter mask (specified with ``template_gm_path``) with a grey matter
