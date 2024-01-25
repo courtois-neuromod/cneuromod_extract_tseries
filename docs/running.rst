@@ -31,12 +31,6 @@ The name must correspond to one of the ``<dset_name>.yaml`` files.
 ::
     python run.py dataset=movie10 parcellation=mist444
 
-TEST BELOW
-
-..  code-block::
-    python run.py dataset=movie10 parcellation=mist444
-
-
 
 The script will look for the input data under
 ``<data_dir>/<dset_name>.fmriprep``
