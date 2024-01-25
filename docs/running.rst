@@ -6,6 +6,7 @@ a simple command line that specifies the dataset and the parcellation to use.
 
 For example,
 .. code-block:: bash
+
    python run.py dataset=shinobi parcellation=mist444
 
 Under the hood, the code relies on a combination of .yaml config files.
