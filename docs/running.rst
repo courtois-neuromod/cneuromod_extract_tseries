@@ -184,7 +184,7 @@ need to be specified in the parcellation .yaml file:
 * ``n_iter``. The number of iterations to perform a binary closing to merge the template grey matter mask (specified with ``template_gm_path``) with a grey matter mask derived from the subject's functional runs (recommended ``n_iter = 2``). Only needed for analyses in MNI space (``template = MNI152NLin2009cAsym``), otherwise omit this field from the config file or set it to ``null``.
 * ``template_parcellation``. Set to ``null``.
 * ``parcel_type``. Whether the specified template parcellation is discrete or probabilistic. Choices = [``dseg``, ``probseg``].
-* ``parcel_name``. The name of the parcellation. Custom subject-specific parcellations (in T1w or MNI space) directly under ``<output_dir>/<dset_name>/subject_masks/<subject>_<template>_<parcel_name>.nii.gz``
+* ``parcel_name``. The name of the parcellation. Save custom subject-specific parcellations (in T1w or MNI space) directly under ``<output_dir>/<dset_name>/subject_masks/<subject>_<template>_<parcel_name>.nii.gz``
 
 For example,
 ::
