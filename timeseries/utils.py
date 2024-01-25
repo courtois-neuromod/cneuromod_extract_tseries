@@ -2,6 +2,7 @@ from typing import List, Tuple, Dict, Union, Optional
 import logging
 from pathlib import Path
 
+import nibabel as nib
 from nibabel import Nifti1Image
 from nilearn.interfaces import fmriprep
 from nilearn.interfaces.bids import parse_bids_filename
@@ -12,7 +13,7 @@ from nilearn.image import (
     new_img_like,
     resample_to_img,
 )
-from nilearn.maskers import NiftiMasker
+from nilearn.maskers import NiftiMasker, NiftiLabelsMasker, NiftiMapsMasker
 import numpy as np
 import pandas as pd
 from rich.logging import RichHandler
@@ -91,14 +92,10 @@ def parse_standardize_options(
     standardize: str,
 ) -> Union[str, bool]:
     # TODO: update standardization choices based on nilearn warnings
-    if standardize not in ["zscore", "psc"]:
+    if standardize not in ["zscore_sample", "psc"]:
         raise ValueError(f"{standardize} is not a valid standardize strategy.")
-    #if standardize == "psc":
-    #    return standardize
-    #else:
-    #    return True
-    else:
-        return standardize
+
+    return standardize
 
 
 def prep_denoise_strategy(
@@ -134,7 +131,7 @@ def prep_denoise_strategy(
 
 
 def generate_timeseries(
-    masker: NiftiMasker,
+    masker: Union[NiftiLabelsMasker, NiftiMapsMasker, NiftiMasker],
     denoised_img: Nifti1Image,
 ) -> np.ndarray:
     """Generate denoised timeseries for one run of CNeuroMod fMRI data.
@@ -298,7 +295,7 @@ def merge_masks(
 def denoise_nifti_voxel(
     strategy: dict,
     subject_mask: Nifti1Image, #Union[str, Path],
-    standardize: Union[str, bool],
+    standardize: str,
     smoothing_fwhm: float,
     img: str,
 ) -> Nifti1Image:
@@ -311,9 +308,8 @@ def denoise_nifti_voxel(
         Denoising strategy parameter to pass to load_confounds_strategy.
     subject_masker : Union[str, Path, Nifti1Image]
         Subject EPI grey matter mask or Path to it.
-    standardize : Union[str, bool]
-        TODO: update based on nilearn normalizing warning
-        Standardize the data. If 'zscore', zscore the data. If 'psc', convert
+    standardize : str
+        If 'zscore_sample', zscore the data. If 'psc', convert
         the data to percent signal change. If False, do not standardize.
     smoothing_fwhm : float
         Smoothing kernel size in mm.

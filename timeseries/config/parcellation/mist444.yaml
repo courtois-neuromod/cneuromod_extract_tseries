@@ -7,3 +7,4 @@ n_iter: 2
 template_parcellation: ./atlases/tpl-MNI152NLin2009bAsym/tpl-MNI152NLin2009bAsym_res-03_atlas-BASC_desc-444_dseg.nii.gz
 parcel_name: atlas-MIST_desc-444_dseg
 parcel_type: dseg
+voxel_based: False

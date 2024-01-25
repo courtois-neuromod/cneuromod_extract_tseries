@@ -10,7 +10,7 @@ from nilearn.image import (
     new_img_like,
     resample_to_img,
 )
-from nilearn.maskers import NiftiLabelsMasker, NiftiMapsMasker
+from nilearn.maskers import NiftiLabelsMasker, NiftiMapsMasker, NiftiMasker
 from nilearn.masking import compute_multi_epi_mask
 import numpy as np
 from omegaconf import DictConfig
@@ -61,7 +61,6 @@ class ExtractionAnalysis:
             self.config.subject_list,
         )
         # define analysis params
-        # TODO: update standardization, see nilearn warning
         self.standardize = parse_standardize_options(
             self.config.standardize,
         )
@@ -181,12 +180,13 @@ class ExtractionAnalysis:
                 exclude,
                 )
             print(f"Remaining: {len(found_mask_list)} masks")
-        
+
         bold_list = []
         mask_list = []
         for fm in found_mask_list:
             identifier = fm.split('/')[-1].split('_space')[0]
             sub, ses = identifier.split('_')[:2]
+
             bpath = sorted(glob.glob(
                 f"{self.bids_dir}/{sub}/{ses}/func/"
                 f"{identifier}*_desc-preproc_*bold.nii.gz"
@@ -196,8 +196,6 @@ class ExtractionAnalysis:
                 bold_list.append(bpath[0])
                 mask_list.append(fm)
 
-        print(bold_list)
-        print(mask_list)
         return bold_list, mask_list
 
 
@@ -301,12 +299,19 @@ class ExtractionAnalysis:
         self: "ExtractionAnalysis",
         subject: str,
         subject_parcellation: nib.nifti1.Nifti1Image,
-    ) -> (NiftiLabelsMasker, str, list):
+    ) -> Tuple[Union[NiftiLabelsMasker, NiftiMapsMasker, NiftiMasker], str, List[str]]:
         """.
 
         Prepare subject-specific params.
         """
-        if self.config.parcel_type == "dseg":
+        if self.config.voxel_based:
+            atlas_masker = NiftiMasker(
+                mask_img=subject_parcellation,
+                detrend=False,
+                standardize=False,
+                smoothing_fwhm=None,
+            )
+        elif self.config.parcel_type == "dseg":
             atlas_masker = NiftiLabelsMasker(
                 labels_img=subject_parcellation,
                 standardize=False,
@@ -317,11 +322,12 @@ class ExtractionAnalysis:
                 standardize=False,
             )
 
+        ts_type = 'voxel' if self.config.voxel_based else 'parcel'
         subj_tseries_path = (
             f"{self.timeseries_dir}/"
             f"sub-{subject}_{self.config.dset_name}_{self.config.template}"
             f"_BOLDtimeseries_{self.config.parcel_name}"
-            f"_{self.strategy['name']}.h5"
+            f"_{self.strategy['name']}_{ts_type}.h5"
         )
 
         processed_run_list = []
@@ -380,7 +386,7 @@ class ExtractionAnalysis:
         self: "ExtractionAnalysis",
         img: str,
         subject_mask: nib.nifti1.Nifti1Image,
-        atlas_masker: Union[NiftiLabelsMasker, NiftiMapsMasker],
+        atlas_masker: Union[NiftiLabelsMasker, NiftiMapsMasker, NiftiMasker],
     ) -> np.array:
         """.
 

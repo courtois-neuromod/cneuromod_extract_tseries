@@ -88,3 +88,5 @@ target/
 # Output files
 outputs/*
 data/*
+env/*
+atlases/*
