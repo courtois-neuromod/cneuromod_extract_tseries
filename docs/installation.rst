@@ -68,7 +68,7 @@ To download the entire dataset recursively, do
 ::
   datalad get -r *
 
-To download a single subject's preprocessed data (e.g., sub-01)
+To download a single subject's preprocessed data (e.g., sub-01), do
 ::
   datalad get -r sub-01/*
 
