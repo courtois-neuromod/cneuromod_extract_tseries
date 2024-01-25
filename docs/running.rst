@@ -39,7 +39,7 @@ This default can be overriden at the command line to match another dataset locat
 like this.
 
 ::
-    python run.py dataset=movie10 data_dir=/home/user/project/my_data_dir parcellation=mist444
+   python run.py dataset=movie10 data_dir=/home/user/project/my_data_dir parcellation=mist444
 
 Alternatively, the ``data_dir`` and ``dset_name`` variables can be modified
 directly in a dataset ``config/dataset/<dset_name>.yaml`` file to reflect the data location.
@@ -95,7 +95,7 @@ parameter in ``cneuromod_extract_tseries/timeseries/config/base.yaml`` when
 launching the script.
 
 ::
-  python run.py dataset=friends subject_list=[01,02,03] parcellation=mist444
+   python run.py dataset=friends subject_list=[01,02,03] parcellation=mist444
 
 4. Denoising strategy
 ---------------------
