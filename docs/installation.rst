@@ -20,7 +20,7 @@ NeuroMod Amazon S3 fileserver so you can download the data.
 2. Installing DataLad
 ---------------------
 
-Install a recent version of the `Datalad software, <https://www.datalad.org/>`_
+Install a recent version of the `Datalad software <https://www.datalad.org/>`_,
 a tool for versioning large data structures in a git repository available
 for Linux, OSX and Windows.
 
@@ -43,7 +43,7 @@ Clone the current code repository from GitHub.
 Specify your CNeuroMod login credentials as environment variables in your
 ``bash`` console to download data from the S3 file server.
 
-You will receive an **access_key** and a **secret_key** when granted access
+Use the **access_key** and **secret_key** you received when granted access
 to the dataset.
 ::
   export AWS_ACCESS_KEY_ID=<s3_access_key>  AWS_SECRET_ACCESS_KEY=<s3_secret_key>
