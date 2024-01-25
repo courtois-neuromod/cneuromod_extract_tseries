@@ -86,4 +86,5 @@ target/
 .mypy_cache/
 
 # Output files
-output/*
+outputs/*
+data/*

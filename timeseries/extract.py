@@ -16,7 +16,7 @@ import numpy as np
 from omegaconf import DictConfig
 from tqdm import tqdm
 
-from utils import (
+from timeseries.utils import (
     denoise_nifti_voxel,
     generate_timeseries,
     prep_denoise_strategy,

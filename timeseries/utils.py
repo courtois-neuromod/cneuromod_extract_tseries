@@ -91,11 +91,13 @@ def parse_standardize_options(
     # TODO: update standardization choices based on nilearn warnings
     if standardize not in ["zscore", "psc"]:
         raise ValueError(f"{standardize} is not a valid standardize strategy.")
-    if standardize == "psc":
-        return standardize
+    #if standardize == "psc":
+    #    return standardize
+    #else:
+    #    return True
     else:
-        return True
-
+        return standardize
+        
 
 def prep_denoise_strategy(
     benchmark_strategy: Dict,

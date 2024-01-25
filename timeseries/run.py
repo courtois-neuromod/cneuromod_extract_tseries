@@ -15,7 +15,7 @@ def run(config: DictConfig) -> None:
     """
     print(OmegaConf.to_yaml(config))
 
-    from extract import ExtractionAnalysis
+    from timeseries.extract import ExtractionAnalysis
 
     analysis = ExtractionAnalysis(config)
     analysis.extract()
