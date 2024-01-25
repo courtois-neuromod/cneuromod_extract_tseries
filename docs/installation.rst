@@ -34,8 +34,8 @@ where the dataset will be installed and adding it to Github. See the
 
 Clone the current code repository from GitHub.
 .. code-block:: bash
-  datalad clone git@github.com:courtois-neuromod/cneuromod_extract_tseries.git
-  cd cneuromod_extract_tseries
+    datalad clone git@github.com:courtois-neuromod/cneuromod_extract_tseries.git
+    cd cneuromod_extract_tseries
 
 
 4. Installing the dataset(s)
