@@ -2,7 +2,7 @@ Installation
 ============
 
 All CNeuroMod data are made available as a `DataLad collection on github <https://github.com/courtois-neuromod/>`_.
-The released datasets are described `here <https://docs.cneuromod.ca/en/latest/DATASETS.html/>`_.
+The released datasets are described `here <https://docs.cneuromod.ca/en/latest/DATASETS.html>`_.
 They can be explored without downloading the data, and it is easy
 to download only the subset of data needed for a project.
 
