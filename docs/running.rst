@@ -33,7 +33,7 @@ The name must correspond to one of the ``<dset_name>.yaml`` files.
 
 TEST BELOW
 
-..  code-block:: bash
+..  code-block::
     python run.py dataset=movie10 parcellation=mist444
 
 
