@@ -2,10 +2,10 @@ Running the code
 ================
 
 The code to extract timeseries from a given CNeuroMod dataset can be run with
-a simple command line that specifies the dataset and the extraction parameters.
+a simple command line that specifies the dataset and the parcellation to use.
 
 For example,
-::
+.. code-block::
     python run.py dataset=shinobi parcellation=mist444
 
 Under the hood, the code relies on a combination of .yaml config files.
@@ -15,7 +15,7 @@ atlases and denoising strategies.
 Users can call the existing config files from the command line, or create their
 own as needed. Depending on the analysis specified, supporting documents
 (e.g., grey matter masks, parcellation atlases) may need to be added, as
-detailed below.
+explained below.
 
 The parameters to specify are described below.
 
