@@ -37,9 +37,8 @@ The script will look for the input data under
 By default, ``<data_dir>`` corresponds to ``cneuromod_extract_tseries/data``.
 This default can be overriden at the command line to match another dataset location,
 like this.
-
 ::
-   python run.py dataset=movie10 data_dir=/home/user/project/my_data_dir parcellation=mist444
+    python run.py dataset=movie10 data_dir=/home/user/project/my_data_dir parcellation=mist444
 
 Alternatively, the ``data_dir`` and ``dset_name`` variables can be modified
 directly in a dataset ``config/dataset/<dset_name>.yaml`` file to reflect the data location.
