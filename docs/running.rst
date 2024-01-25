@@ -17,7 +17,7 @@ own as needed. Depending on the analysis specified, supporting documents
 (e.g., grey matter masks, parcellation atlases) may need to be added, as
 explained below.
 
-The parameters to specify are described below.
+The parameters to specify are described here.
 
 
 1. Dataset
@@ -52,7 +52,7 @@ directly in a dataset ``config/dataset/<dset_name>.yaml`` file to reflect the da
 The **default output directory** (``../output``) is specified as ``output_dir`` in
 ``cneuromod_extract_tseries/timeseries/config/base.yaml``.
 
-If needed, this default can simply be overriden at the command line when launching the code.
+If needed, this default can be overriden at the command line when launching the code.
 ::
     python run.py dataset=friends parcellation=mist444 output_dir=/home/user/project/results/my_analysis
 
