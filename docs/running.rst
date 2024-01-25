@@ -32,8 +32,10 @@ The name must correspond to one of the ``<dset_name>.yaml`` files.
     python run.py dataset=movie10 parcellation=mist444
 
 
-..  code-block:: php
+
+..  code-block:: bash
     python run.py
+
 
 
 The script will look for the input data under
