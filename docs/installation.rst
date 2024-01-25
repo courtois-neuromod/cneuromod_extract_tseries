@@ -20,7 +20,7 @@ NeuroMod Amazon S3 fileserver so you can download the data.
 2. Installing DataLad
 ---------------------
 
-Install a recent version of the `Datalad software<https://www.datalad.org/>`_,
+Install a recent version of the `Datalad software <https://www.datalad.org/>`_ ,
 a tool for versioning large data structures in a git repository available
 for Linux, OSX and Windows.
 
