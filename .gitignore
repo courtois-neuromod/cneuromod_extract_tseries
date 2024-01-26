@@ -87,7 +87,9 @@ target/
 
 # Output files
 outputs/*
-!outputs/.gitkeep
+data/*
+atlases/*
+!*/.gitkeep
 data/*
 env/*
 atlases/tpl*
