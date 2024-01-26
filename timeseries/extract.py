@@ -188,8 +188,8 @@ class ExtractionAnalysis:
             sub, ses = identifier.split('_')[:2]
 
             bpath = sorted(glob.glob(
-                f"{self.bids_dir}/{sub}/{ses}/func/"
-                f"{identifier}*_desc-preproc_*bold.nii.gz"
+                f"{self.bids_dir}/{sub}/{ses}/func/{identifier}"
+                f"*{self.config.template}*_desc-preproc_*bold.nii.gz"
             ))
 
             if len(bpath) == 1 and Path(bpath[0]).exists():
