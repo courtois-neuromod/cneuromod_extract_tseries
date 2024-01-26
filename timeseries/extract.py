@@ -16,17 +16,7 @@ import numpy as np
 from omegaconf import DictConfig
 from tqdm import tqdm
 
-from timeseries.utils import (
-    denoise_nifti_voxel,
-    generate_timeseries,
-    prep_denoise_strategy,
-    get_subject_list,
-    merge_masks,
-    parse_bids_name,
-    parse_standardize_options,
-    _check_mask_affine,
-    _get_consistent_masks,
-)
+from timeseries import utils
 
 
 class ExtractionAnalysis:
@@ -56,15 +46,15 @@ class ExtractionAnalysis:
         Define analysis parameters.
         """
         self.set_paths()
-        self.subjects = get_subject_list(
+        self.subjects = utils.get_subject_list(
             self.bids_dir,
             self.config.subject_list,
         )
         # define analysis params
-        self.standardize = parse_standardize_options(
+        self.standardize = utils.parse_standardize_options(
             self.config.standardize,
         )
-        self.strategy = prep_denoise_strategy(
+        self.strategy = utils.prep_denoise_strategy(
             dict(self.config.denoise),
         )
         self.set_compression()
@@ -174,8 +164,8 @@ class ExtractionAnalysis:
                 "*_mask.nii.gz",
                 ),
             )
-        if exclude := _check_mask_affine(found_mask_list):
-            found_mask_list, __annotations__ = _get_consistent_masks(
+        if exclude := utils._check_mask_affine(found_mask_list):
+            found_mask_list, __annotations__ = utils._get_consistent_masks(
                 found_mask_list,
                 exclude,
                 )
@@ -284,7 +274,7 @@ class ExtractionAnalysis:
 
             if self.config.template == "MNI152NLin2009cAsym":
                 # merge mask from subject's epi files w MNI template grey matter mask
-                subject_epi_mask = merge_masks(
+                subject_epi_mask = utils.merge_masks(
                     subject_epi_mask,
                     self.template_gm_path,
                     self.config.n_iter,
@@ -358,7 +348,7 @@ class ExtractionAnalysis:
 
         for img in tqdm(bold_list):
             try:
-                session, specifier = parse_bids_name(img)
+                session, specifier = utils.parse_bids_name(img)
                 print(specifier)
 
                 if not f"{specifier}_timeseries" in processed_runs:
@@ -391,7 +381,7 @@ class ExtractionAnalysis:
 
         Extract timeseries from denoised volume.
         """
-        denoised_img = denoise_nifti_voxel(
+        denoised_img = utils.denoise_nifti_voxel(
             self.strategy,
             subject_mask,
             self.standardize,
@@ -404,7 +394,7 @@ class ExtractionAnalysis:
             return None, None
 
         else:
-            time_series = generate_timeseries(
+            time_series = utils.generate_timeseries(
                 atlas_masker,
                 denoised_img,
             )
