@@ -107,7 +107,7 @@ Choices of denoising strategies are saved under
 Each denoise .yaml file contains parameters designed to pass to
 `nilearn's load_confounds_strategy <https://nilearn.github.io/dev/modules/generated/nilearn.interfaces.fmriprep.load_confounds_strategy.html>`_.
 
-By default, the `simple+gsr` strategy is called from the base config file
+By default, the ``simple+gsr`` strategy is called from the base config file
 ``timeseries/config/base.yaml``. You can override this choice
 at the command line.
 ::
@@ -130,8 +130,8 @@ In a .yaml file, define your custom strategy in the following format:
 5. Standarization and smoothing
 -------------------------------
 
-Options for data standardization include ``zscore`` and ``psc``.
-By default, the ``zscore`` standardization is called from the base config file
+Options for data standardization include ``zscore_sample`` and ``psc``.
+By default, the ``zscore_sample`` standardization is called from the base config file
 ``timeseries/config/base.yaml``. You can override this choice at the command line.
 ::
     python -m timeseries.run dataset=friends parcellation=mist444 standardize=psc
@@ -164,7 +164,7 @@ the following parameters need to be specified in the parcellation .yaml file:
 * ``template``. This field specifies whether to process fMRI data in native (T1w) or in normalized (MNI) space. Specify ``template = MNI152NLin2009cAsym`` when using a standard template.
 * ``template_gm_path``. The path to a normalized grey matter mask. Grey matter masks from the MNI152NLin2009cAsym template, which match the normalized CNeuroMod data, are saved under ``atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-0*_label-GM_probseg.nii.gz``. With CNeuroMod data, we recommend using ``tpl-MNI152NLin2009cAsym_res-02_label-GM_probseg.nii.gz`` (res = 2).
 * ``n_iter``. The number of iterations to perform a binary closing to merge the template grey matter mask (specified with ``template_gm_path``) with a grey matter mask derived from the subject's functional runs (recommended ``n_iter = 2``).
-* ``parcel_name``. The name given to the parcellation. For each subject, a subject-specific parcellation will be generated and saved as <output_dir>/<dset_name>/subject_masks/<subject>_<template>_<parcel_name>.nii.gz.
+* ``parcel_name``. The name given to the parcellation. For each subject, a subject-specific parcellation will be generated and saved as ``<output_dir>/<dset_name>/subject_masks/<subject>_<template>_<parcel_name>.nii.gz``.
 * ``parcel_type``. Whether the specified template parcellation is discrete or probabilistic. Choices = [``dseg``, ``probseg``]
 * ``voxel_based``. If True, extract timeserie for each voxel in a (single) parcel. If False, extract one timeseries per parcel(s). Note that the voxel-based approach works only with binary masks.
 * ``template_parcellation``. The full path to a standard atlas / parcellation that specifies the ROI(s) from which to extract the timeseries. Template parcellations should be saved under ``atlases/tpl-<space>/tpl-<space>_<parcel_descript>.nii.gz``
@@ -184,7 +184,7 @@ need to be specified in the parcellation .yaml file:
 * ``n_iter``. The number of iterations to perform a binary closing to merge the template grey matter mask (specified with ``template_gm_path``) with a grey matter mask derived from the subject's functional runs (recommended ``n_iter = 2``). Only needed for analyses in MNI space (``template = MNI152NLin2009cAsym``), otherwise omit this field from the config file or set it to ``null``.
 * ``template_parcellation``. Set to ``null``.
 * ``parcel_type``. Whether the specified template parcellation is discrete or probabilistic. Choices = [``dseg``, ``probseg``].
-* ``voxel_based``. If True, extract timeserie for each voxel in a (single) parcel. If False, extract one timeseries per parcel(s). Note that the voxel-based approach works only with binary masks.
+* ``voxel_based``. If True, extract timeserie for each voxel in a (single) parcel. If False, extract one timeseries per parcel(s). Note that the voxel-based approach only works with binary masks.
 * ``parcel_name``. The name of the parcellation. Save custom subject-specific parcellations (in T1w or MNI space) directly under ``<output_dir>/<dset_name>/subject_masks/<subject>_<template>_<parcel_name>.nii.gz``
 
 For example,
