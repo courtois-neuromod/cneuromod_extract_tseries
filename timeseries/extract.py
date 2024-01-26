@@ -374,12 +374,11 @@ class ExtractionAnalysis:
                             session,
                             specifier,
                             time_series,
+                            self.comp_args,
                         )
 
             except:
                 print(f"could not process file {img}" )
-
-        return
 
 
     def get_tseries(

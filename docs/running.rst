@@ -166,7 +166,7 @@ the following parameters need to be specified in the parcellation .yaml file:
 * ``n_iter``. The number of iterations to perform a binary closing to merge the template grey matter mask (specified with ``template_gm_path``) with a grey matter mask derived from the subject's functional runs (recommended ``n_iter = 2``).
 * ``parcel_name``. The name given to the parcellation. For each subject, a subject-specific parcellation will be generated and saved as <output_dir>/<dset_name>/subject_masks/<subject>_<template>_<parcel_name>.nii.gz.
 * ``parcel_type``. Whether the specified template parcellation is discrete or probabilistic. Choices = [``dseg``, ``probseg``]
-* ``voxel_based``. If True, extract timeseries for each voxel in the parcel(s). If False, extract one timeseries per parcel.
+* ``voxel_based``. If True, extract timeseries for each voxel in the (single) parcel. If False, extract one timeseries per parcel(s). Note that the voxel-based approach works only with binary masks.
 * ``template_parcellation``. The full path to a standard atlas / parcellation that specifies the ROI(s) from which to extract the timeseries. Template parcellations should be saved under ``atlases/tpl-<space>/tpl-<space>_<parcel_descript>.nii.gz``
 
 For example,
@@ -184,7 +184,7 @@ need to be specified in the parcellation .yaml file:
 * ``n_iter``. The number of iterations to perform a binary closing to merge the template grey matter mask (specified with ``template_gm_path``) with a grey matter mask derived from the subject's functional runs (recommended ``n_iter = 2``). Only needed for analyses in MNI space (``template = MNI152NLin2009cAsym``), otherwise omit this field from the config file or set it to ``null``.
 * ``template_parcellation``. Set to ``null``.
 * ``parcel_type``. Whether the specified template parcellation is discrete or probabilistic. Choices = [``dseg``, ``probseg``].
-* ``voxel_based``. If True, extract timeseries for each voxel in the parcel(s). If False, extract one timeseries per parcel.
+* ``voxel_based``. If True, extract timeseries for each voxel in the (single) parcel. If False, extract one timeseries per parcel(s). Note that the voxel-based approach works only with binary masks.
 * ``parcel_name``. The name of the parcellation. Save custom subject-specific parcellations (in T1w or MNI space) directly under ``<output_dir>/<dset_name>/subject_masks/<subject>_<template>_<parcel_name>.nii.gz``
 
 For example,
