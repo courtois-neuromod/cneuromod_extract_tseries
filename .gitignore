@@ -89,5 +89,6 @@ target/
 outputs/*
 data/*
 atlases/*
+subject_masks/*
 !*/.gitkeep
 env/*
