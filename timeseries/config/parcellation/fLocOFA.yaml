@@ -1,0 +1,9 @@
+# @package _global_
+
+template: T1w
+template_gm_path: null
+
+template_parcellation: null
+parcel_name: fLoc-face-OFA
+parcel_type: dseg
+voxel_based: True
