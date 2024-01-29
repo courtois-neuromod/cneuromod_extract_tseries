@@ -1,0 +1,8 @@
+# @package _global_
+
+template: T1w
+template_gm_path: null
+
+parcel_name: npythy-V1
+parcel_type: dseg
+voxel_based: True
