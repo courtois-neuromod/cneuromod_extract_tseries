@@ -73,6 +73,6 @@ for sub in range(1, 7):
         mpath = Path(
             "/home/mstlaure/projects/rrg-pbellec/mstlaure/"
             "cneuromod_extract_tseries/masks/subject_masks/fLoc/"
-            f"sub-{sub_num}/sub-{sub_num}_T1w_{pname[0]}_{pname[1].split('.')[0]}.nii"
+            f"sub-{sub_num}/sub-{sub_num}_T1w_{pname[0]}_{pname[1].split('.')[0]}.nii.gz"
         )
         nib.save(rs_parcel, mpath)
