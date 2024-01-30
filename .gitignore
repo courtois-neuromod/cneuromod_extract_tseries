@@ -92,3 +92,4 @@ atlases/*
 subject_masks/*
 !*/.gitkeep
 env/*
+slurm_files/*
