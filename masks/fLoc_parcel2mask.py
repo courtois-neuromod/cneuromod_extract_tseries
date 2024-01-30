@@ -68,11 +68,11 @@ for sub in range(1, 7):
         parcel = nib.load(parcel_path)
 
         rs_parcel = nilearn.image.resample_to_img(parcel, subject_epi_mask, interpolation='continuous')
-        rs_parcel = nib.nifti1.Nifti1Image((rs_parcel.get_fdata() > 0.5).astype(int), affine=rs_parcel.affine)
+        rs_parcel = nib.nifti1.Nifti1Image((rs_parcel.get_fdata() > 0.5).astype(int), affine=rs_parcel.affine, dtype="uint8")
 
         mpath = Path(
             "/home/mstlaure/projects/rrg-pbellec/mstlaure/"
             "cneuromod_extract_tseries/masks/subject_masks/fLoc/"
-            f"sub-{sub_num}/sub-{sub_num}_T1w_{pname[0]}_{pname[1]}.nii"
+            f"sub-{sub_num}/sub-{sub_num}_T1w_{pname[0]}_{pname[1].split('.')[0]}.nii"
         )
         nib.save(rs_parcel, mpath)
