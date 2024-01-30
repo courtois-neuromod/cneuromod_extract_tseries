@@ -130,32 +130,6 @@ def prep_denoise_strategy(
     return benchmark_strategy
 
 
-def generate_timeseries(
-    masker: Union[NiftiLabelsMasker, NiftiMapsMasker, NiftiMasker],
-    denoised_img: Nifti1Image,
-) -> np.ndarray:
-    """Generate denoised timeseries for one run of CNeuroMod fMRI data.
-
-    Parameters
-    ----------
-    masker : NiftiMasker
-        NiftiMasker instance for extracting time series.
-
-    denoised_img : Nifti1Image
-        Denoised functional image.
-
-    Returns
-    -------
-    np.ndarray
-        The masked time series data array.
-    """
-    time_series_atlas = masker.fit_transform(denoised_img)
-
-    # convert to float 32 instead of 64
-    return time_series_atlas.astype(np.float32)
-
-
-
 def _get_consistent_masks(
     mask_imgs: List[Union[Path, str, Nifti1Image]], exclude: List[int]
 ) -> Tuple[List[int], List[str]]:

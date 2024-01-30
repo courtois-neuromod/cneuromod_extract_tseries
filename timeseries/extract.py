@@ -394,12 +394,7 @@ class ExtractionAnalysis:
             return None, None
 
         else:
-            time_series = utils.generate_timeseries(
-                atlas_masker,
-                denoised_img,
-            )
-
-            return time_series
+            return atlas_masker.fit_transform(denoised_img).astype(np.float32)
 
 
     def save_tseries(
