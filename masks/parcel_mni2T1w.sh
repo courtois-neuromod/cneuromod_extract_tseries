@@ -1,8 +1,8 @@
 module load StdEnv/2020
 module load gcc/9.3.0
-module load fsl/6.0.3
+#module load fsl/6.0.3
 
-module load freesurfer/7.1.1
+#module load freesurfer/7.1.1
 module load ants/2.3.5
 
 source /project/rrg-pbellec/mstlaure/.virtualenvs/things_memory_results/bin/activate
@@ -16,7 +16,7 @@ source /project/rrg-pbellec/mstlaure/.virtualenvs/things_memory_results/bin/acti
 # https://neurostars.org/t/how-to-transform-mask-from-mni-to-native-space-using-fmriprep-outputs/2880/8
 
 MNIPARCEL="${1}"  # /path/to/infile_MNI.nii
-OUTFILE="${2}"  # /path/to/outfile_T1w.nii
+OUTPATH="${2}"  # /path/to/output/dir
 SPREPDIR="/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries/data/friends.fmriprep/sourcedata/smriprep"
 
 #PARCELDIR="/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries/masks/standard_masks/fLoc_kanwisher_parcels"
@@ -26,7 +26,7 @@ for SUBNUM in 01 02 03 04 05 06
 do
   antsApplyTransforms --default-value 0 --dimensionality 3 --float 0 \
   --input ${MNIPARCEL} --interpolation Linear \
-  --output ${OUTFILE} \
+  --output ${OUTPATH}/sub-${SUBNUM}_test.nii \
   --reference-image ${SPREPDIR}/sub-${SUBNUM}/anat/sub-${SUBNUM}_desc-preproc_T1w.nii.gz \
   --transform ${SPREPDIR}/sub-${SUBNUM}/anat/sub-${SUBNUM}_from-MNI152NLin2009cAsym_to-T1w_mode-image_xfm.h5
 done
