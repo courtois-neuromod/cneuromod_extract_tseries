@@ -89,10 +89,7 @@ target/
 outputs/*
 data/*
 atlases/*
-masks/subject_masks/*
-masks/standard_masks/*
+masks/vision_localizers/*
 !*/.gitkeep
-!masks/subject_masks/.gitkeep
-!masks/standard_masks/.gitkeep
 env/*
 slurm_files/*
