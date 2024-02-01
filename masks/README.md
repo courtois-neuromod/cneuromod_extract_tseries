@@ -27,7 +27,18 @@ Links:
 
 converting MNI coordinates (in mm) to T1W coordinates (in voxels)
 
+With ANTS: antsApplyTransformsToPoints
+https://neurostars.org/t/extracting-individual-transforms-from-composite-h5-files-fmriprep/2215/14
+https://antspy.readthedocs.io/en/latest/_modules/ants/registration/apply_transforms.html
+https://github.com/stnava/chicken/blob/master/runthis.sh#L53-L54
+https://github.com/stnava/chicken/blob/d3e3855b9c13f8096aed27a0addf66b1a11e6bec/runthis.sh#L53-L54
+
+Coordinate systems:
+https://www.slicer.org/wiki/Coordinate_systems
+
+
 USE FSL FLIRT std2imgcoord, combine two transformations...
+
 https://neurostars.org/t/coordinates-from-mni-to-subject-space-using-transform-h5-file/5994/3
 
 https://neurostars.org/t/mni-coordinates-to-subjects-epi/5628
