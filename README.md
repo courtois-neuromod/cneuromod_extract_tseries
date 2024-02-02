@@ -3,7 +3,7 @@ cneuromod_extract_tseries
 
 Timeseries extraction for Courtois-Neuromod fMRI datasets.
 
-Documentation on how to use this tool can be found [here](https://github.com/courtois-neuromod/cneuromod_extract_tseries/blob/dev/docs/overview.rst)
+Documentation on how to use this tool can be found [here](https://github.com/courtois-neuromod/cneuromod_extract_tseries/blob/dev_clean/docs/overview.rst)
 
 Project Organization
 ------------
