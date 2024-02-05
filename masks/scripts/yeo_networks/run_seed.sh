@@ -19,7 +19,7 @@ source /home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries/en
 SUBJECT=="${1}"  # e.g., "01"
 CODEDIR="/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries"
 DATADIR="${CODEDIR}/data/friends.fmriprep"
-OUTDIR="${CODEDIR}/masks/yeo_networks/connectivity_mni"
+OUTDIR="${CODEDIR}/masks/yeo_networks"
 
 # launch job
 python seed_connectivity.py \

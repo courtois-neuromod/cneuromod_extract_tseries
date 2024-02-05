@@ -105,9 +105,14 @@ def generate_mni_seed_masks(
     mni_GM_mask: Nifti1Image,
 ) -> None:
     """ . """
+    Path(f"{args.out_dir}/seed_masks").mkdir(parents=True, exist_ok=True)
+    Path(f"{args.out_dir}/binary_masks").mkdir(parents=True, exist_ok=True)
+    Path(f"{args.out_dir}/temp").mkdir(parents=True, exist_ok=True)
+
     for seed in SEEDS:
         mni_seed_mask_path = Path(
-            f"{args.out_dir}/{args.subject}_{seed[0]}_seed_MNI.nii.gz"
+            f"{args.out_dir}/seed_masks/{args.subject}"
+            f"_{seed[0]}_seed_MNI.nii.gz"
         )
         if not mni_seed_mask_path.exists():
             mni_seed_masker = NiftiSpheresMasker(
@@ -137,13 +142,15 @@ def make_labels_seed_masks(
 
     for n_ROI, seed in seeds_ROI.items():
         mni_seed_mask_path = Path(
-            f"{args.out_dir}/{args.subject}_{seed}_seed_MNI.nii.gz"
+            f"{args.out_dir}/seed_masks/"
+            f"{args.subject}_{seed}_seed_MNI.nii.gz"
         )
         mni_seed_mask = nib.load(mni_seed_mask_path)
         seeds_ROI[n_ROI]["mni_mask"] = mni_seed_mask.get_fdata()*n_ROI
 
         t1w_seed_mask_path = Path(
-            f"{args.out_dir}/{args.subject}_{seed}_seed_T1w.nii.gz"
+            f"{args.out_dir}/seed_masks/"
+            f"{args.subject}_{seed}_seed_T1w.nii.gz"
         )
         t1w_seed_mask = ni.load(t1w_seed_mask_path)
         t1w_seed_mask = resample_to_img(
@@ -247,7 +254,8 @@ def create_network_masks(
             affine=mean_connectivity.affine,
         )
         network_mask.to_filename(
-            f"{args.out_dir}/{args.subject}_{seed[0]}_{space}_mask.nii.gz"
+            f"{args.out_dir}/binary_masks/"
+            f"{args.subject}_{seed[0]}_{space}_mask.nii.gz"
         )
 
 
@@ -274,13 +282,13 @@ def main(args: argparse.Namespace):
         "MNI152NLin2009cAsym",
     )
 
-    Path(f"{args.out_dir}/temp").mkdir(parents=True, exist_ok=True)
     # generates mni seed masks only if not found
     generate_mni_seed_masks(args, mni_GM_mask)
 
     found_t1w_seed_masks = np.sum([
         Path(
-            f"{args.out_dir}/{args.subject}_{seed[0]}_seed_T1w.nii.gz"
+            f"{args.out_dir}/seed_masks/"
+            f"{args.subject}_{seed[0]}_seed_T1w.nii.gz"
         ).exists() for seed in SEEDS]) == len(SEEDS)
 
     if not found_t1w_seed_masks:
@@ -288,7 +296,8 @@ def main(args: argparse.Namespace):
         OFFLINE work: generate T1w seed masks
         For each subject, convert each SEED mask from MNI to T1w space w ANTS
         using parcel_mni2T1w.sh script.
-        Save as <args.out_dir>/<args.subject>_<seed[0]>_seed_T1w.nii.gz
+        Save as
+        <args.out_dir>/seed_masks/<args.subject>_<seed[0]>_seed_T1w.nii.gz
         """
         print(
             "Missing T1w seed masks. Use ants to generate seed masks in"
