@@ -25,5 +25,5 @@ OUTDIR="${CODEDIR}/masks/yeo_networks/connectivity_mni"
 python seed_connectivity.py \
     --data_dir "${DATADIR}" \
     --out_dir "${OUTDIR}" \
-    --task_filter "b_" \  
+    --task_filter "b_" \
     --subject="sub-${SUBJECT}"
