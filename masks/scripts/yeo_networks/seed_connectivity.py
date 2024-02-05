@@ -276,7 +276,7 @@ def main(args: argparse.Namespace):
 
     Path(f"{args.out_dir}/temp").mkdir(parents=True, exist_ok=True)
     # generates mni seed masks only if not found
-    generate_mni_seed_masks(args)
+    generate_mni_seed_masks(args, mni_GM_mask)
 
     found_t1w_seed_masks = np.sum([
         Path(
