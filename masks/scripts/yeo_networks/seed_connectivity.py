@@ -10,7 +10,7 @@ import pandas as pd
 import pickle as pk
 from tqdm import tqdm
 import nilearn.interfaces
-from nilearn.image import mean_img
+from nilearn.image import mean_img, resample_to_img
 from nilearn.maskers import NiftiMasker, NiftiLabelsMasker, NiftiSpheresMasker
 from nilearn.masking import compute_multi_epi_mask
 
@@ -143,40 +143,38 @@ def make_labels_seed_masks(
     for n_ROI, seed in seeds_ROI.items():
         mni_seed_mask_path = Path(
             f"{args.out_dir}/seed_masks/"
-            f"{args.subject}_{seed}_seed_MNI.nii.gz"
+            f"{args.subject}_{seed['ROI_name']}_seed_MNI.nii.gz"
         )
         mni_seed_mask = nib.load(mni_seed_mask_path)
-        seeds_ROI[n_ROI]["mni_mask"] = mni_seed_mask.get_fdata()*n_ROI
+        seeds_ROI[n_ROI]["mni_mask"] = np.squeeze(
+            mni_seed_mask.get_fdata()*n_ROI
+        )
 
         t1w_seed_mask_path = Path(
             f"{args.out_dir}/seed_masks/"
-            f"{args.subject}_{seed}_seed_T1w.nii.gz"
+            f"{args.subject}_{seed['ROI_name']}_seed_T1w.nii.gz"
         )
-        t1w_seed_mask = ni.load(t1w_seed_mask_path)
+        t1w_seed_mask = nib.load(t1w_seed_mask_path)
         t1w_seed_mask = resample_to_img(
             t1w_seed_mask, t1w_GM_mask, interpolation="nearest"
         )
         t1w_seed_max = np.max(t1w_seed_mask.get_fdata())
         seeds_ROI[n_ROI]["t1w_mask"] = (
-            t1w_seed_max.get_fdata() == t1w_seed_max
+            t1w_seed_mask.get_fdata() == t1w_seed_max
         ).astype(int)*n_ROI
 
-    # debugging sanity check; remove later
-    mlabels = np.sum([x["mni_mask"] for x in seeds_ROI.values()])
-    tlabels = np.sum([x["t1w_mask"] for x in seeds_ROI.values()])
-    assert len(mlabels.shape) == 3
-    assert np.sum(mlabels > 0) == len(SEEDS)
-    assert len(tlabels.shape) == 3
-    assert np.sum(tlabels > 0) == len(SEEDS)
-
     mni_labels_mask = nib.nifti1.Nifti1Image(
-        np.sum([x["mni_mask"] for x in seeds_ROI.values()]),
+        np.sum(np.stack(
+            [x["mni_mask"] for x in seeds_ROI.values()], axis=-1
+        ), axis=-1),
         affine=mni_GM_mask.affine,
         dtype="uint8",
     )
 
     t1w_labels_mask = nib.nifti1.Nifti1Image(
-        np.sum([x["t1w_mask"] for x in seeds_ROI.values()]),
+        np.sum(np.stack(
+            [x["t1w_mask"] for x in seeds_ROI.values()], axis=-1
+        ), axis=-1),
         affine=t1w_GM_mask.affine,
         dtype="uint8",
     )
@@ -195,7 +193,7 @@ def compute_connectivity(
 ) -> Dict:
     """."""
 
-    connectivity_lists = {}
+    connectivity_lists = {s[0]:[] for s in SEEDS}
     for i, file_path in tqdm(enumerate(bold_list)):
         filename = os.path.split(file_path)[1].replace(".nii.gz", "")
 
@@ -222,11 +220,11 @@ def compute_connectivity(
             denoised_brain,
         )
 
-        for i, r_id in seed_masker.region_ids_.items():
-            seed_name = seeds_ROI[int(r_id)]
+        for i, r_id in enumerate(seed_masker.labels_):
+            seed_name = seeds_ROI[int(r_id)]['ROI_name']
             seed_vox_corr = (
-                np.dot(brain_time_series.T, seed_time_series[:, i])
-                / seed_time_series.shape[0]
+                np.dot(brain_timeseries.T, seed_timeseries[:, i])
+                / seed_timeseries.shape[0]
             )
 
             out_path = f"{args.out_dir}/temp/{filename}_{seed_name}_{space}_connectivity.nii.gz"
@@ -244,14 +242,15 @@ def create_network_masks(
 ) -> None:
     """."""
 
-    nvox = int(np.sum(GM_mask)*0.1)  # add parameters?
+    nvox = int(np.sum(GM_mask.get_fdata())*args.keep_ratio)
     for seed in SEEDS:
         mean_connectivity = mean_img(fconnect_lists[seed[0]])
 
-        vox_cutoff = np.sort(mean_connectivity)[-nvox]
+        vox_cutoff = np.sort(mean_connectivity.get_fdata().reshape([-1]))[-nvox]
         network_mask = nib.nifti1.Nifti1Image(
             (mean_connectivity.get_fdata() >= vox_cutoff).astype(int),
             affine=mean_connectivity.affine,
+            dtype="uint8",
         )
         network_mask.to_filename(
             f"{args.out_dir}/binary_masks/"
@@ -379,12 +378,9 @@ if __name__ == "__main__":
         help="Regular expression to select runs.",
     )
     parser.add_argument(
-        "--atlas_path",
-        type=Path,
-        default=Path(
-            "../../../atlases/tpl-MNI152NLin2009bAsym/"
-            "tpl-MNI152NLin2009bAsym_res-03_atlas-BASC_desc-197_dseg.nii.gz",
-        ).resolve(),
+        "--keep_ratio",
+        type=float,
+        default=0.1,
     )
 
     main(parser.parse_args())
