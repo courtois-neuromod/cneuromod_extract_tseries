@@ -89,7 +89,7 @@ target/
 outputs/*
 data/*
 atlases/*
-masks/vision_localizers/*
+masks/*
 !*/.gitkeep
 env/*
 slurm_files/*
