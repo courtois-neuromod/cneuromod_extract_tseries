@@ -275,6 +275,7 @@ def main(args: argparse.Namespace):
     Based on nilearn tutorial
     https://nilearn.github.io/stable/auto_examples/03_connectivity/plot_seed_to_voxel_correlation.html
     """
+    print(args)
 
     mni_bold_list, mni_confounds, mni_GM_mask = get_fmri_files(
         args,

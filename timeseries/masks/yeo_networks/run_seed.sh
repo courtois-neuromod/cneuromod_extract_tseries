@@ -16,7 +16,7 @@ module load python/3.10.13
 # activate project's virtual env
 source /home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries/env/bin/activate
 
-SUBJECT=="${1}"  # e.g., "01"
+SUBJECT="${1}"  # e.g., "01"
 CODEDIR="/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries"
 DATADIR="${CODEDIR}/data/friends.fmriprep"
 OUTDIR="${CODEDIR}/masks/yeo_networks"
