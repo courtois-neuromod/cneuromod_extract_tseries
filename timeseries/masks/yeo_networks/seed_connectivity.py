@@ -16,12 +16,12 @@ from nilearn.masking import compute_multi_epi_mask
 
 
 SEEDS = (
-    ("visual", (-16, -74, 7), 1),
-    ("sensorimotor", (-41, -20, 62), 2),
-    ("dorsal_attention", (-34, -38, 44), 3),
-    ("ventral_attention", (-5, 15, 32), 4),  # (-31, 11, 8)),
-    ("fronto-parietal", (-40, 50, 7), 5),
-    ("default-mode", (-7, -52, 26), 6),
+    ("visual", (-16, -74, 7), 1, 0.085),
+    ("sensorimotor", (-41, -20, 62), 2, 0.06),
+    ("dorsal_attention", (-34, -38, 44), 3, 0.075),
+    ("ventral_attention", (-5, 15, 32), 4, 0.05),  # (-31, 11, 8)),
+    ("fronto-parietal", (-40, 50, 7), 5, 0.057),
+    ("default-mode", (-7, -52, 26), 6, 0.12),
 )
 
 LOAD_CONFOUNDS_PARAMS = {
@@ -241,10 +241,18 @@ def create_network_masks(
     GM_mask: Nifti1Image,
 ) -> None:
     """."""
+    GM_mask.to_filename(
+        f"{args.out_dir}/binary_masks/{args.subject}_GM-mask_MNI.nii.gz"
+    )
 
-    nvox = int(np.sum(GM_mask.get_fdata())*args.keep_ratio)
     for seed in SEEDS:
+        nvox = int(np.sum(GM_mask.get_fdata())*seed[3])
         mean_connectivity = mean_img(fconnect_lists[seed[0]])
+        mean_connectivity.to_filename(
+            f"{args.out_dir}/binary_masks/"
+            f"{args.subject}_{seed[0]}_{space}_mean-connectivity.nii.gz"
+
+        )
 
         vox_cutoff = np.sort(mean_connectivity.get_fdata().reshape([-1]))[-nvox]
         network_mask = nib.nifti1.Nifti1Image(
@@ -377,11 +385,6 @@ if __name__ == "__main__":
         type=str,
         default="",
         help="Regular expression to select runs.",
-    )
-    parser.add_argument(
-        "--keep_ratio",
-        type=float,
-        default=0.1,
     )
 
     main(parser.parse_args())
