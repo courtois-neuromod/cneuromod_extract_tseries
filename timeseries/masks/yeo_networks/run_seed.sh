@@ -20,10 +20,12 @@ SUBJECT="${1}"  # e.g., "01"
 CODEDIR="/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries"
 DATADIR="${CODEDIR}/data/friends.fmriprep"
 OUTDIR="${CODEDIR}/masks/yeo_networks"
+ATLAS="${CODEDIR}/atlases/tpl-MNI152NLin2009bSym/tpl-MNI152NLin2009bSym_res-03_atlas-MIST_desc-ROI_dseg.nii.gz"
 
 # launch job
 python seed_connectivity.py \
     --data_dir "${DATADIR}" \
     --out_dir "${OUTDIR}" \
+    --atlas_path "${ATLAS}" \
     --task_filter "b_" \
     --subject="sub-${SUBJECT}"
