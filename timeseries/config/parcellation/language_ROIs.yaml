@@ -1,0 +1,10 @@
+# @package _global_
+
+template: MNI152NLin2009cAsym
+template_gm_path: ./atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_label-GM_probseg.nii.gz
+n_iter: 2
+
+template_parcellation: ./masks/language_rois/ROI_parcels_mni/tpl-MNI152NLin2009cAsym_language-ROIs_Toneva-8_dseg.nii.gz
+parcel_name: langage-ROIs_Toneva-8_dseg
+parcel_type: dseg
+voxel_based: False

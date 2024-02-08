@@ -69,6 +69,8 @@ class ExtractionAnalysis:
         self.bids_dir = Path(
             f"{self.config.data_dir}/{self.config.dset_name}.fmriprep"
         ).resolve()
+        #TODO: replace with subject's own grey matter mask in either MNI/T1w
+        # space from fMRI.prep anat output?
         # grey-matter mask in MNI-space, probability segmentation
         if self.config.template == "MNI152NLin2009cAsym":
             self.template_gm_path = Path(
@@ -271,7 +273,8 @@ class ExtractionAnalysis:
                 f"Group EPI mask affine:\n{subject_epi_mask.affine}"
                 f"\nshape: {subject_epi_mask.shape}"
             )
-
+            # TODO: implement so merge_masks with subject's own grey matter
+            # mask for cleaner signal
             if self.config.template == "MNI152NLin2009cAsym":
                 # merge mask from subject's epi files w MNI template grey matter mask
                 subject_epi_mask = utils.merge_masks(
@@ -409,6 +412,7 @@ class ExtractionAnalysis:
 
         Save episode's time series in .h5 file.
         """
+        # TODO: export parcel labels along w timeseries matrices?
         flag =  "a" if Path(subj_tseries_path).exists() else "w"
         with h5py.File(subj_tseries_path, flag) as f:
 
