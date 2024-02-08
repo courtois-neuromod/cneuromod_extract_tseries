@@ -150,7 +150,7 @@ def generate_mni_parcel_masks(
                 standardize=False,
                 verbose=0,
             )
-            ROI_val = seed_masker.fit_transform(atlas_parcel)[0][0]
+            ROI_val = mni_seed_masker.fit_transform(atlas_parcel)[0][0]
 
             parcel_mask = nib.nifti1.Nifti1Image(
                 (atlas_parcel.get_fdata() == ROI_val).astype(int),
