@@ -162,77 +162,65 @@ def generate_mni_parcel_masks(
             nib.save(parcel_mask, mni_parcel_mask_path)
 
 
-def make_labels_seed_masks(
+def make_labels_parcel_masks(
     args: argparse.Namespace,
     mni_GM_mask: Nifti1Image,
     t1w_GM_mask: Nifti1Image,
 
 ) -> Tuple[Dict, Nifti1Image, Nifti1Image]:
     """ . """
-    seeds_ROI = {s[2]:{"ROI_name": s[0]} for s in SEEDS}
+    parcels_ROI = {s[2]:{"network_name": s[0]} for s in SEEDS}
 
-    for n_ROI, seed in seeds_ROI.items():
+    for n_ROI, parcel in parcels_ROI.items():
         mni_parcel_mask_path = Path(
             f"{args.out_dir}/parcel_masks/"
-            f"{args.subject}_{seed['ROI_name']}_parcel_MNI.nii.gz"
+            f"{args.subject}_{parcel['network_name']}_parcel_MNI.nii.gz"
         )
         mni_parcel_mask = nib.load(mni_parcel_mask_path)
         mni_parcel_mask = resample_to_img(
             mni_parcel_mask, mni_GM_mask, interpolation="nearest",
         )
-        # TODO: need squeeze?
-        seeds_ROI[n_ROI]["mni_mask"] = np.squeeze(
+        parcels_ROI[n_ROI]["mni_mask"] = (
             mni_parcel_mask.get_fdata()*mni_GM_mask.get_fdata()*n_ROI
         )
 
         t1w_parcel_mask_path = Path(
             f"{args.out_dir}/parcel_masks/"
-            f"{args.subject}_{seed['ROI_name']}_parcel_T1w.nii.gz"
+            f"{args.subject}_{parcel['network_name']}_parcel_T1w.nii.gz"
         )
         t1w_parcel_mask = nib.load(t1w_parcel_mask_path)
         t1w_parcel_mask = resample_to_img(
             t1w_parcel_mask, t1w_GM_mask, interpolation="nearest",
         )
-        seeds_ROI[n_ROI]["t1w_mask"] = (
+        parcels_ROI[n_ROI]["t1w_mask"] = (
             (t1w_parcel_mask.get_fdata() > 0.5).astype(int)
         )*t1w_GM_mask.get_fdata()*n_ROI
 
-        # TODO: make parcel mask binary (check for nearest interp rather than linear...)
-        # TODO: make it binary (check for nearest interp rather than linear...)
-        # TODO: mask parcel with GM mask (T1w space)
-        # TODO: QC (notebook), check (visualize) that some voxels left...
-        t1w_seed_max = np.max(t1w_seed_mask.get_fdata())
-        seeds_ROI[n_ROI]["t1w_mask"] = (
-            t1w_seed_mask.get_fdata() == t1w_seed_max
-        ).astype(int)*n_ROI
-
     mni_labels_mask = nib.nifti1.Nifti1Image(
         np.sum(np.stack(
-            [x["mni_mask"] for x in seeds_ROI.values()], axis=-1
+            [x["mni_mask"] for x in parcels_ROI.values()], axis=-1
         ), axis=-1),
         affine=mni_GM_mask.affine,
         dtype="uint8",
     )
-    assert np.unique(mni_labels_mask.get_fdata()) == [x for x in seeds_ROI.keys()]
 
     t1w_labels_mask = nib.nifti1.Nifti1Image(
         np.sum(np.stack(
-            [x["t1w_mask"] for x in seeds_ROI.values()], axis=-1
+            [x["t1w_mask"] for x in parcels_ROI.values()], axis=-1
         ), axis=-1),
         affine=t1w_GM_mask.affine,
         dtype="uint8",
     )
-    assert np.unique(mni_labels_mask.get_fdata()) == [x for x in seeds_ROI.keys()]
 
-    return seeds_ROI, mni_labels_mask, t1w_labels_mask
+    return parcels_ROI, mni_labels_mask, t1w_labels_mask
 
 
 def compute_connectivity(
     args: argparse.Namespace,
     space: str,
-    seeds_ROI: Dict,
+    parcels_ROI: Dict,
     bold_list: List[str],
-    GM_mask: Nifti1Image,
+    func_mask: Nifti1Image,
     labels_mask: Nifti1Image,
     confounds: List[pd.DataFrame],
 ) -> Dict:
@@ -243,7 +231,7 @@ def compute_connectivity(
         filename = os.path.split(file_path)[1].replace(".nii.gz", "")
 
         brain_masker = NiftiMasker(
-            mask_img=GM_mask,
+            mask_img=func_mask,
             detrend=False,
             standardize="zscore_sample",
             smoothing_fwhm=5,
@@ -256,25 +244,25 @@ def compute_connectivity(
             brain_timeseries,
         )
 
-        seed_masker = NiftiLabelsMasker(
+        parcel_masker = NiftiLabelsMasker(
             labels_img=labels_mask,
             detrend=False,
             standardize=False,
         )
-        seed_timeseries = seed_masker.fit_transform(
+        parcel_timeseries = parcel_masker.fit_transform(
             denoised_brain,
         )
 
-        for i, r_id in enumerate(seed_masker.labels_):
-            seed_name = seeds_ROI[int(r_id)]['ROI_name']
-            seed_vox_corr = (
-                np.dot(brain_timeseries.T, seed_timeseries[:, i])
-                / seed_timeseries.shape[0]
+        for i, r_id in enumerate(parcel_masker.labels_):
+            net_name = parcels_ROI[int(r_id)]['network_name']
+            parcel_corr = (
+                np.dot(brain_timeseries.T, parcel_timeseries[:, i])
+                / parcel_timeseries.shape[0]
             )
 
-            out_path = f"{args.out_dir}/temp/{filename}_{seed_name}_{space}_connectivity.nii.gz"
-            connectivity_lists[seed_name].append(out_path)
-            brain_masker.inverse_transform(seed_vox_corr.T).to_filename(out_path)
+            out_path = f"{args.out_dir}/temp/{filename}_{net_name}_{space}_connectivity.nii.gz"
+            connectivity_lists[net_name].append(out_path)
+            brain_masker.inverse_transform(parcel_corr.T).to_filename(out_path)
 
     return connectivity_lists
 
@@ -393,12 +381,12 @@ def main(args: argparse.Namespace):
         ) = get_fmri_files(args, "T1w")
 
         (
-            seeds_ROI,
+            parcels_ROI,
             mni_labels_mask,
             t1w_labels_mask,
-        ) = make_labels_seed_masks(
+        ) = make_labels_parcel_masks(
             args,
-            mni_GM_mask,  # no need for func masks: GM masks are masked w func
+            mni_GM_mask,
             t1w_GM_mask,
         )
 
@@ -406,7 +394,7 @@ def main(args: argparse.Namespace):
         mni_fconnect_lists = compute_connectivity(
             args,
             "MNI",
-            seeds_ROI,
+            parcels_ROI,
             mni_bold_list,
             mni_func_mask,
             mni_labels_mask,
@@ -425,9 +413,9 @@ def main(args: argparse.Namespace):
         t1w_fconnect_lists = compute_connectivity(
             args,
             "T1w",
-            seeds_ROI,
+            parcels_ROI,
             t1w_bold_list,
-            t1w_func_mask, #TODO: change to GM mask? or only at export?
+            t1w_func_mask,
             t1w_labels_mask,
             t1w_confounds,
         )
