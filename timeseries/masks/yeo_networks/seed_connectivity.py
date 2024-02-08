@@ -130,7 +130,6 @@ def get_fmri_files(
 
 def generate_mni_parcel_masks(
     args: argparse.Namespace,
-    mni_func_mask: Nifti1Image,
 ) -> None:
     """ . """
     Path(f"{args.out_dir}/parcel_masks").mkdir(parents=True, exist_ok=True)
@@ -158,22 +157,8 @@ def generate_mni_parcel_masks(
                 affine=atlas_parcel.affine,
                 dtype="uint8",
             )
-
-            #rs_parcel_mask = resample_to_img(
-            #    parcel_mask, mni_func_mask, interpolation="nearest",
-            #)
-
-            #masked_parcel_array = (
-            #    rs_parcel_mask.get_fdata()*mni_func_mask.get_fdata()
-            #).astype(int)
-
             assert np.sum(parcel_mask.get_fdata()) > 0.0
 
-            #masked_parcel_mask = nib.nifti1.Nifti1Image(
-            #    masked_parcel_array,
-            #    affine=mni_func_mask.affine,
-            #    dtype="uint8",
-            #)
             nib.save(parcel_mask, mni_parcel_mask_path)
 
 
@@ -340,7 +325,7 @@ def create_network_masks(
             f"{args.out_dir}/binary_masks/"
             f"{args.subject}_{seed[0]}_{space}_GM-mask.nii.gz"
         )
-        
+
 
 def main(args: argparse.Namespace):
     """
@@ -378,7 +363,7 @@ def main(args: argparse.Namespace):
     Generates mni parcel masks (using MIST-ROI parcellation) from the network's
     seed coordinate (Yeo 2011 7-networks) only if it doesn't exist
     """
-    generate_mni_parcel_masks(args, mni_func_mask, mni_GM_mask)
+    generate_mni_parcel_masks(args)
 
     found_t1w_parcel_masks = np.sum([
         Path(
