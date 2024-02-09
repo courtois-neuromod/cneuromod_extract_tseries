@@ -107,13 +107,3 @@ else:
 
             rs_mask_t1w = resample_to_img(mask_t1w, func_mask_tw1, interpolation="nearest")
             rs_mask_t1w.to_filename(f"{lang_dir}/binary_masks_t1w/{snum}_T1w_Language-Toneva8-{roi_name}.nii.gz")
-
-
-# TODO: come up w naming convention for masks : parcels, vs binary masks, in anat vs func space...
-# TODO: organize output in masks dir
-
-#
-
-# TODO : add masking w grey-matter mask during voxelwise timeseries extraction
-# (not needed for parcel-wise, but will reduce number of features for voxelwise target)
-# ALso, it's ok to smooth before masking parcels: brings back signal if misalignment
