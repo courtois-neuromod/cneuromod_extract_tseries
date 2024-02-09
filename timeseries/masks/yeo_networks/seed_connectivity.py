@@ -360,7 +360,7 @@ def main(args: argparse.Namespace):
         """
         OFFLINE work: generate T1w parcel masks
         For each subject, convert each PARCEL mask from MNI to T1w space w ANTS
-        using parcel_mni2T1w.sh script.
+        using yeo-parcel_mni2T1w.sh script.
         Save as
         <args.out_dir>/parcel_masks/<args.subject>_<seed[0]>_parcel_T1w.nii.gz
         """

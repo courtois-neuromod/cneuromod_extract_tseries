@@ -1,0 +1,9 @@
+# @package _global_
+
+template: T1w
+template_gm_path: null
+
+template_parcellation: null
+parcel_name: langage-ROIs_Toneva-8_dseg
+parcel_type: dseg
+voxel_based: False
