@@ -59,20 +59,28 @@ for sub in range(1, 7):
 
     parcel_list = glob.glob(
         "/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries/"
-        "masks/standard_masks/fLoc_kanwisher_parcels/ROI_parcels_t1w/"
-        f"sub-{sub_num}_kanwisher*.nii"
+        f"masks/vision-fLoc/tpl-sub{sub_num}T1w/"
+        f"tpl-sub{sub_num}T1w_res-anat_atlas-vision-fLoc-kanwisher_desc-*_pseg-mask.nii"
     )
 
     for parcel_path in parcel_list:
-        pname = parcel_path.split('/')[-1].split("_")[1:3]
-        parcel = nib.load(parcel_path)
 
-        rs_parcel = nilearn.image.resample_to_img(parcel, subject_epi_mask, interpolation='continuous')
-        rs_parcel = nib.nifti1.Nifti1Image((rs_parcel.get_fdata() > 0.5).astype(int), affine=rs_parcel.affine, dtype="uint8")
+        parcel = nib.load(parcel_path)
+        rs_parcel = nilearn.image.resample_to_img(
+            parcel, subject_epi_mask, interpolation='continuous'
+        )
+        rs_parcel = nib.nifti1.Nifti1Image(
+            (rs_parcel.get_fdata() > 0.5).astype(int),
+            affine=rs_parcel.affine,
+            dtype="uint8",
+        )
+
+        pname = parcel_path.split('/')[-1].split("_")[-2]
 
         mpath = Path(
             "/home/mstlaure/projects/rrg-pbellec/mstlaure/"
-            "cneuromod_extract_tseries/masks/subject_masks/fLoc/"
-            f"sub-{sub_num}/sub-{sub_num}_T1w_{pname[0]}-{pname[1].split('.')[0]}.nii.gz"
+            f"cneuromod_extract_tseries/masks/vision-fLoc/tpl-sub{sub_num}T1w/"
+            f"tpl-sub{sub_num}/tpl-sub{sub_num}T1w_res-func_atlas-vision-fLoc-"
+            f"kanwisher_{pname}_mask.nii.gz"
         )
         nib.save(rs_parcel, mpath)

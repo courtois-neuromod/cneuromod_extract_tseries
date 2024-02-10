@@ -25,45 +25,43 @@ source /project/rrg-pbellec/mstlaure/.virtualenvs/things_memory_results/bin/acti
 # Generates reg.mni152.2mm.dat file under $SUBJECTS_DIR/cvs_avg35/mri/transforms/
 #mni152reg --s cvs_avg35
 
-PARCELDIR="/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries/masks/standard_masks/fLoc_kanwisher_parcels"
-SUBPARCELDIR="/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries/masks/subject_masks/fLoc"
+PARCELDIR="/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries/masks/vision-fLoc"
 SPREPDIR="/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries/data/friends.fmriprep/sourcedata/smriprep"
 
-
-for PARAM in body_EBA face_FFA face_OFA face_pSTS scene_MPA scene_OPA scene_PPA
+for PARAM in body-EBA face-FFA face-OFA face-pSTS scene-MPA scene-OPA scene-PPA
 do
-  mri_vol2vol --targ ${PARCELDIR}/ROI_parcels_cvs/${PARAM}.nii \
+  mri_vol2vol --targ "${PARCELDIR}/tpl-CVSavg35/tpl-CVSavg35_atlas-vision-fLoc-kanwisher_desc-${PARAM}_mask.nii" \
   --mov $FSLDIR/data/standard/MNI152_T1_2mm.nii.gz \
-  --o ${PARCELDIR}/ROI_parcels_mni/${PARAM}_cvs2mni.nii \
+  --o ${PARCELDIR}/tpl-MNIT1/tpl-MNIT1_res-2mm_atlas-vision-fLoc-kanwisher_desc-${PARAM}_pseg-mask.nii \
   --inv --reg ${SUBJECTS_DIR}/cvs_avg35/mri/transforms/reg.mni152.2mm.dat
 
-  mri_vol2vol --targ ${PARCELDIR}/ROI_parcels_cvs/${PARAM}_L.nii \
+  mri_vol2vol --targ "${PARCELDIR}/tpl-CVSavg35/tpl-CVSavg35_atlas-vision-fLoc-kanwisher_desc-${PARAM}-L_mask.nii" \
   --mov $FSLDIR/data/standard/MNI152_T1_2mm.nii.gz \
-  --o ${PARCELDIR}/ROI_parcels_mni/${PARAM}_L_cvs2mni.nii \
+  --o "${PARCELDIR}/tpl-MNIT1/tpl-MNIT1_res-2mm_atlas-vision-fLoc-kanwisher_desc-${PARAM}-L_pseg-mask.nii" \
   --inv --reg ${SUBJECTS_DIR}/cvs_avg35/mri/transforms/reg.mni152.2mm.dat
 
-  mri_vol2vol --targ ${PARCELDIR}/ROI_parcels_cvs/${PARAM}_R.nii \
+  mri_vol2vol --targ "${PARCELDIR}/tpl-CVSavg35/tpl-CVSavg35_atlas-vision-fLoc-kanwisher_desc-${PARAM}-R_mask.nii" \
   --mov $FSLDIR/data/standard/MNI152_T1_2mm.nii.gz \
-  --o ${PARCELDIR}/ROI_parcels_mni/${PARAM}_R_cvs2mni.nii \
+  --o "${PARCELDIR}/tpl-MNIT1/tpl-MNIT1_res-2mm_atlas-vision-fLoc-kanwisher_desc-${PARAM}-R_pseg-mask.nii" \
   --inv --reg ${SUBJECTS_DIR}/cvs_avg35/mri/transforms/reg.mni152.2mm.dat
 
   for SUBNUM in 01 02 03 04 05 06
   do
     antsApplyTransforms --default-value 0 --dimensionality 3 --float 0 \
-    --input ${PARCELDIR}/ROI_parcels_mni/${PARAM}_cvs2mni.nii --interpolation Linear \
-    --output ${SUBPARCELDIR}/sub-${SUBNUM}/sub-${SUBNUM}_kanwisher-${PARAM}.nii \
+    --input ${PARCELDIR}/tpl-MNIT1/tpl-MNIT1_res-2mm_atlas-vision-fLoc-kanwisher_desc-${PARAM}_pseg-mask.nii --interpolation Linear \
+    --output ${PARCELDIR}/tpl-sub${SUBNUM}T1w/tpl-sub${SUBNUM}T1w_res-anat_atlas-vision-fLoc-kanwisher_desc-${PARAM}_pseg-mask.nii \
     --reference-image ${SPREPDIR}/sub-${SUBNUM}/anat/sub-${SUBNUM}_desc-preproc_T1w.nii.gz \
     --transform ${SPREPDIR}/sub-${SUBNUM}/anat/sub-${SUBNUM}_from-MNI152NLin2009cAsym_to-T1w_mode-image_xfm.h5
 
     antsApplyTransforms --default-value 0 --dimensionality 3 --float 0 \
-    --input ${PARCELDIR}/ROI_parcels_mni/${PARAM}_L_cvs2mni.nii --interpolation Linear \
-    --output ${SUBPARCELDIR}/sub-${SUBNUM}/sub-${SUBNUM}_kanwisher-${PARAM}_L.nii \
+    --input "${PARCELDIR}/tpl-MNIT1/tpl-MNIT1_res-2mm_atlas-vision-fLoc-kanwisher_desc-${PARAM}-L_pseg-mask.nii" --interpolation Linear \
+    --output "${PARCELDIR}/tpl-sub${SUBNUM}T1w/tpl-sub${SUBNUM}T1w_res-anat_atlas-vision-fLoc-kanwisher_desc-${PARAM}-L_pseg-mask.nii" \
     --reference-image ${SPREPDIR}/sub-${SUBNUM}/anat/sub-${SUBNUM}_desc-preproc_T1w.nii.gz \
     --transform ${SPREPDIR}/sub-${SUBNUM}/anat/sub-${SUBNUM}_from-MNI152NLin2009cAsym_to-T1w_mode-image_xfm.h5
 
     antsApplyTransforms --default-value 0 --dimensionality 3 --float 0 \
-    --input ${PARCELDIR}/ROI_parcels_mni/${PARAM}_R_cvs2mni.nii --interpolation Linear \
-    --output ${SUBPARCELDIR}/sub-${SUBNUM}/sub-${SUBNUM}_kanwisher-${PARAM}_R.nii \
+    --input "${PARCELDIR}/tpl-MNIT1/tpl-MNIT1_res-2mm_atlas-vision-fLoc-kanwisher_desc-${PARAM}-R_pseg-mask.nii" --interpolation Linear \
+    --output "${PARCELDIR}/tpl-sub${SUBNUM}T1w/tpl-sub${SUBNUM}T1w_res-anat_atlas-vision-fLoc-kanwisher_desc-${PARAM}-R_pseg-mask.nii" \
     --reference-image ${SPREPDIR}/sub-${SUBNUM}/anat/sub-${SUBNUM}_desc-preproc_T1w.nii.gz \
     --transform ${SPREPDIR}/sub-${SUBNUM}/anat/sub-${SUBNUM}_from-MNI152NLin2009cAsym_to-T1w_mode-image_xfm.h5
   done

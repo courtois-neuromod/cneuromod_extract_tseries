@@ -8,7 +8,7 @@ import argparse
 
 def get_arguments():
 
-    parser = argparse.ArgumentParser(description="Produces subject-specific ROIs in native space from fLoc contrasts and group ROIs")
+    parser = argparse.ArgumentParser(description="Exports probabilistic masks in cvs_avg53 space for Kanwisher parcels")
     parser.add_argument('--in_dir', default='', type=str, help='absolute path to input directory')
     parser.add_argument('--out_dir', default='', type=str, help='absolute path to output directory')
 
@@ -19,7 +19,7 @@ def get_arguments():
 
 def split_rois(in_dir, out_dir):
     '''
-    Script takes Kanwisher group parcels from fLoc contrats in cvs_avg35 space
+    Script takes Kanwisher group parcels from fLoc contrasts in cvs_avg35 space
     and generates separate masks per ROI
     ROIs include:
     - face contrast: FFA (fusiform face area), OFA (occipital face area),
@@ -28,7 +28,8 @@ def split_rois(in_dir, out_dir):
     - scene contrast: PPA (parahippocampal place area), MPA (medial place area / RSP),
                       OPA (occipital place area)
 
-    Parcel numbers were selected based on ROIs shown on flatmaps in Oli and Martin's THINGS data paper
+    Parcel numbers were selected based on ROIs shown on flatmaps in the
+    THINGS-data paper.
     In that paper, ROIs included: V1, V2 and V3 from retinotopy
     From fLoc
     face:
@@ -44,11 +45,12 @@ def split_rois(in_dir, out_dir):
     object:
     - LOC (lateral occipital cortex)
 
-    These numbers were identified by looking at the parcel positions in the flat maps,
-    as well as their position in Freesurfer and description in the Kanwisher group's methods paper
+    ROI id numbers were identified by looking at the parcel positions within the
+    THINGS-data flat maps, as well as their position on surfaces visualized with
+    Freesurfer and descriptions from the Kanwisher group's methods paper.
     https://web.mit.edu/bcs/nklab/media/pdfs/julian.neuroimage.2012.pdf
 
-    Note: to visualize cvs parcels in freesurfer, just call freeview
+    Note: to visualize cvs parcels in freesurfer, type freeview to open the GUI.
     Load volume cvs_avg35 template, e.g. from /usr/local/freesurfer/7.3.2/subjects/csv_avg35/mri/T1.mgz
     Load volume parcel: e.g., cvs_scene_parcels/fROIs-fwhm-5-0.0001.nii
     Select "Lookup Table" as the color map, then load the parcel file's accompanying "parcel_LUT.txt" file as the Lookup table ("load lookup table")
@@ -94,7 +96,9 @@ def split_rois(in_dir, out_dir):
     contrast_list = list(roi_number_dict.keys())
 
     for c in contrast_list:
-        c_file = nib.load(f'{in_dir}/cvs_{c}_parcels/cvs_{c}_parcels/fROIs-fwhm_5-0.0001.nii')
+        c_file = nib.load(
+            f"{in_dir}/cvs_{c}_parcels/cvs_{c}_parcels/fROIs-fwhm_5-0.0001.nii"
+        )
         c_affine = c_file.affine
         c_array = c_file.get_fdata()
 
@@ -108,13 +112,19 @@ def split_rois(in_dir, out_dir):
             right_array = (c_array == right_val)#.astype(float)
             bilat_array = (left_array + right_array).astype(bool)
 
-            left_mask = nib.nifti1.Nifti1Image(left_array.astype(float), affine=c_affine)
-            right_mask = nib.nifti1.Nifti1Image(right_array.astype(float), affine=c_affine)
-            bilat_mask = nib.nifti1.Nifti1Image(bilat_array.astype(float), affine=c_affine)
+            left_mask = nib.nifti1.Nifti1Image(
+                left_array.astype(float), affine=c_affine
+            )
+            right_mask = nib.nifti1.Nifti1Image(
+                right_array.astype(float), affine=c_affine
+            )
+            bilat_mask = nib.nifti1.Nifti1Image(
+                bilat_array.astype(float), affine=c_affine
+            )
 
-            nib.save(left_mask, f'{out_dir}/{c}_{roi}_L.nii')
-            nib.save(right_mask, f'{out_dir}/{c}_{roi}_R.nii')
-            nib.save(bilat_mask, f'{out_dir}/{c}_{roi}.nii')
+            nib.save(left_mask, f'{out_dir}/tpl-CVSavg35_atlas-vision-fLoc-kanwisher_desc-{c}-{roi}-L_mask.nii')
+            nib.save(right_mask, f'{out_dir}/tpl-CVSavg35_atlas-vision-fLoc-kanwisher_desc-{c}-{roi}-R_mask.nii')
+            nib.save(bilat_mask, f'{out_dir}/tpl-CVSavg35_atlas-vision-fLoc-kanwisher_desc-{c}-{roi}_mask.nii')
 
 
 if __name__ == '__main__':

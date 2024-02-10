@@ -3,7 +3,7 @@
 #SBATCH --job-name=extract_tseries
 #SBATCH --output=/project/rrg-pbellec/mstlaure/cneuromod_extract_tseries/slurm_files/slurm-%A_%a.out
 #SBATCH --error=/project/rrg-pbellec/mstlaure/cneuromod_extract_tseries/slurm_files/slurm-%A_%a.err
-#SBATCH --time=24:00:00
+#SBATCH --time=12:00:00
 #SBATCH --cpus-per-task=10
 #SBATCH --mem-per-cpu=4000M
 #SBATCH --mail-type=ALL
@@ -18,8 +18,8 @@ source /home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries/en
 
 SUBJECT="${1}"  # e.g., "01"
 CODEDIR="/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries"
-DATADIR="${CODEDIR}/data/friends.fmriprep"
-OUTDIR="${CODEDIR}/masks/yeo_networks"
+DATADIR="${CODEDIR}/data/hcptrt.fmriprep"
+OUTDIR="${CODEDIR}/masks/yeo-7net"
 ATLAS="${CODEDIR}/atlases/tpl-MNI152NLin2009bSym/tpl-MNI152NLin2009bSym_res-03_atlas-MIST_desc-ROI_dseg.nii.gz"
 
 # launch job
@@ -27,5 +27,4 @@ python seed_connectivity.py \
     --data_dir "${DATADIR}" \
     --out_dir "${OUTDIR}" \
     --atlas_path "${ATLAS}" \
-    --task_filter "b_" \
-    --subject="sub-${SUBJECT}"
+    --subject "${SUBJECT}"

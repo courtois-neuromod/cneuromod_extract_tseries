@@ -7,19 +7,19 @@ import numpy as np
 import nibabel as nib
 from nibabel import Nifti1Image
 import pandas as pd
-import pickle as pk
 from tqdm import tqdm
 import nilearn.interfaces
 from nilearn.image import mean_img, resample_to_img
 from nilearn.maskers import NiftiMasker, NiftiLabelsMasker, NiftiSpheresMasker
 from nilearn.masking import compute_multi_epi_mask
+from scipy.stats import zscore
 
 
 SEEDS = (
     ("visual", (-16, -74, 7), 1, 0.085),
     ("sensorimotor", (-41, -20, 62), 2, 0.06),
-    ("dorsal_attention", (-34, -38, 44), 3, 0.075),
-    ("ventral_attention", (-5, 15, 32), 4, 0.05),  # (-31, 11, 8)),
+    ("dorsal-attention", (-34, -38, 44), 3, 0.075),
+    ("ventral-attention", (-5, 15, 32), 4, 0.05),  # (-31, 11, 8)),
     ("fronto-parietal", (-40, 50, 7), 5, 0.057),
     ("default-mode", (-7, -52, 26), 6, 0.12),
 )
@@ -86,8 +86,8 @@ def get_GM_mask(
     gm_space = "" if space_name=="T1w" else f"_space-{space_name}"
     p = 0.5 if space_name=="T1w" else 0.4
     prob_GM_mask = nib.load(
-        f"{args.data_dir}/sourcedata/smriprep/{args.subject}/"
-        f"anat/{args.subject}{gm_space}_label-GM_probseg.nii.gz"
+        f"{args.data_dir}/sourcedata/smriprep/sub-{args.subject}/"
+        f"anat/sub-{args.subject}{gm_space}_label-GM_probseg.nii.gz"
     )
     prob_GM_mask = resample_to_img(
         prob_GM_mask, func_mask, interpolation="linear",
@@ -111,10 +111,9 @@ def get_fmri_files(
     """."""
     found_masks = sorted(
         glob.glob(
-            f"{args.data_dir}/{args.subject}/"
-            f"ses-*/func/*_space-{space_name}*_mask.nii.gz",
+            f"{args.data_dir}/sub-{args.subject}/"
+            f"ses-*/func/*task-restingstate*_space-{space_name}*_mask.nii.gz",
     ))
-    found_masks = [p for p in found_masks if re.search(args.task_filter, p)]
 
     bold_list, mask_list = get_lists(args.data_dir, found_masks, space_name)
     dset_func_mask = get_dset_func_mask(mask_list)
@@ -132,18 +131,19 @@ def generate_mni_parcel_masks(
     args: argparse.Namespace,
 ) -> None:
     """
-    Generates mni parcel masks (using MIST-ROI parcellation) from the network's
-    seed coordinate (Yeo 2011 7-networks) only if mask doesn't exist.
+    Generates mni parcel masks (using MIST-ROI parcellation) from the
+    network's seed coordinate (Yeo 2011 7-networks) if mask doesn't already
+    exist.
     """
     Path(f"{args.out_dir}/parcel_masks").mkdir(parents=True, exist_ok=True)
-    Path(f"{args.out_dir}/binary_masks").mkdir(parents=True, exist_ok=True)
+    Path(f"{args.out_dir}/network_masks").mkdir(parents=True, exist_ok=True)
     Path(f"{args.out_dir}/temp").mkdir(parents=True, exist_ok=True)
 
     atlas_parcel = nib.load(args.atlas_path)
     for seed in SEEDS:
         mni_parcel_mask_path = Path(
-            f"{args.out_dir}/parcel_masks/{args.subject}"
-            f"_{seed[0]}_parcel_MNI.nii.gz"
+            f"{args.out_dir}/parcel_masks/{args.atlas_space}"
+            f"_{args.atlas_res}_atlas-yeo7-net_desc-{seed[0]}-parcel_mask.nii.gz"
         )
         if not mni_parcel_mask_path.exists():
             mni_seed_masker = NiftiSpheresMasker(
@@ -173,10 +173,18 @@ def make_mask_array(
     space: str,
 ) -> np.array:
     """ . """
-    parcel_mask_path = Path(
-        f"{args.out_dir}/parcel_masks/"
-        f"{args.subject}_{parcel['network_name']}_parcel_{space}.nii.gz"
-    )
+    if space == "MNI":
+        parcel_mask_path = Path(
+            f"{args.out_dir}/parcel_masks/"
+            f"{args.atlas_space}_{args.atlas_res}_atlas-yeo7-net_desc-"
+            f"{parcel['network_name']}-parcel_mask.nii.gz"
+        )
+    else:
+        parcel_mask_path = Path(
+            f"{args.out_dir}/parcel_masks/"
+            f"tpl-sub{args.subject}Tw1_res-anat_atlas-yeo7-net_desc-"
+            f"{parcel['network_name']}-parcel_mask.nii.gz"
+        )
     parcel_mask = nib.load(parcel_mask_path)
     parcel_mask = resample_to_img(
         parcel_mask, GM_mask, interpolation="nearest",
@@ -223,7 +231,6 @@ def make_labels_parcel_masks(
 
 def compute_connectivity(
     args: argparse.Namespace,
-    space: str,
     parcels_ROI: Dict,
     bold_list: List[str],
     func_mask: Nifti1Image,
@@ -266,7 +273,7 @@ def compute_connectivity(
                 / parcel_timeseries.shape[0]
             )
 
-            out_path = f"{args.out_dir}/temp/{filename}_{net_name}_{space}_connectivity.nii.gz"
+            out_path = f"{args.out_dir}/temp/{filename}_{net_name}_connectivity.nii.gz"
             connectivity_lists[net_name].append(out_path)
             brain_masker.inverse_transform(parcel_corr.T).to_filename(out_path)
 
@@ -281,43 +288,48 @@ def create_network_masks(
     GM_mask: Nifti1Image,
 ) -> None:
     """."""
+    s_name = f"tpl-sub{args.subject}T1w" if space == "T1w" else f"tpl-MNI152NLin2009cAsym_sub-{args.subject}"
+
     func_mask.to_filename(
-        f"{args.out_dir}/binary_masks/{args.subject}_func-mask_{space}.nii.gz"
+        f"{args.out_dir}/network_masks/"
+        f"sub-{args.subject}_{space}_res-func_desc-func-brain_mask.nii.gz"
     )
     GM_mask.to_filename(
-        f"{args.out_dir}/binary_masks/{args.subject}_GM-mask_{space}.nii.gz"
+        f"{args.out_dir}/network_masks/"
+        f"sub-{args.subject}_{space}_res-func_desc-GM_mask.nii.gz"
     )
 
     for seed in SEEDS:
         mean_connectivity = mean_img(fconnect_lists[seed[0]])
         mean_connectivity.to_filename(
-            f"{args.out_dir}/binary_masks/"
-            f"{args.subject}_{seed[0]}_{space}_mean-connectivity.nii.gz"
-
+            f"{args.out_dir}/network_masks/"
+            f"sub-{args.subject}_{space}_res-func_atlas-yeo7-net_"
+            f"desc-{seed[0]}_avg-connectivity.nii.gz"
         )
 
-        nvox = int(np.sum(func_mask.get_fdata())*seed[3])
-        vox_cutoff = np.sort(mean_connectivity.get_fdata().reshape([-1]))[-nvox]
-        network_arr = (mean_connectivity.get_fdata() >= vox_cutoff).astype(int)
-
-        network_mask = nib.nifti1.Nifti1Image(
-            network_arr,
-            affine=mean_connectivity.affine,
-            dtype="uint8",
+        z_masker = NiftiMasker(
+            mask_img=func_mask,
+            detrend=False,
+            standardize="zscore_sample",
+            smoothing_fwhm=None,
         )
+        z_connectivity = z_masker.fit_transform(mean_connectivity)
+        network_mask = z_masker.inverse_transform(
+            (z_connectivity > 3.0).astype(int),
+        )
+
+        #nvox = int(np.sum(func_mask.get_fdata())*seed[3])
+        #vox_cutoff = np.sort(mean_connectivity.get_fdata().reshape([-1]))[-nvox]
+        #network_arr = (mean_connectivity.get_fdata() >= vox_cutoff).astype(int)
+        #network_mask = nib.nifti1.Nifti1Image(
+        #    network_arr,
+        #    affine=mean_connectivity.affine,
+        #    dtype="uint8",
+        #)
+
         network_mask.to_filename(
-            f"{args.out_dir}/binary_masks/"
-            f"{args.subject}_{seed[0]}_{space}_mask.nii.gz"
-        )
-
-        network_strict_mask = nib.nifti1.Nifti1Image(
-            (network_arr*GM_mask.get_fdata()).astype(int),
-            affine=mean_connectivity.affine,
-            dtype="uint8",
-        )
-        network_strict_mask.to_filename(
-            f"{args.out_dir}/binary_masks/"
-            f"{args.subject}_{seed[0]}_{space}_GM-mask.nii.gz"
+            f"{args.out_dir}/network_masks/"
+            f"{s_name}_res-func_atlas-yeo7-net_desc-{seed[0]}_mask.nii.gz"
         )
 
 
@@ -331,9 +343,9 @@ def main(args: argparse.Namespace):
     and correlates its signal with all brain voxels within a grey matter
     mask.
 
-    Voxel-wise correlations are averaged across all task runs, and a percentage
-    of voxels with the highest R scores is select to form a binary mask for
-    each network.
+    Voxel-wise correlations are averaged across all resting-state runs, and a
+    percentage of voxels with the highest R scores is select to form a
+    binary mask for each network.
     Network-specific percentages are proportional to the number of voxels
     within each network in the Yeo 2011 7-network parcellation.
 
@@ -352,8 +364,8 @@ def main(args: argparse.Namespace):
 
     found_t1w_parcel_masks = np.sum([
         Path(
-            f"{args.out_dir}/parcel_masks/"
-            f"{args.subject}_{seed[0]}_parcel_T1w.nii.gz"
+            f"{args.out_dir}/parcel_masks/tpl-sub{args.subject}T1w_res-anat"
+            f"_atlas-yeo7-net_desc-{seed[0]}-parcel_mask.nii.gz"
         ).exists() for seed in SEEDS]) == len(SEEDS)
 
     if not found_t1w_parcel_masks:
@@ -362,7 +374,7 @@ def main(args: argparse.Namespace):
         For each subject, convert each PARCEL mask from MNI to T1w space w ANTS
         using yeo-parcel_mni2T1w.sh script.
         Save as
-        <args.out_dir>/parcel_masks/<args.subject>_<seed[0]>_parcel_T1w.nii.gz
+        <args.out_dir>/parcel_masks/tpl-sub<args.subject>T1w_res-anat_<seed[0]>_parcel_T1w.nii.gz
         """
         print(
             "Missing T1w parcel masks. Use ants to generate parcel masks in"
@@ -395,7 +407,6 @@ def main(args: argparse.Namespace):
         print("Computing functional connectivity in MNI space")
         mni_fconnect_lists = compute_connectivity(
             args,
-            "MNI",
             parcels_ROI,
             mni_bold_list,
             mni_func_mask,
@@ -405,7 +416,7 @@ def main(args: argparse.Namespace):
         print("Creating network masks in MNI space")
         create_network_masks(
             args,
-            "MNI",
+            "MNI152NLin2009cAsym",
             mni_fconnect_lists,
             mni_func_mask,
             mni_GM_mask,
@@ -414,7 +425,6 @@ def main(args: argparse.Namespace):
         print("Computing functional connectivity in T1w space")
         t1w_fconnect_lists = compute_connectivity(
             args,
-            "T1w",
             parcels_ROI,
             t1w_bold_list,
             t1w_func_mask,
@@ -447,7 +457,17 @@ if __name__ == "__main__":
     parser.add_argument(
         "--subject",
         type=str,
-        help="Subject to use (e.g. 'sub-01').",
+        help="Subject to use (e.g. '01').",
+    )
+    parser.add_argument(
+        "--atlas_space",
+        type=str,
+        default="tpl-MNI152NLin2009bSym",
+    )
+    parser.add_argument(
+        "--atlas_res",
+        type=str,
+        default="res-03",
     )
     parser.add_argument(
         "--atlas_path",
@@ -457,12 +477,5 @@ if __name__ == "__main__":
             "tpl-MNI152NLin2009bSym_res-03_atlas-MIST_desc-ROI_dseg.nii.gz"
         ).resolve(),
     )
-    parser.add_argument(
-        "--task_filter",
-        type=str,
-        default="",
-        help="Regular expression to select runs.",
-    )
-
 
     main(parser.parse_args())
