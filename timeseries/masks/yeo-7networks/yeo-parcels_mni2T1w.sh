@@ -13,9 +13,9 @@ do
   for SUBNUM in 01 02 03 04 05 06
   do
     antsApplyTransforms --default-value 0 --dimensionality 3 --float 0 \
-    --input "${PARCELPATH}/tpl-MNI152NLin2009bSym_res-03_atlas-yeo7-net_desc-${PNAME}-parcel_mask.nii.gz" \
+    --input "${PARCELPATH}/tpl-MNI152NLin2009bSym_res-03_atlas-yeo-7net_desc-${PNAME}-seed-parcel_mask.nii.gz" \
     --interpolation NearestNeighbor \
-    --output "${PARCELPATH}/tpl-sub${SUBNUM}Tw1_res-anat_atlas-yeo7-net_desc-${PNAME}-parcel_mask.nii.gz" \
+    --output "${PARCELPATH}/tpl-sub${SUBNUM}Tw1_res-anat_atlas-yeo-7net_desc-${PNAME}-seed-parcel_mask.nii.gz" \
     --reference-image ${SPREPDIR}/sub-${SUBNUM}/anat/sub-${SUBNUM}_desc-preproc_T1w.nii.gz \
     --transform ${SPREPDIR}/sub-${SUBNUM}/anat/sub-${SUBNUM}_from-MNI152NLin2009cAsym_to-T1w_mode-image_xfm.h5
   done

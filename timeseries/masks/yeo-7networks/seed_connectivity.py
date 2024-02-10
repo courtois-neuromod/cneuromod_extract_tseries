@@ -143,7 +143,7 @@ def generate_mni_parcel_masks(
     for seed in SEEDS:
         mni_parcel_mask_path = Path(
             f"{args.out_dir}/parcel_masks/{args.atlas_space}"
-            f"_{args.atlas_res}_atlas-yeo7-net_desc-{seed[0]}-parcel_mask.nii.gz"
+            f"_{args.atlas_res}_atlas-yeo-7net_desc-{seed[0]}-seed-parcel_mask.nii.gz"
         )
         if not mni_parcel_mask_path.exists():
             mni_seed_masker = NiftiSpheresMasker(
@@ -176,14 +176,14 @@ def make_mask_array(
     if space == "MNI":
         parcel_mask_path = Path(
             f"{args.out_dir}/parcel_masks/"
-            f"{args.atlas_space}_{args.atlas_res}_atlas-yeo7-net_desc-"
-            f"{parcel['network_name']}-parcel_mask.nii.gz"
+            f"{args.atlas_space}_{args.atlas_res}_atlas-yeo-7net_desc-"
+            f"{parcel['network_name']}-seed-parcel_mask.nii.gz"
         )
     else:
         parcel_mask_path = Path(
             f"{args.out_dir}/parcel_masks/"
-            f"tpl-sub{args.subject}Tw1_res-anat_atlas-yeo7-net_desc-"
-            f"{parcel['network_name']}-parcel_mask.nii.gz"
+            f"tpl-sub{args.subject}Tw1_res-anat_atlas-yeo-7net_desc-"
+            f"{parcel['network_name']}-seed-parcel_mask.nii.gz"
         )
     parcel_mask = nib.load(parcel_mask_path)
     parcel_mask = resample_to_img(
@@ -303,7 +303,7 @@ def create_network_masks(
         mean_connectivity = mean_img(fconnect_lists[seed[0]])
         mean_connectivity.to_filename(
             f"{args.out_dir}/network_masks/"
-            f"sub-{args.subject}_{space}_res-func_atlas-yeo7-net_"
+            f"sub-{args.subject}_{space}_res-func_atlas-yeo-7net_"
             f"desc-{seed[0]}_avg-connectivity.nii.gz"
         )
 
@@ -329,7 +329,7 @@ def create_network_masks(
 
         network_mask.to_filename(
             f"{args.out_dir}/network_masks/"
-            f"{s_name}_res-func_atlas-yeo7-net_desc-{seed[0]}_mask.nii.gz"
+            f"{s_name}_res-func_atlas-yeo-7net_desc-{seed[0]}_mask.nii.gz"
         )
 
 
@@ -365,7 +365,7 @@ def main(args: argparse.Namespace):
     found_t1w_parcel_masks = np.sum([
         Path(
             f"{args.out_dir}/parcel_masks/tpl-sub{args.subject}T1w_res-anat"
-            f"_atlas-yeo7-net_desc-{seed[0]}-parcel_mask.nii.gz"
+            f"_atlas-yeo-7net_desc-{seed[0]}-seed-parcel_mask.nii.gz"
         ).exists() for seed in SEEDS]) == len(SEEDS)
 
     if not found_t1w_parcel_masks:
