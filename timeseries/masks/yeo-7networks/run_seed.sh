@@ -3,7 +3,7 @@
 #SBATCH --job-name=extract_tseries
 #SBATCH --output=/project/rrg-pbellec/mstlaure/cneuromod_extract_tseries/slurm_files/slurm-%A_%a.out
 #SBATCH --error=/project/rrg-pbellec/mstlaure/cneuromod_extract_tseries/slurm_files/slurm-%A_%a.err
-#SBATCH --time=12:00:00
+#SBATCH --time=2:00:00
 #SBATCH --cpus-per-task=10
 #SBATCH --mem-per-cpu=4000M
 #SBATCH --mail-type=ALL
