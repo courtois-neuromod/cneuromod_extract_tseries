@@ -315,7 +315,7 @@ def create_network_masks(
         )
         z_connectivity = np.squeeze(z_masker.fit_transform(mean_connectivity))
         network_mask = z_masker.inverse_transform(
-            (zscore(z_connectivity, nan_policy='propagate') > 3.0).astype("int32"),
+            (zscore(z_connectivity, nan_policy='propagate') > 2.0).astype("int32"),
         )
 
         #nvox = int(np.sum(func_mask.get_fdata())*seed[3])
