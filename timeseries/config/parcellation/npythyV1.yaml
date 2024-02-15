@@ -1,9 +1,11 @@
 # @package _global_
 
-template: T1w
-template_gm_path: null
+space: T1w
+use_template_gm: False
+gm_path: ./data/friends.fmriprep/sourcedata/smriprep/sub-*/anat/sub-*_label-GM_probseg.nii.gz
 
-template_parcellation: null
-parcel_name: npythy-V1
-parcel_type: dseg
-voxel_based: True
+use_template_parcel: False
+parcellation: ./atlas/tpl-sub*T1w/tpl-sub*T1w_res-func_atlas-vision-retino-npythy_desc-V1_mask.nii.gz
+
+parcel_name: vision-retino-npythy_V1
+parcel_type: mask

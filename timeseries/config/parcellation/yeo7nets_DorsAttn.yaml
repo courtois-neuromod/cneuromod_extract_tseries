@@ -5,7 +5,7 @@ use_template_gm: False
 gm_path: ./data/friends.fmriprep/sourcedata/smriprep/sub-*/anat/sub-*_label-GM_probseg.nii.gz
 
 use_template_parcel: False
-parcellation: ./atlas/tpl-sub*T1w/tpl-sub*T1w_res-func_atlas-language-Toneva_desc-AntTemp_mask.nii.gz
+parcellation: ./atlas/tpl-sub*T1w/tpl-sub*T1w_res-func_atlas-yeo-7net_desc-dorsal-attention_mask.nii.gz
 
-parcel_name: language-Toneva_AntTemp
+parcel_name: yeo-7net_dorsal-attention
 parcel_type: mask

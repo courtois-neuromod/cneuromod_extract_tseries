@@ -1,5 +1,4 @@
 from typing import List, Tuple, Dict, Union, Optional
-import logging
 from pathlib import Path
 
 import nibabel as nib
@@ -16,8 +15,8 @@ from nilearn.image import (
 from nilearn.maskers import NiftiMasker, NiftiLabelsMasker, NiftiMapsMasker
 import numpy as np
 import pandas as pd
-from rich.logging import RichHandler
 from scipy.ndimage import binary_closing
+
 
 """
 The following functions are adapted for the CNeuroMod datasets
@@ -28,18 +27,6 @@ using brain parcellations in standardized space.
 Source:
 https://github.com/SIMEXP/giga_connectome/tree/main
 """
-
-PRESET_STRATEGIES = [
-    "simple",
-    "simple+gsr",
-    "scrubbing.2",
-    "scrubbing.2+gsr",
-    "scrubbing.5",
-    "scrubbing.5+gsr",
-    "acompcor50",
-    "icaaroma",
-]
-
 
 def get_subject_list(
     bids_dir: Path,
@@ -88,16 +75,6 @@ def get_subject_list(
     return checked_labels
 
 
-def parse_standardize_options(
-    standardize: str,
-) -> Union[str, bool]:
-    # TODO: update standardization choices based on nilearn warnings
-    if standardize not in ["zscore_sample", "psc"]:
-        raise ValueError(f"{standardize} is not a valid standardize strategy.")
-
-    return standardize
-
-
 def prep_denoise_strategy(
     benchmark_strategy: Dict,
 ) -> dict:
@@ -130,112 +107,40 @@ def prep_denoise_strategy(
     return benchmark_strategy
 
 
-def _get_consistent_masks(
-    mask_imgs: List[Union[Path, str, Nifti1Image]], exclude: List[int]
-) -> Tuple[List[int], List[str]]:
-    """Create a list of masks that has the same affine.
-    From https://github.com/SIMEXP/giga_connectome/blob/main/giga_connectome/mask.py
-
-    Parameters
-    ----------
-
-    mask_imgs :
-        The original list of functional masks
-
-    exclude :
-        List of index to exclude.
-
-    Returns
-    -------
-    List of str
-        Functional masks with the same affine.
-
-    List of str
-        Identifiers of scans with a different affine.
+def make_parcel(
+    parcellation: Nifti1Image,
+    epi_mask: Nifti1Image,
+    gm_path: Union[Path, None],
+    gm_masking: bool,
+)-> Nifti1Image:
     """
-    weird_mask_identifiers = []
-    odd_masks = np.array(mask_imgs)[np.array(exclude)]
-    odd_masks = odd_masks.tolist()
-    for odd_file in odd_masks:
-        identifier = Path(odd_file).name.split("_space")[0]
-        weird_mask_identifiers.append(identifier)
-    cleaned_func_masks = set(mask_imgs) - set(odd_masks)
-    cleaned_func_masks = list(cleaned_func_masks)
-    return cleaned_func_masks, weird_mask_identifiers
-
-
-def _check_mask_affine(
-    mask_imgs: List[Union[Path, str, Nifti1Image]]
-) -> Union[list, None]:
-    """Given a list of input mask images, show the most common affine matrix
-    and subjects with different values.
-    From https://github.com/SIMEXP/giga_connectome/blob/main/giga_connectome/mask.py
-
-    Parameters
-    ----------
-    mask_imgs : :obj:`list` of Niimg-like objects
-        See :ref:`extracting_data`.
-        3D or 4D EPI image with same affine.
-
-    Returns
-    -------
-
-    List or None
-        Index of masks with odd affine matrix. Return None when all masks have
-        the same affine matrix.
+    Resample parcellation to EPI (functional) mask.
+    If vowelwise timeseries are extracted from a binary mask,
+    apply grey matter mask to parcellation for tighter voxel selection.
     """
-    # save all header and affine info in hashable type
-    gc_log = gc_logger()
-
-    header_info = {"affine": []}
-    key_to_header = {}
-    for this_mask in mask_imgs:
-        img = load_img(this_mask)
-        affine = img.affine
-        affine_hashable = str(affine)
-        header_info["affine"].append(affine_hashable)
-        if affine_hashable not in key_to_header:
-            key_to_header[affine_hashable] = affine
-
-    if isinstance(mask_imgs[0], Nifti1Image):
-        mask_imgs = np.arange(len(mask_imgs))
-    else:
-        mask_imgs = np.array(mask_imgs)
-    # get most common values
-    common_affine = max(
-        set(header_info["affine"]), key=header_info["affine"].count
+    subject_parcel = resample_to_img(
+        parcellation, epi_mask, interpolation="nearest",
     )
-    gc_log.info(
-        f"We found {len(set(header_info['affine']))} unique affine "
-        f"matrices. The most common one is "
-        f"{key_to_header[common_affine]}"
-    )
-    odd_balls = set(header_info["affine"]) - {common_affine}
-    if not odd_balls:
-        return None
-
-    exclude = []
-    for ob in odd_balls:
-        ob_index = [
-            i for i, aff in enumerate(header_info["affine"]) if aff == ob
-        ]
-        gc_log.debug(
-            "The following subjects has a different affine matrix "
-            f"({key_to_header[ob]}) comparing to the most common value: "
-            f"{mask_imgs[ob_index]}."
+    if gm_masking:
+        gm = nib.squeeze_image(
+            resample_to_img(
+                source_img=gm_path,
+                target_img=epi_mask,
+                interpolation="continuous",
+            ),
         )
-        exclude += ob_index
-    gc_log.info(
-        f"{len(exclude)} out of {len(mask_imgs)} has "
-        "different affine matrix. Ignore when creating group mask."
-    )
-    return sorted(exclude)
+        subject_parcel = new_img_like(
+            gm,
+            (get_data(subject_parcel)*(get_data(gm) > 0.4).astype("int8")
+            ).astype("int8"),
+        )
+
+    return subject_parcel
 
 
 def merge_masks(
     subject_epi_mask: Nifti1Image,
-    mni_gm_path: str,
-    n_iter: int,
+    gm_path: Path,
 )-> Nifti1Image:
     """.
 
@@ -243,24 +148,24 @@ def merge_masks(
     Adapted from https://github.com/SIMEXP/giga_connectome/blob/22a4ae09f647870d576ead2a73799007c1f8159d/giga_connectome/mask.py#L65
     """
     # resample MNI grey matter template mask to subject's grey matter mask
-    mni_gm = nib.squeeze_image(
+    gm = nib.squeeze_image(
         resample_to_img(
-            source_img=mni_gm_path,
+            source_img=gm_path,
             target_img=subject_epi_mask,
             interpolation="continuous",
         ),
     )
 
     # steps adapted from nilearn.images.fetch_icbm152_brain_gm_mask
-    mni_gm_mask = (get_data(mni_gm) > 0.2).astype("int8")
-    mni_gm_mask = binary_closing(mni_gm_mask, iterations=n_iter)
-    mni_gm_mask_nii = new_img_like(mni_gm, mni_gm_mask)
+    gm_mask = (get_data(gm) > 0.2).astype("int8")
+    gm_mask = binary_closing(gm_mask, iterations=2)
+    gm_mask_nii = new_img_like(gm, gm_mask)
 
     # combine both subject and template masks into one
     subject_mask_nii = math_img(
         "img1 & img2",
         img1=subject_epi_mask,
-        img2=mni_gm_mask_nii,
+        img2=gm_mask_nii,
     )
 
     return subject_mask_nii
@@ -299,12 +204,9 @@ def denoise_nifti_voxel(
     if _check_exclusion(cf, sm):
         return None
 
-    # if high pass filter is not applied through cosines regressors,
-    # then detrend
-    detrend = "cosine00" not in cf.columns
     subject_masker = NiftiMasker(
         mask_img=subject_mask,
-        detrend=detrend,
+        detrend=False,
         standardize=standardize,
         smoothing_fwhm=smoothing_fwhm,
     )
@@ -342,20 +244,3 @@ def parse_bids_name(img: str) -> str:
     if isinstance(run, str):
         specifier = f"{specifier}_run-{run}"
     return session, specifier
-
-
-def gc_logger(log_level: str = "INFO") -> logging.Logger:
-    """
-    From https://github.com/SIMEXP/giga_connectome/blob/main/giga_connectome/logger.py
-    """
-    # FORMAT = '\n%(asctime)s - %(name)s - %(levelname)s\n\t%(message)s\n'
-    FORMAT = "%(message)s"
-
-    logging.basicConfig(
-        level=log_level,
-        format=FORMAT,
-        datefmt="[%X]",
-        handlers=[RichHandler()],
-    )
-
-    return logging.getLogger("giga_connectome")

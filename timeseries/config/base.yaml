@@ -7,7 +7,6 @@ defaults:
   - parcellation: null
   - denoise: simple+gsr
 
-standardize: zscore_sample
 smoothing_fwhm: 5.0
 
 output_dir: ./outputs
