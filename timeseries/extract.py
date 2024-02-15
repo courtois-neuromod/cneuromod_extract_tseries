@@ -225,7 +225,7 @@ class ExtractionAnalysis:
         )
 
         subject_parcel_path = Path(
-            f"{self.mask_dir}/sub-{subject}_{self.config.space}_"
+            f"{self.mask_dir}/sub-{subject}_{self.config.space}"
             f"_{self.config.dset_name}_{self.config.parcel_name}_"
             "parcellation.nii.gz"
         )
