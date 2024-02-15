@@ -225,8 +225,8 @@ class ExtractionAnalysis:
         )
 
         subject_parcel_path = Path(
-            f"{self.mask_dir}/sub-{subject}_{self.config.space}"
-            f"_{self.config.dset_name}_{self.config.parcel_name}_"
+            f"{self.mask_dir}/sub-{subject}_{self.config.dset_name}"
+            f"_{self.config.space}_{self.config.parcel_name}_"
             "parcellation.nii.gz"
         )
         if subject_parcel_path.exists():
@@ -271,14 +271,14 @@ class ExtractionAnalysis:
         if self.gm_path is None:
             subject_gm_path = None
             subject_mask_path = (
-                f"{self.mask_dir}/sub-{subject}_{self.config.space}"
-                f"_desc-{self.config.dset_name}-func_mask.nii.gz"
+                f"{self.mask_dir}/sub-{subject}_{self.config.dset_name}"
+                f"_{self.config.space}_func_mask.nii.gz"
             )
         else:
             subject_gm_path = self.gm_path if self.config.use_template_gm else self.gm_path[f"sub-{subject}"]
             subject_mask_path = (
-                f"{self.mask_dir}/sub-{subject}_{self.config.space}"
-                f"_desc-{self.config.dset_name}-func+GM_mask.nii.gz"
+                f"{self.mask_dir}/sub-{subject}_{self.config.dset_name}"
+                f"_{self.config.space}_func+GM_mask.nii.gz"
             )
 
         if Path(subject_mask_path).exists():
@@ -354,9 +354,9 @@ class ExtractionAnalysis:
         ts_type = 'voxel' if self.config.parcel_type == 'mask' else 'parcel'
         subj_tseries_path = (
             f"{self.timeseries_dir}/"
-            f"sub-{subject}_{self.config.space}_{self.config.dset_name}"
-            f"_{self.config.parcel_name}_BOLDtimeseries"
-            f"_{self.strategy['name']}_{ts_type}.h5"
+            f"sub-{subject}_{self.config.dset_name}_{self.config.space}"
+            f"_{self.config.parcel_name}_{self.strategy['name']}"
+            f"_{ts_type}wise_BOLDtimeseries.h5"
         )
         processed_run_list = []
         if Path(subj_tseries_path).exists():
