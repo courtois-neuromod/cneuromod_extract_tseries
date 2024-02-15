@@ -113,7 +113,7 @@ class ExtractionAnalysis:
                 ).resolve() for s in range(1, 7)
             }
             miss_count = np.sum(
-                [not v.exists() for k, v in self.gm_path.items()]
+                [not v.exists() for k, v in prepped_path.items()]
             )
             if miss_count > 3:  # TODO: set to 0 once all 6 subjects have retino
                 raise ValueError(
