@@ -392,7 +392,7 @@ class ExtractionAnalysis:
                 if not f"{specifier}_timeseries" in processed_runs:
                     time_series = self.get_tseries(
                         img,
-                        subject_mask,
+                        subject_epi_mask,
                         atlas_masker,
                     )
 
