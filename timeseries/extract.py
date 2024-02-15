@@ -71,7 +71,9 @@ class ExtractionAnalysis:
             self.config.gm_path, self.config.use_template_gm, "grey matter mask")
         # Parcellation(s) (template or subject-specific)
         self.parcellation_path = self._prep_paths(
-            self.config.parcellation, self.config.use_template_parcel, "parcellation")
+            self.config.parcellation,
+            self.config.use_template_parcel,
+            "parcellation",
         )
 
         # Set output paths
