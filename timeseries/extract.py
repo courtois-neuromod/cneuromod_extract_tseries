@@ -163,7 +163,6 @@ class ExtractionAnalysis:
                 bold_list,
                 subject_parcellation,
                 subject_epi_mask,
-                subject_gm_path,
             )
 
 
