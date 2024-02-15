@@ -5,7 +5,7 @@ use_template_gm: False
 gm_path: ./data/friends.fmriprep/sourcedata/smriprep/sub-*/anat/sub-*_label-GM_probseg.nii.gz
 
 use_template_parcel: False
-parcellation: ./atlas/tpl-sub*T1w/tpl-sub*T1w_res-func_atlas-language-Toneva_desc-dmpfc_mask.nii.gz
+parcellation: ./atlases/tpl-sub*T1w/tpl-sub*T1w_res-func_atlas-language-Toneva_desc-dmpfc_mask.nii.gz
 
 parcel_name: language-Toneva_dmpfc
 parcel_type: mask
