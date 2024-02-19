@@ -156,7 +156,3 @@ The following parameters need to be specified in the parcellation .yaml file:
 * ``use_template_parcel``. Boolean. Set to ``True`` if ``parcellation`` is a standard atlas (e.g., MIST, Schaefer 7 networks, DiFuMo) or an ROI mask used for all subjects. Set to ``False`` if an individual parcellation or ROI mask is used for each subject (replace the subject number with ``sub-*`` in ``parcellation``).
 * ``parcel_name``. The name given to the parcellation, which will be used to label the output.
 * ``parcel_type``. Choices = [``dseg``, ``probseg``, ``mask``]. Whether the specified ``parcellation`` is discrete, probabilistic or an ROI mask. Select ``dseg`` or ``probseg`` (depending on the atlas) to extract average timeseries from each parcel in the parcellation atlas. Select ``mask`` to extract timeseries from each voxel within an ROI mask (``parcellation`` must point to a binary mask).
-
-*# TODO: list provided parcellations*
-
-*TODO (optional): add your own custom parcellation: see masks.py (WIP), parcellations.rst (WIP)*
