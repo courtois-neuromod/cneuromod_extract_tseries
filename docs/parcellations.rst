@@ -7,17 +7,17 @@ Available Parcellations
 
 **MIST and BASC atlases**
 
-* MIST and BASC parcellations are under ``atlas/tpl-MNI152NLin2009bSym``
-* BASC parcellations are also under ``atlas/tpl-MNI152NLin2009bAsym``
+* MIST and BASC parcellations are under ``atlases/tpl-MNI152NLin2009bSym``
+* BASC parcellations are also under ``atlases/tpl-MNI152NLin2009bAsym``
 
 **Other standard atlases in MNI152NLin2009cAsym space**
 
-* The Schaefer and DiFuMo parcellations are under ``atlas/tpl-MNI152NLin2009cAsym/``
+* The Schaefer and DiFuMo parcellations are under ``atlases/tpl-MNI152NLin2009cAsym/``
 
 
 2. Subject-specific parcellations
 ---------------------------------
-For each subject, individual ROI masks and parcellations are saved under ``atlas/tpl-sub0*T1w/``
+For each subject, individual ROI masks and parcellations are saved under ``atlases/tpl-sub0*T1w/``
 
 Those include:
 
