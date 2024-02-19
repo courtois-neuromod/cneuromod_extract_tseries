@@ -148,6 +148,7 @@ Custom parcellations can be added by creating <parcelation_name>.yaml files unde
 atlas or ROI mask needed to mask the signal (see below).
 
 The following parameters need to be specified in the parcellation .yaml file:
+
 * ``space``. This field specifies whether to process fMRI data in native (T1w) or in standard (MNI) space. Space must match the specified grey matter and parcellation atlas/roi mask. Options = [``T1w``, ``MNI152NLin2009cAsym``].
 * ``gm_path``. Full or relative path to a grey matter mask (.nii.gz) to mask the BOLD signal during denoising (before applying the parcellation or ROI mask). To use subject-specific masks, replace the subject number with ``sub-*`` in the file path. Set to ``null`` to specify no mask.
 * ``use_template_gm``. Boolean. Set to ``True`` if a standard grey matter mask is used for all subjects. Set to ``False`` if an individual mask is loaded for each subject (replace the subject number with ``sub-*`` in ``gm_path``).
