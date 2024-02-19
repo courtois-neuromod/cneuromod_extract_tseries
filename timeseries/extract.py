@@ -224,10 +224,11 @@ class ExtractionAnalysis:
             mask_list,
         )
 
+        mtype = "ROImask" if self.config.parcel_type == "mask" else "parcellation"
         subject_parcel_path = Path(
             f"{self.mask_dir}/sub-{subject}_{self.config.dset_name}"
             f"_{self.config.space}_{self.config.parcel_name}_"
-            "parcellation.nii.gz"
+            f"{mtype}.nii.gz"
         )
         if subject_parcel_path.exists():
             print(
