@@ -55,7 +55,7 @@ rest of the brain using resting state runs from the hcptrt dataset.
 
 For three subjects (sub-01, sub-02 and sub-03) who completed a retinotopy task,
 ROI masks from the early visual cortex were derived from their population
-receptive fields and from group priors using the Neuropythy toolbox.
+receptive fields and from group priors using the `Neuropythy toolbox <https://github.com/noahbenson/neuropythy>`_.
 
 **Higher visual ROIs derived from fLoc**
 
