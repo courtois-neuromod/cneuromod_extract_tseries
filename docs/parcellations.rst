@@ -71,5 +71,5 @@ For three subjects (sub-01, sub-02 and sub-03) who completed the fLoc task,
 ROI masks from higher level visual areas with face, scene and
 body preferences were identified with a combination of group priors and their
 own data. For all subjects, group parcels of regions with face, scene and
-body preferences identified by the Kanwisher lab were also warped into
+body preferences identified by the `Kanwisher lab <https://web.mit.edu/bcs/nklab/GSS.shtml#download>`_ were also warped into
 single-subject space.
