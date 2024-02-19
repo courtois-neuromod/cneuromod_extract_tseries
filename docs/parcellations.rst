@@ -6,10 +6,12 @@ Available Parcellations
 -------------------------
 
 **MIST and BASC atlases**
+
 * MIST and BASC parcellations are under ``atlas/tpl-MNI152NLin2009bSym``
 * BASC parcellations are also under ``atlas/tpl-MNI152NLin2009bAsym``
 
 **Other standard atlases in MNI152NLin2009cAsym space**
+
 * The Schaefer and DiFuMo parcellations are under ``atlas/tpl-MNI152NLin2009cAsym/``
 
 
@@ -20,6 +22,7 @@ For each subject, individual ROI masks and parcellations are saved under ``atlas
 Those include:
 
 **Language ROI masks (n=8) from Mariya Toneva and Leila Wehbe**
+
 * Angular gyri (AngularG)
 * Anterior and posterior temporal cortex (AntTemp, PostTemp)
 * Dorsomedial prefrontal cortex (dmpfc)
@@ -34,6 +37,7 @@ doi: https://doi.org/10.1101/2020.09.28.316935
 
 
 **Yeo networks (n=6) derived from seed functional connectivity**
+
 * Default Mode network
 * Dorsal Attention network
 * Front-parietal network
@@ -48,6 +52,7 @@ seed parcel (MIST-ROI atlas), and by correlating its activation with the
 rest of the brain using resting state runs from the hcptrt dataset.
 
 **Early visual ROIs derived from retinotopy**
+
 * V1, V2, V3, V3a, V3b, VO1, VO2, hV4, LO1, LO2, TO1 and TO2
 
 For three subjects (sub-01, sub-02 and sub-03) who completed a retinotopy task,
@@ -55,6 +60,7 @@ ROI masks from the early visual cortex were derived from their population
 receptive fields and from group priors using the Neuropythy toolbox.
 
 **Higher visual ROIs derived from fLoc**
+
 * Extrastriate body area (body-EBA)
 * Fusiform face area (face-FFA)
 * Occipital face area (face-OFA)
