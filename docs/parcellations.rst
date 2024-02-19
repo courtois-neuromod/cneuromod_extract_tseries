@@ -32,8 +32,7 @@ Those include:
 
 For each subject, language ROIS were warped from standard MNI space to
 individual space. These ROIs are based on the work of Fedorenko et al. 2010
-and Binder et al., 2009, as explained here:
-doi: https://doi.org/10.1101/2020.09.28.316935
+and Binder et al., 2009, as explained `here <https://doi.org/10.1101/2020.09.28.316935/>`_
 
 
 **Yeo networks (n=6) derived from seed functional connectivity**
@@ -45,8 +44,7 @@ doi: https://doi.org/10.1101/2020.09.28.316935
 * Ventral attention network
 * Visual network
 
-Networks are based on Yeo et al., 2011
-https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3174820/
+Networks are based on `Yeo et al., 2011 <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3174820/>`_
 For each subject, each network was derived by averaging the signal within a
 seed parcel (MIST-ROI atlas), and by correlating its activation with the
 rest of the brain using resting state runs from the hcptrt dataset.
