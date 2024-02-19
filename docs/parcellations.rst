@@ -32,7 +32,7 @@ Those include:
 
 For each subject, language ROIS were warped from standard MNI space to
 individual space. These ROIs are based on the work of Fedorenko et al. 2010
-and Binder et al., 2009, as explained `here <https://doi.org/10.1101/2020.09.28.316935/>`_
+and Binder et al., 2009, as explained `here <https://www.biorxiv.org/content/10.1101/2020.09.28.316935v4>`_
 
 
 **Yeo networks (n=6) derived from seed functional connectivity**
