@@ -84,3 +84,10 @@ target/
 
 # Mypy cache
 .mypy_cache/
+
+# Output files
+outputs/*
+!outputs/.gitkeep
+data/*
+env/*
+atlases/tpl*

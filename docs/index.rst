@@ -11,9 +11,10 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   getting-started
-   commands
-
+   overview
+   installation
+   running
+   parcellations
 
 
 Indices and tables

@@ -1,0 +1,5 @@
+
+name: acompcor50
+function: load_confounds_strategy
+parameters:
+  denoise_strategy: compcor
