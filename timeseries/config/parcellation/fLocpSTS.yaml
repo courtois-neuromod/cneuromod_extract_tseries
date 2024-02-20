@@ -1,0 +1,11 @@
+# @package _global_
+
+space: T1w
+use_template_gm: False
+gm_path: ./data/friends.fmriprep/sourcedata/smriprep/sub-*/anat/sub-*_label-GM_probseg.nii.gz
+
+use_template_parcel: False
+parcellation: ./atlases/tpl-sub*T1w/tpl-sub*T1w_res-func_atlas-vision-fLoc-task_desc-face-pSTS_mask.nii.gz
+
+parcel_name: vision-fLoc-task_face-pSTS
+parcel_type: mask
