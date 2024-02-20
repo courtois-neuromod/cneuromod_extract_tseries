@@ -1,48 +1,52 @@
-Code to produce ROI masks in single-subject space,
-or single-subject masks in MNI space from functional data (not from template)
+Mask-Making scripts
+===================
+
+Collection of scripts to generate ROI masks and parcellations to extract timeseries from CNeuroMod datasets
+
+Script output, including from intermediary steps, is saved under ./masks according to their source (e.g., language-Toneva, vision-fLoc, yeo-7net, etc.)
+
+Final masks and atlases used for timeseries extraction are saved under ./atlases according to their
+space (e.g.,tpl-MNI152NLin2009cAsym, tpl-sub01T1w for masks warped to sub-01's subject space, etc.)
+
+Current scripts are for the following masks and atlases:
+
+**1. fLoc Visual Localizer**
+
+Source: ``./timeseries/vision-fLoc``
+Scripts:
+
+* ``split_fLoc_CVSparcels_perROI.py``. Script takes group parcels from the [Kanwisher lab](https://web.mit.edu/bcs/nklab/GSS.shtml#download) in cvs_avg35 space and generates a separate binary mask for each ROI.
+* ``fLoc-parcels_CVS2T1w.sh``. Script takes group parcels in cvs_avg35 space, warps them to MNI space, then warps them to individual (T1w) space for each subject (result is probabilistic mask).
+* ``fLoc_parcel2mask.py``. Script resamples subject-space probabilistic parcels to the subject's EPI (functional) space, thresholds the parcels to obtain binary masks.
 
 
-Vision: localisers in 3 out of 6 subjects for floc and retino in T1w space
-Use group atlases for other subjects?
+**2. 8 Language ROIs (from Toneva & Wehbe)**
+Source: ``./timeseries/language-Toneva``
+Scripts:
 
-Audio: Maelle used MIST (MNI space)
-
-Language: ask Valentina and Maria
-some from HCPtrt task... Federenko localizers
-
-
-Functional networks
-FP code: in MNI space
-derive single-subject networks that can be converted into binary masks
-based on seed coordinates from Yeo's 7 functional networks
-
-Links:
-- https://github.com/courtois-neuromod/fmri-generator/blob/master/scripts/seed_connectivity.py
-- https://nilearn.github.io/stable/auto_examples/03_connectivity/plot_seed_to_voxel_correlation.html
-"The maps presented in the results are using seeds in 6 of the 7 Yeo networks [30]: the default-mode network with a seed in the cingulate gyrus (-7, -52, 26), the visual network with a seed in the superior lingual gyrus (-16, -74, 7), the sensorimotor network with a seed in the postcentral gyrus (-41, -20, 62), the dorsal attentional network with another seed in the postcentral gyrus (-34, -38, 44), the ventral attentional network with a seed in the cingulate gyrus (-5, 15, 32) and the fronts-parietal network with a seed in the middle frontal gyrus (-40, 50, 7). The seventh limbic network was excluded because it is composed of regions with high signal loss and distortions due to field inhomogeneity."
+* ``step1_format_language_rois.py``. Script saves the source parcellation atlas as a .nii file with the .affine matrix of functional .nii.gz files in MNI space for the CNeuroMod subjects. A binary mask in (functional) MNI space is also created for each ROI (n=8).
+* ``step2_lang-parcels_mni2T1w.sh``. Script warps binary parcel masks from MNI space to individual (anatomical T1w) space for each CNeuroMod subject with ants using the fmri.prep transformation matrix.
+* ``step3_format_language_rois.py``. Script resamples binary masks in individual T1w space from anatomical to functional (EPI) resolution. Output is final binary masks in EPI space.
 
 
+**2. 8 Language ROIs (from Toneva & Wehbe)**
+Source: ``./timeseries/language-Toneva``
+Scripts:
+
+* ``step1_format_language_rois.py``. Script saves the source parcellation atlas as a .nii file with the .affine matrix of functional .nii.gz files in MNI space for the CNeuroMod subjects. A binary mask in (functional) MNI space is also created for each ROI (n=8).
+* ``step2_lang-parcels_mni2T1w.sh``. Script warps binary parcel masks from MNI space to individual (anatomical T1w) space for each CNeuroMod subject with ants using the fmri.prep transformation matrix.
+* ``step3_format_language_rois.py``. Script resamples binary masks in individual T1w space from anatomical to functional (EPI) resolution. Output is final binary masks in EPI space.
 
 
+**3. Six of seven Yeo et al. 2011 networks from functional connectivity**.
+Source: ``./timeseries/yeo-7networks``
+Scripts:
 
-converting MNI coordinates (in mm) to T1W coordinates (in voxels)
-
-With ANTS: antsApplyTransformsToPoints
-https://neurostars.org/t/extracting-individual-transforms-from-composite-h5-files-fmriprep/2215/14
-https://antspy.readthedocs.io/en/latest/_modules/ants/registration/apply_transforms.html
-https://github.com/stnava/chicken/blob/master/runthis.sh#L53-L54
-https://github.com/stnava/chicken/blob/d3e3855b9c13f8096aed27a0addf66b1a11e6bec/runthis.sh#L53-L54
-
-Coordinate systems:
-https://www.slicer.org/wiki/Coordinate_systems
+* ``seed_connectivity.py``. If seed parcel masks do not exist in MNI and individual space, the script takes seed voxel coordinates in MNI space from 6 of 7 Yeo et al. (2011) networks, positions seeds within a MIST-ROI parcel, and generates a binary parcel mask. These masks can be warped to individual space with ``yeo-parcels_mni2T1w.sh``. If parcel masks exist in MNI and subject space, the script extracts their timeseries (from resting state runs in the hcptrt dataset), correlates them with the rest of the brain, averages these correlations across multiple runs (per subject), and thresholds the resulting maps to obtain binary network masks.
+* ``yeo-parcels_mni2T1w.sh``. Script warps binary parcel masks from MNI space to individual (anatomical T1w) space for each CNeuroMod subject with ants using the fmri.prep transformation matrix.
 
 
-USE FSL FLIRT std2imgcoord, combine two transformations...
-
-https://neurostars.org/t/coordinates-from-mni-to-subject-space-using-transform-h5-file/5994/3
-
-https://neurostars.org/t/mni-coordinates-to-subjects-epi/5628
-
-https://neurostars.org/t/mni-to-native-space/2107/2
-
-https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FLIRT/UserGuide#img2imgcoord
+TODO: Audio: Maelle used MIST (MNI space)
+TODO: Vale's methods, use Federenko parcels from prob of 200 subjects and intersect w subjects' story > math map from hcptrt.
+TODO: the retino ROIs are from the retinotopy project, already binary masks in EPI space from Neuropythy output
+TODO Vision: retino, use group atlas for 3 remaining subjects?
