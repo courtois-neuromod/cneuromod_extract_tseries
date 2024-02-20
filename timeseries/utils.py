@@ -82,24 +82,6 @@ def prep_denoise_strategy(
     Add load confound function to dictionary of parameters
     that specify the denoise strategy. These parameters are
     designed to pass to load_confounds_strategy.
-
-    Parameters
-    ---------
-    benchmark_strategy : Dict
-        Denoising strategy parameters specified in
-        ./config/denoise/<strategy_name>.yaml config files.
-        Strategy choices include:
-        simple, simple+gsr, scrubbing.5, scrubbing.5+gsr, \
-        scrubbing.2, scrubbing.2+gsr, acompcor50, icaaroma.
-
-        For custom parameterization, save your own strategy config file \
-        as ./config/denoise/{my_strategy}.yaml.
-
-    Return
-    ------
-
-    dict
-        Denosing strategy parameter to pass to load_confounds_strategy.
     """
     lc_function = getattr(fmriprep, benchmark_strategy["function"])
     benchmark_strategy.update({"function": lc_function})
