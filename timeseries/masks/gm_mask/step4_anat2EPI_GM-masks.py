@@ -7,8 +7,6 @@ mask_path = "/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tser
 func_path = "/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries/masks/yeo-7net/network_masks"
 
 
-# QC: final pipeline all subject masks
-
 for s in range(1, 7):
     snum = str(s).zfill(2)
 
