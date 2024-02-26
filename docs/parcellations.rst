@@ -43,6 +43,7 @@ ROIs include:
 * Posterior cingulate cortex (pCingulate)
 
 E.g., ``atlases/tpl-sub0*T1w/tpl-sub*T1w_res-func_atlas-language-Toneva_desc-AntTemp_mask.nii.gz``
+
 For each subject, language ROIS were warped from standard MNI space to
 individual space. These ROIs are based on the work of Fedorenko et al. 2010
 and Binder et al., 2009, as explained `here <https://www.biorxiv.org/content/10.1101/2020.09.28.316935v4>`_
@@ -60,6 +61,7 @@ Networks include:
 * Visual network
 
 E.g., ``atlases/tpl-sub0*T1w/tpl-sub*T1w_res-func_atlas-yeo-7net_desc-default-mode_mask.nii.gz``
+
 Networks are based on `Yeo et al., 2011 <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3174820/>`_
 For each subject, each network was derived by averaging the signal within a
 seed parcel (MIST-ROI atlas), and by correlating its activation with the
@@ -73,6 +75,7 @@ ROIs include:
 * V1, V2, V3, V3a, V3b, VO1, VO2, hV4, LO1, LO2, TO1 and TO2
 
 E.g., ``atlases/tpl-sub0*T1w/tpl-sub*T1w_res-func_atlas-vision-retino-npythy_desc-V1_mask.nii.gz``
+
 For three subjects (sub-01, sub-02 and sub-03) who completed a retinotopy task,
 ROI masks from the early visual cortex were derived from their population
 receptive fields and from group priors using the `Neuropythy toolbox <https://github.com/noahbenson/neuropythy>`_.
@@ -93,9 +96,12 @@ ROIs include:
 For three subjects (sub-01, sub-02 and sub-03) who completed the fLoc task,
 ROI masks from higher level visual areas with face, scene and
 body preferences were identified with a combination of group priors and their
-own data. \
-E.g., ``atlases/tpl-sub0*T1w/tpl-sub*T1w_res-func_atlas-vision-fLoc-task_desc-face-FFA_mask.nii.gz`` \
+own data.
+
+E.g., ``atlases/tpl-sub0*T1w/tpl-sub*T1w_res-func_atlas-vision-fLoc-task_desc-face-FFA_mask.nii.gz``
+
 For all subjects, group parcels of regions with face, scene and
 body preferences identified by the `Kanwisher lab <https://web.mit.edu/bcs/nklab/GSS.shtml#download>`_ were also warped into
-single-subject space. \
-E.g., ``atlases/tpl-sub0*T1w/tpl-sub*T1w_res-func_atlas-vision-fLoc-kanwisher_desc-face-FFA_mask.nii.gz`` \
+single-subject space.
+
+E.g., ``atlases/tpl-sub0*T1w/tpl-sub*T1w_res-func_atlas-vision-fLoc-kanwisher_desc-face-FFA_mask.nii.gz``
