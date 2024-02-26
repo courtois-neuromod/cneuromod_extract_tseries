@@ -2,7 +2,7 @@
 
 space: T1w
 use_template_gm: False
-gm_path: ./data/friends.fmriprep/sourcedata/smriprep/sub-*/anat/sub-*_label-GM_probseg.nii.gz
+gm_path: ./atlases/tpl-sub*T1w/tpl-sub*T1w_res-func_label-GM_desc-from-FS_dseg.nii.gz
 
 use_template_parcel: False
 parcellation: ./atlases/tpl-sub*T1w/tpl-sub*T1w_res-func_atlas-yeo-7net_desc-fronto-parietal_mask.nii.gz

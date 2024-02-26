@@ -10,6 +10,24 @@ space (e.g.,tpl-MNI152NLin2009cAsym, tpl-sub01T1w for masks warped to sub-01's s
 
 Current scripts are for the following masks and atlases:
 
+
+**0. Grey matter masks from Freesurfer**
+
+Source: ``./timeseries/gm_mask``
+Scripts:
+
+* ``step1_FSaseg_mgz2nii.sh``. Script converts aseg.mgz segmentations from Freesurfer
+into nii.gz files.
+* ``step2_FSaseg_2_T1wGMmask.py``. Script creates subject grey matter masks in
+T1w space from Freesurfer parcellation using cortical and subcortical grey
+matter indices.
+* ``step3_GMmask_T1w2MNI.sh``. Script uses ANTS and fmriprep transformation
+matrices to warp grey matter masks from T1w to MNI space for each subject.
+* ``step4_anat2EPI_GM-masks.py``. Script downsamples subject grey matter masks
+in T1w and MNI space from anatomical to functional (EPI) resolution.
+
+
+
 **1. fLoc Visual Localizer**
 
 Source: ``./timeseries/vision-fLoc``

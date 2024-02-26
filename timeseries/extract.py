@@ -45,11 +45,14 @@ class ExtractionAnalysis:
 
         Define analysis parameters.
         """
-        self.set_paths()
+        self.bids_dir = Path(
+            f"{self.config.data_dir}/{self.config.dset_name}.fmriprep"
+        ).resolve()
         self.subjects = utils.get_subject_list(
             self.bids_dir,
             self.config.subject_list,
         )
+        self.set_paths()
         self.standardize = "zscore_sample"
         self.strategy = utils.prep_denoise_strategy(
             dict(self.config.denoise),
@@ -60,12 +63,9 @@ class ExtractionAnalysis:
     def set_paths(self: "ExtractionAnalysis") -> None:
         """.
 
-        Set analysis input and output paths.
+        Set analysis mask and output paths.
         """
-        # Input paths
-        self.bids_dir = Path(
-            f"{self.config.data_dir}/{self.config.dset_name}.fmriprep"
-        ).resolve()
+        # Set mask paths
         # Grey matter mask(s) (template or subject-specific)
         self.gm_path = None if self.config.gm_path is None else self._prep_paths(
             self.config.gm_path, self.config.use_template_gm, "grey matter mask")
@@ -108,14 +108,14 @@ class ExtractionAnalysis:
                 )
         else:
             prepped_path = {
-                f"sub-{str(s).zfill(2)}": Path(
-                    f"{file_path.replace('*', f'{str(s).zfill(2)}')}"
-                ).resolve() for s in range(1, 7)
+                f"sub-{s}": Path(
+                    f"{file_path.replace('*', s)}"
+                ).resolve() for s in self.subjects
             }
             miss_count = np.sum(
                 [not v.exists() for k, v in prepped_path.items()]
             )
-            if miss_count > 3:  # TODO: set to 0 once all 6 subjects have retino
+            if miss_count > 0:
                 raise ValueError(
                     f"{miss_count} {file_type}s not found."
                 )
@@ -211,24 +211,25 @@ class ExtractionAnalysis:
         mask_list: list,
     ) -> Tuple[nib.nifti1.Nifti1Image, nib.nifti1.Nifti1Image]:
         """.
-        Generates subject functional mask from task runs EPI masks,
-        then resample parcellation atlas to the EPI space.
-        Return subject-specific parcellation.
+        Generates subject EPI mask from all task run masks,
+        confined by a grey matter mask if one is specified.
+        Resamples parcellation atlas to the EPI space.
+        Returns subject-specific parcellation and EPI mask.
 
         For voxelwise extractions from a binary mask
         (self.config.parcel_type == mask), the parcellation is confined by
-        a grey matter mask if one is specified.
+        the specified grey matter mask.
         """
-        subject_epi_mask, subject_gm_path = self.make_subject_EPImask(
+        subject_epi_mask = self.make_subject_EPImask(
             subject,
             mask_list,
         )
 
-        mtype = "ROImask" if self.config.parcel_type == "mask" else "parcellation"
+        m_type = "ROImask" if self.config.parcel_type == "mask" else "parcellation"
         subject_parcel_path = Path(
             f"{self.mask_dir}/sub-{subject}_{self.config.dset_name}"
             f"_{self.config.space}_{self.config.parcel_name}_"
-            f"{mtype}.nii.gz"
+            f"{m_type}.nii.gz"
         )
         if subject_parcel_path.exists():
             print(
@@ -245,10 +246,9 @@ class ExtractionAnalysis:
             subject_parcel = utils.make_parcel(
                 parcellation,
                 subject_epi_mask,
-                subject_gm_path,
                 np.logical_and(
                     self.config.parcel_type == 'mask',
-                    subject_gm_path is not None,
+                    self.gm_path is not None,
                 ),
             )
             nib.save(subject_parcel, subject_parcel_path)
@@ -260,31 +260,24 @@ class ExtractionAnalysis:
         self: "ExtractionAnalysis",
         subject: str,
         mask_list: list,
-    ) -> Tuple[nib.nifti1.Nifti1Image, Union[Path, None]]:
+    ) -> nib.nifti1.Nifti1Image:
         """.
 
         Generate subject-specific EPI mask from all task runs.
 
-        If a grey matter mask is specified (subject_gm_path != None),
-        combine task-derived EPI functional mask with a grey matter
-        mask, either subject-specific or from a standard template.
+        Combine the task-derived EPI functional mask with a grey matter
+        mask if one is specified (self.gm_path != None),
+        either subject-specific or from a standard template.
         """
-        if self.gm_path is None:
-            subject_gm_path = None
-            subject_mask_path = (
-                f"{self.mask_dir}/sub-{subject}_{self.config.dset_name}"
-                f"_{self.config.space}_func_mask.nii.gz"
-            )
-        else:
-            subject_gm_path = self.gm_path if self.config.use_template_gm else self.gm_path[f"sub-{subject}"]
-            subject_mask_path = (
-                f"{self.mask_dir}/sub-{subject}_{self.config.dset_name}"
-                f"_{self.config.space}_func+GM_mask.nii.gz"
-            )
+        m_type = "func" if self.gm_path is None else "func+GM"
+        subject_mask_path = (
+            f"{self.mask_dir}/sub-{subject}_{self.config.dset_name}"
+            f"_{self.config.space}_{m_type}_mask.nii.gz"
+        )
 
         if Path(subject_mask_path).exists():
             print(
-                "Loading existing subject grey matter mask."
+                "Loading existing subject functional mask."
             )
             subject_epi_mask = nib.load(subject_mask_path)
 
@@ -313,16 +306,19 @@ class ExtractionAnalysis:
                 f"\nshape: {subject_epi_mask.shape}"
             )
 
-            if subject_gm_path is not None:
+            if self.gm_path is not None:
+                subject_gm_path = self.gm_path if self.config.use_template_gm else self.gm_path[f"sub-{subject}"]
+
                 # merge functional mask from subject's epi files w grey matter mask
                 subject_epi_mask = utils.merge_masks(
                     subject_epi_mask,
                     subject_gm_path,
+                    self.config.parcel_type == "mask",
                 )
 
             nib.save(subject_epi_mask, subject_mask_path)
 
-        return subject_epi_mask, subject_gm_path
+        return subject_epi_mask
 
 
     def prep_subject(

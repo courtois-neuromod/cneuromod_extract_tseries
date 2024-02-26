@@ -92,7 +92,7 @@ def prep_denoise_strategy(
 def make_parcel(
     parcellation: Nifti1Image,
     epi_mask: Nifti1Image,
-    gm_path: Union[Path, None],
+    #gm_path: Union[Path, None],
     gm_masking: bool,
 )-> Nifti1Image:
     """
@@ -104,49 +104,49 @@ def make_parcel(
         parcellation, epi_mask, interpolation="nearest",
     )
     if gm_masking:
-        gm = nib.squeeze_image(
-            resample_to_img(
-                source_img=gm_path,
-                target_img=epi_mask,
-                interpolation="continuous",
-            ),
-        )
         subject_parcel = new_img_like(
-            gm,
-            (get_data(subject_parcel)*(get_data(gm) > 0.4).astype("int8")
-            ).astype("int8"),
+            epi_mask,
+            (get_data(subject_parcel)*get_data(epi_mask)).astype("int8"),
         )
 
     return subject_parcel
 
 
 def merge_masks(
-    subject_epi_mask: Nifti1Image,
+    epi_mask: Nifti1Image,
     gm_path: Path,
+    voxelwise: bool,
 )-> Nifti1Image:
     """.
 
-    Combine task-derived subject epi mask and MNI template mask into one GM mask.
+    Combine task-derived subject epi mask and grey matter\ mask into one GM mask.
     Adapted from https://github.com/SIMEXP/giga_connectome/blob/22a4ae09f647870d576ead2a73799007c1f8159d/giga_connectome/mask.py#L65
     """
-    # resample MNI grey matter template mask to subject's grey matter mask
-    gm = nib.squeeze_image(
-        resample_to_img(
-            source_img=gm_path,
-            target_img=subject_epi_mask,
-            interpolation="continuous",
-        ),
-    )
+    gm_mask_nii = nib.load(gm_path)
 
-    # steps adapted from nilearn.images.fetch_icbm152_brain_gm_mask
-    gm_mask = (get_data(gm) > 0.2).astype("int8")
-    gm_mask = binary_closing(gm_mask, iterations=2)
-    gm_mask_nii = new_img_like(gm, gm_mask)
+    # use wider GM mask to extract parcel signal
+    if not voxelwise:
+        # resample MNI grey matter template mask to subject's functional mask
+        gm_mask_nii = new_img_like(
+            gm_mask_nii,
+            get_data(gm_mask_nii).astype(np.float64),
+        )
+        gm = nib.squeeze_image(
+            resample_to_img(
+                source_img=gm_mask_nii,
+                target_img=epi_mask,
+                interpolation="continuous",
+            ),
+        )
+        # steps adapted from nilearn.images.fetch_icbm152_brain_gm_mask
+        gm_mask = (get_data(gm) > 0.2).astype("int8")
+        gm_mask = binary_closing(gm_mask, iterations=2)
+        gm_mask_nii = new_img_like(gm, gm_mask)
 
-    # combine both subject and template masks into one
+    # combine both functional and grey matter masks into one
     subject_mask_nii = math_img(
         "img1 & img2",
-        img1=subject_epi_mask,
+        img1=epi_mask,
         img2=gm_mask_nii,
     )
 

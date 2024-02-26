@@ -21,6 +21,12 @@ For each subject, individual ROI masks and parcellations are saved under ``atlas
 
 Those include:
 
+**Individual grey matter masks**
+
+Subject-specific masks that include cortical and subcortical grey matter
+were created from Freesurfer segmentation (aseg.mgz) in MNI and T1w space.
+
+
 **Language ROI masks (n=8) from Mariya Toneva and Leila Wehbe**
 
 * Angular gyri (AngularG)
