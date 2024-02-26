@@ -57,7 +57,7 @@ Scripts:
 * ``yeo-parcels_mni2T1w.sh``. Script warps binary parcel masks from MNI space to individual (anatomical T1w) space for each CNeuroMod subject with ants using the fmri.prep transformation matrix.
 
 
-TODO: Audio: Maelle used MIST (MNI space)
-TODO: Vale's methods, use Federenko parcels from prob of 200 subjects and intersect w subjects' story > math map from hcptrt.
-TODO: the retino ROIs are from the retinotopy project, already binary masks in EPI space from Neuropythy output
+TODO: Audio: Maelle used MIST (MNI space) \
+TODO: Vale's methods, use Federenko parcels from prob of 200 subjects and intersect w subjects' story > math map from hcptrt. \
+TODO: the retino ROIs are from the retinotopy project, already binary masks in EPI space from Neuropythy output \
 TODO Vision: retino, use group atlas for 3 remaining subjects?
