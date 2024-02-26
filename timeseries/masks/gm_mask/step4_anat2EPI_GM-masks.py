@@ -39,14 +39,15 @@ for s in range(1, 7):
     mask_mni_tr = new_img_like(
         mask_mni_rs, (mask_mni_rs.get_fdata() > 0.05).astype("uint8")
     )
-    mask_mni_rec = math_img(
-        "img1 & img2",
-        img1=mask_mni_func,
-        img2=mask_mni_tr,
-    )
+    #mask_mni_rec = math_img(
+    #    "img1 & img2",
+    #    img1=mask_mni_func,
+    #    img2=mask_mni_tr,
+    #)
 
     nib.save(
-        mask_mni_rec,
+        #mask_mni_rec,
+        mask_mni_tr,
         f"{mask_path}/tpl-MNI152NLin2009cAsym_sub-{snum}"
         "_res-func_label-GM_desc-from-FS_dseg.nii.gz"
     )
@@ -84,14 +85,15 @@ for s in range(1, 7):
         (get_data(mask_t1w_rs) > 0.2).astype("uint8")
     )
 
-    mask_t1w_rec = math_img(
-        "img1 & img2",
-        img1=mask_t1w_func,
-        img2=mask_t1w_tr,
-    )
+    #mask_t1w_rec = math_img(
+    #    "img1 & img2",
+    #    img1=mask_t1w_func,
+    #    img2=mask_t1w_tr,
+    #)
 
     nib.save(
-        mask_t1w_rec,
+        #mask_t1w_rec,
+        mask_t1w_tr,
         f"{mask_path}/tpl-sub{snum}T1w"
         "_res-func_label-GM_desc-from-FS_dseg.nii.gz"
     )
