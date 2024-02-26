@@ -83,22 +83,20 @@ def get_GM_mask(
     space_name: str,
 ) -> Nifti1Image:
     """."""
-    gm_space = "" if space_name=="T1w" else f"_space-{space_name}"
-    p = 0.5 if space_name=="T1w" else 0.4
-    prob_GM_mask = nib.load(
-        f"{args.data_dir}/sourcedata/smriprep/sub-{args.subject}/"
-        f"anat/sub-{args.subject}{gm_space}_label-GM_probseg.nii.gz"
-    )
-    prob_GM_mask = resample_to_img(
-        prob_GM_mask, func_mask, interpolation="linear",
-    )
-
-    binary_GM_array = (
-        (prob_GM_mask.get_fdata() > p).astype(int)
-    )*func_mask.get_fdata()
-
+    if space_name=="T1w":
+        gm_mask = nib.load(
+            f"{args.atlas_dir}/tpl-sub{args.subject}T1w/tpl-sub"
+            f"{args.subject}T1w_res-func_label-GM_desc-from-FS_dseg.nii.gz"
+        )
+    else:
+        gm_mask = nib.load(
+            f"{args.atlas_dir}/tpl-MNI152NLin2009cAsym/"
+            f"tpl-MNI152NLin2009cAsym_sub-{args.subject}_res-func_"
+            "label-GM_desc-from-FS_dseg.nii.gz"
+        )
+        
     return nib.nifti1.Nifti1Image(
-        binary_GM_array.astype(int),
+        (gm_mask.get_fdata()*func_mask.get_fdata()).astype(int),
         affine=func_mask.affine,
         dtype="uint8",
     )
@@ -139,7 +137,7 @@ def generate_mni_parcel_masks(
     Path(f"{args.out_dir}/network_masks").mkdir(parents=True, exist_ok=True)
     Path(f"{args.out_dir}/temp").mkdir(parents=True, exist_ok=True)
 
-    atlas_parcel = nib.load(args.atlas_path)
+    atlas_parcel = nib.load(Path(f"{args.atlas_dir}/{args.atlas}").resolve())
     for seed in SEEDS:
         mni_parcel_mask_path = Path(
             f"{args.out_dir}/parcel_masks/{args.atlas_space}"
@@ -479,12 +477,14 @@ if __name__ == "__main__":
         default="res-03",
     )
     parser.add_argument(
-        "--atlas_path",
-        type=Path,
-        default=Path(
-            "../../../atlases/tpl-MNI152NLin2009bSym/"
-            "tpl-MNI152NLin2009bSym_res-03_atlas-MIST_desc-ROI_dseg.nii.gz"
-        ).resolve(),
+        "--atlas_dir",
+        type=str,
+        default="../../../atlases",
+    )
+    parser.add_argument(
+        "--atlas",
+        type=str,
+        default="tpl-MNI152NLin2009bSym/tpl-MNI152NLin2009bSym_res-03_atlas-MIST_desc-ROI_dseg.nii.gz",
     )
 
     main(parser.parse_args())
