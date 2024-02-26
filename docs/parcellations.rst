@@ -34,6 +34,7 @@ Individual grey matter masks warped to MNI space are also available under
 **Language ROI masks (n=8) from Mariya Toneva and Leila Wehbe**
 
 ROIs include:
+
 * Angular gyri (AngularG)
 * Anterior and posterior temporal cortex (AntTemp, PostTemp)
 * Dorsomedial prefrontal cortex (dmpfc)
@@ -50,6 +51,7 @@ and Binder et al., 2009, as explained `here <https://www.biorxiv.org/content/10.
 **Yeo networks (n=6) derived from seed functional connectivity**
 
 Networks include:
+
 * Default Mode network
 * Dorsal Attention network
 * Front-parietal network
@@ -67,6 +69,7 @@ rest of the brain using resting state runs from the hcptrt dataset.
 **Early visual ROIs derived from retinotopy**
 
 ROIs include:
+
 * V1, V2, V3, V3a, V3b, VO1, VO2, hV4, LO1, LO2, TO1 and TO2
 
 E.g., ``atlases/tpl-sub0*T1w/tpl-sub*T1w_res-func_atlas-vision-retino-npythy_desc-V1_mask.nii.gz``
@@ -78,6 +81,7 @@ receptive fields and from group priors using the `Neuropythy toolbox <https://gi
 **Higher visual ROIs derived from fLoc**
 
 ROIs include:
+
 * Extrastriate body area (body-EBA)
 * Fusiform face area (face-FFA)
 * Occipital face area (face-OFA)
