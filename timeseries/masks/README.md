@@ -11,7 +11,7 @@ space (e.g.,tpl-MNI152NLin2009cAsym, tpl-sub01T1w for masks warped to sub-01's s
 Current scripts are for the following masks and atlases:
 
 
-**0. Grey matter masks from Freesurfer**
+**1. Grey matter masks from Freesurfer**
 
 Source: ``./timeseries/gm_mask`` \
 Scripts:
@@ -28,7 +28,7 @@ in T1w and MNI space from anatomical to functional (EPI) resolution.
 
 
 
-**1. fLoc Visual Localizer**
+**2. fLoc Visual Localizer**
 
 Source: ``./timeseries/vision-fLoc`` \
 Scripts:
@@ -38,7 +38,7 @@ Scripts:
 * ``fLoc_parcel2mask.py``. Script resamples subject-space probabilistic parcels to the subject's EPI (functional) space, thresholds the parcels to obtain binary masks.
 
 
-**2. 8 Language ROIs (from Toneva & Wehbe)**
+**3. Eight Language ROIs (from Toneva & Wehbe)**
 
 Source: ``./timeseries/language-Toneva`` \
 Scripts:
@@ -48,7 +48,7 @@ Scripts:
 * ``step3_format_language_rois.py``. Script resamples binary masks in individual T1w space from anatomical to functional (EPI) resolution. Output is final binary masks in EPI space.
 
 
-**3. Six of seven Yeo et al. 2011 networks from functional connectivity**
+**4. Six of seven Yeo et al. 2011 networks from functional connectivity**
 
 Source: ``./timeseries/yeo-7networks`` \
 Scripts:
