@@ -33,6 +33,13 @@ LOAD_CONFOUNDS_PARAMS = {
 }
 
 
+def parse_atlas(
+    atlas_name: str,
+    key: str,
+) -> str:
+    return {x.split('-')[0]:x for x in atlas_name.split("_") if "-" in x}[key]
+
+
 def get_lists(
     data_dir: str,
     found_masks: List[str],
@@ -137,13 +144,15 @@ def generate_mni_parcel_masks(
     Path(f"{args.out_dir}/network_masks").mkdir(parents=True, exist_ok=True)
     Path(f"{args.out_dir}/temp").mkdir(parents=True, exist_ok=True)
 
+    a_space = parse_atlas(args.atlas_name, "tpl")
+    a_res = parse_atlas(args.atlas_name, "res")
     atlas_parcel = nib.load(Path(
-        f"{args.atlas_dir}/{args.atlas_space}/{args.atlas_name}"
+        f"{args.atlas_dir}/{a_space}/{args.atlas_name}"
     ).resolve())
     for seed in SEEDS:
         mni_parcel_mask_path = Path(
-            f"{args.out_dir}/parcel_masks/{args.atlas_space}"
-            f"_{args.atlas_res}_atlas-yeo-7net_desc-{seed[0]}-seed-parcel_mask.nii.gz"
+            f"{args.out_dir}/parcel_masks/{a_space}"
+            f"_{a_res}_atlas-yeo-7net_desc-{seed[0]}-seed-parcel_mask.nii.gz"
         )
         if not mni_parcel_mask_path.exists():
             mni_seed_masker = NiftiSpheresMasker(
@@ -173,10 +182,12 @@ def make_mask_array(
     space: str,
 ) -> np.array:
     """ . """
+    a_space = parse_atlas(args.atlas_name, "tpl")
+    a_res = parse_atlas(args.atlas_name, "res")
     if space == "MNI":
         parcel_mask_path = Path(
             f"{args.out_dir}/parcel_masks/"
-            f"{args.atlas_space}_{args.atlas_res}_atlas-yeo-7net_desc-"
+            f"{a_space}_{a_res}_atlas-yeo-7net_desc-"
             f"{parcel['network_name']}-seed-parcel_mask.nii.gz"
         )
     else:
@@ -473,16 +484,6 @@ if __name__ == "__main__":
         type=str,
         default="../../../atlases",
     )
-    parser.add_argument(
-        "--atlas_space",
-        type=str,
-        default="tpl-MNI152NLin2009bSym",
-    )
-    parser.add_argument(
-        "--atlas_res",
-        type=str,
-        default="res-03",
-    )    
     parser.add_argument(
         "--atlas_name",
         type=str,
