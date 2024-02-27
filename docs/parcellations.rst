@@ -1,7 +1,7 @@
 Available Parcellations
 =======================
 
-
+=======
 1. Standard parcellations
 -------------------------
 
