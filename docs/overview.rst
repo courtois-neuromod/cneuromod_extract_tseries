@@ -16,4 +16,4 @@ exports arrays of denoised timeseries as .HDF5 (one file per subject).
 
 * `Run the code <https://github.com/courtois-neuromod/cneuromod_extract_tseries/blob/dev_clean/docs/running.rst/>`_
 
-* `Create custom parcellations <https://github.com/courtois-neuromod/cneuromod_extract_tseries/blob/dev_clean/docs/parcellations.rst/>`_
+* `Currently available parcellations <https://github.com/courtois-neuromod/cneuromod_extract_tseries/blob/dev_clean/docs/parcellations.rst/>`_
