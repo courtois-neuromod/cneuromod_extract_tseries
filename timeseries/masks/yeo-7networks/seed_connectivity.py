@@ -33,6 +33,13 @@ LOAD_CONFOUNDS_PARAMS = {
 }
 
 
+def parse_atlas(
+    atlas_name: str,
+    key: str,
+) -> str:
+    return {x.split('-')[0]:x for x in atlas_name.split("_") if "-" in x}[key]
+
+
 def get_lists(
     data_dir: str,
     found_masks: List[str],
@@ -83,22 +90,20 @@ def get_GM_mask(
     space_name: str,
 ) -> Nifti1Image:
     """."""
-    gm_space = "" if space_name=="T1w" else f"_space-{space_name}"
-    p = 0.5 if space_name=="T1w" else 0.4
-    prob_GM_mask = nib.load(
-        f"{args.data_dir}/sourcedata/smriprep/sub-{args.subject}/"
-        f"anat/sub-{args.subject}{gm_space}_label-GM_probseg.nii.gz"
-    )
-    prob_GM_mask = resample_to_img(
-        prob_GM_mask, func_mask, interpolation="linear",
-    )
-
-    binary_GM_array = (
-        (prob_GM_mask.get_fdata() > p).astype(int)
-    )*func_mask.get_fdata()
+    if space_name=="T1w":
+        gm_mask = nib.load(
+            f"{args.atlas_dir}/tpl-sub{args.subject}T1w/tpl-sub"
+            f"{args.subject}T1w_res-func_label-GM_desc-from-FS_dseg.nii.gz"
+        )
+    else:
+        gm_mask = nib.load(
+            f"{args.atlas_dir}/tpl-MNI152NLin2009cAsym/"
+            f"tpl-MNI152NLin2009cAsym_sub-{args.subject}_res-func_"
+            "label-GM_desc-from-FS_dseg.nii.gz"
+        )
 
     return nib.nifti1.Nifti1Image(
-        binary_GM_array.astype(int),
+        (gm_mask.get_fdata()*func_mask.get_fdata()).astype(int),
         affine=func_mask.affine,
         dtype="uint8",
     )
@@ -139,11 +144,15 @@ def generate_mni_parcel_masks(
     Path(f"{args.out_dir}/network_masks").mkdir(parents=True, exist_ok=True)
     Path(f"{args.out_dir}/temp").mkdir(parents=True, exist_ok=True)
 
-    atlas_parcel = nib.load(args.atlas_path)
+    a_space = parse_atlas(args.atlas_name, "tpl")
+    a_res = parse_atlas(args.atlas_name, "res")
+    atlas_parcel = nib.load(Path(
+        f"{args.atlas_dir}/{a_space}/{args.atlas_name}"
+    ).resolve())
     for seed in SEEDS:
         mni_parcel_mask_path = Path(
-            f"{args.out_dir}/parcel_masks/{args.atlas_space}"
-            f"_{args.atlas_res}_atlas-yeo-7net_desc-{seed[0]}-seed-parcel_mask.nii.gz"
+            f"{args.out_dir}/parcel_masks/{a_space}"
+            f"_{a_res}_atlas-yeo-7net_desc-{seed[0]}-seed-parcel_mask.nii.gz"
         )
         if not mni_parcel_mask_path.exists():
             mni_seed_masker = NiftiSpheresMasker(
@@ -173,10 +182,12 @@ def make_mask_array(
     space: str,
 ) -> np.array:
     """ . """
+    a_space = parse_atlas(args.atlas_name, "tpl")
+    a_res = parse_atlas(args.atlas_name, "res")
     if space == "MNI":
         parcel_mask_path = Path(
             f"{args.out_dir}/parcel_masks/"
-            f"{args.atlas_space}_{args.atlas_res}_atlas-yeo-7net_desc-"
+            f"{a_space}_{a_res}_atlas-yeo-7net_desc-"
             f"{parcel['network_name']}-seed-parcel_mask.nii.gz"
         )
     else:
@@ -469,22 +480,14 @@ if __name__ == "__main__":
         help="Subject to use (e.g. '01').",
     )
     parser.add_argument(
-        "--atlas_space",
+        "--atlas_dir",
         type=str,
-        default="tpl-MNI152NLin2009bSym",
+        default="../../../atlases",
     )
     parser.add_argument(
-        "--atlas_res",
+        "--atlas_name",
         type=str,
-        default="res-03",
-    )
-    parser.add_argument(
-        "--atlas_path",
-        type=Path,
-        default=Path(
-            "../../../atlases/tpl-MNI152NLin2009bSym/"
-            "tpl-MNI152NLin2009bSym_res-03_atlas-MIST_desc-ROI_dseg.nii.gz"
-        ).resolve(),
+        default="tpl-MNI152NLin2009bSym_res-03_atlas-MIST_desc-ROI_dseg.nii.gz",
     )
 
     main(parser.parse_args())
