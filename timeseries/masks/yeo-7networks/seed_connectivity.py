@@ -94,7 +94,7 @@ def get_GM_mask(
             f"tpl-MNI152NLin2009cAsym_sub-{args.subject}_res-func_"
             "label-GM_desc-from-FS_dseg.nii.gz"
         )
-        
+
     return nib.nifti1.Nifti1Image(
         (gm_mask.get_fdata()*func_mask.get_fdata()).astype(int),
         affine=func_mask.affine,
@@ -137,7 +137,9 @@ def generate_mni_parcel_masks(
     Path(f"{args.out_dir}/network_masks").mkdir(parents=True, exist_ok=True)
     Path(f"{args.out_dir}/temp").mkdir(parents=True, exist_ok=True)
 
-    atlas_parcel = nib.load(Path(f"{args.atlas_dir}/{args.atlas}").resolve())
+    atlas_parcel = nib.load(Path(
+        f"{args.atlas_dir}/{args.atlas_space}/{args.atlas_name}"
+    ).resolve())
     for seed in SEEDS:
         mni_parcel_mask_path = Path(
             f"{args.out_dir}/parcel_masks/{args.atlas_space}"
@@ -467,6 +469,11 @@ if __name__ == "__main__":
         help="Subject to use (e.g. '01').",
     )
     parser.add_argument(
+        "--atlas_dir",
+        type=str,
+        default="../../../atlases",
+    )
+    parser.add_argument(
         "--atlas_space",
         type=str,
         default="tpl-MNI152NLin2009bSym",
@@ -475,16 +482,11 @@ if __name__ == "__main__":
         "--atlas_res",
         type=str,
         default="res-03",
-    )
+    )    
     parser.add_argument(
-        "--atlas_dir",
+        "--atlas_name",
         type=str,
-        default="../../../atlases",
-    )
-    parser.add_argument(
-        "--atlas",
-        type=str,
-        default="tpl-MNI152NLin2009bSym/tpl-MNI152NLin2009bSym_res-03_atlas-MIST_desc-ROI_dseg.nii.gz",
+        default="tpl-MNI152NLin2009bSym_res-03_atlas-MIST_desc-ROI_dseg.nii.gz",
     )
 
     main(parser.parse_args())
