@@ -1,0 +1,11 @@
+# @package _global_
+
+space: T1w
+use_template_gm: False
+gm_path: ./atlases/tpl-sub*T1w/tpl-sub*T1w_res-func_label-GM_desc-from-FS_dseg.nii.gz
+
+use_template_parcel: False
+parcellation: ./atlases/tpl-sub*T1w/tpl-sub*T1w_res-func_atlas-language-Toneva_desc-AngularG_mask.nii.gz
+
+parcel_name: language-Toneva_AngularG
+parcel_type: mask

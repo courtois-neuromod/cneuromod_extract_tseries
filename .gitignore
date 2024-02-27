@@ -87,7 +87,9 @@ target/
 
 # Output files
 outputs/*
-!outputs/.gitkeep
 data/*
+atlases/*
+masks/*
+!*/.gitkeep
 env/*
-atlases/tpl*
+slurm_files/*
