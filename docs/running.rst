@@ -15,7 +15,6 @@ atlases and denoising strategies.
 Users can call the existing config files from the command line, or customize
 their own as explained below. The parameters to specify are described here.
 
-
 1. Dataset
 ----------
 
