@@ -52,7 +52,7 @@ to the dataset.
 
   export AWS_ACCESS_KEY_ID=<s3_access_key>  AWS_SECRET_ACCESS_KEY=<s3_secret_key>
 
-Install the dataset repositery as ``<dataset_name>.fmriprep``.
+Install the dataset repository as ``<dataset_name>.fmriprep``.
 The default location is within ``cneuromod_extract_tseries/data``
 
 E.g.,
