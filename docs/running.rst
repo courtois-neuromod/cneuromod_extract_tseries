@@ -62,7 +62,7 @@ If needed, this default can be overridden at the command line when launching the
 It can also be modified manually for all analyses directly in ``timeseries/config/base.yaml``
 
 
-A subject's timeseries will be exported as ``<output_dir>/<dset_name>/<parcel_name>/timeseries/<subject>_<dset_name>_<template>_<parcel_name>_<denoising_strategy>_<voxel,parcel>wise_BOLDtimeseries.h5``
+A subject's timeseries will be exported as ``<output_dir>/<dset_name>/<parcel_name>/timeseries/<subject>_<dset_name>_<template>_<parcel_name>_<denoising_strategy>_<voxel , parcel>wise_BOLDtimeseries.h5``
 
 For example,
 
