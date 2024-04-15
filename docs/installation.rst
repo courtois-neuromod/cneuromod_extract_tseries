@@ -32,8 +32,7 @@ where the dataset will be installed and adding it to Github. See the
 3. Installing the code repository
 ---------------------------------
 
-Clone the current code repository from GitHub.
-::
+Clone the current code repository from GitHub.::
     datalad clone git@github.com:courtois-neuromod/cneuromod_extract_tseries.git
     cd cneuromod_extract_tseries
 
@@ -52,7 +51,7 @@ Install the dataset repositery as ``<dataset_name>.fmriprep``.
 The default location is within ``cneuromod_extract_tseries/data``
 
 E.g.,
-:: 
+::
   cd data
   datalad install git@github.com:courtois-neuromod/friends.fmriprep.git
   cd friends.fmriprep
