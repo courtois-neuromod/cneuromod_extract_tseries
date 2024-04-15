@@ -47,6 +47,7 @@ Specify your CNeuroMod login credentials as environment variables in your
 
 Use the **access_key** and **secret_key** you received when granted access
 to the dataset.
+
 .. code-block::
 
   export AWS_ACCESS_KEY_ID=<s3_access_key>  AWS_SECRET_ACCESS_KEY=<s3_secret_key>
@@ -64,17 +65,20 @@ E.g.,
 By default, the latest stable (recommended) release will be installed.
 If you need another version (e.g., to reproduce a result), you can switch
 to the appropriate tag/branch.
+
 .. code-block::
 
   git checkout rel/2022
 
 Pull the dataset repository's data from the server.
 To download the entire dataset recursively, do
+
 .. code-block::
 
   datalad get -r *
 
 To download a single subject's preprocessed data (e.g., sub-01), do
+
 .. code-block::
 
   datalad get -r sub-01/*
@@ -83,6 +87,7 @@ To download a single subject's preprocessed data (e.g., sub-01), do
 5. Setting up the virtual environment
 -------------------------------------
 Install the required libraries within a virtual environment.
+
 .. code-block::
 
   pip install -r requirements.txt
