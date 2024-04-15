@@ -56,6 +56,7 @@ Install the dataset repositery as ``<dataset_name>.fmriprep``.
 The default location is within ``cneuromod_extract_tseries/data``
 
 E.g.,
+
 .. code-block::
 
   cd data
