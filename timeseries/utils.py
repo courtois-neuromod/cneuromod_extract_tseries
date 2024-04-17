@@ -92,7 +92,6 @@ def prep_denoise_strategy(
 def make_parcel(
     parcellation: Nifti1Image,
     epi_mask: Nifti1Image,
-    #gm_path: Union[Path, None],
     gm_masking: bool,
 )-> Nifti1Image:
     """
@@ -119,7 +118,7 @@ def merge_masks(
 )-> Nifti1Image:
     """.
 
-    Combine task-derived subject epi mask and grey matter\ mask into one GM mask.
+    Combine task-derived subject epi mask and grey matter mask into one GM mask.
     Adapted from https://github.com/SIMEXP/giga_connectome/blob/22a4ae09f647870d576ead2a73799007c1f8159d/giga_connectome/mask.py#L65
     """
     gm_mask_nii = nib.load(gm_path)
