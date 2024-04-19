@@ -37,7 +37,7 @@ m_dir = Path(
     "../../../masks/yeo-7net/"
 ).resolve()
 
-for snum in ["sub-01", "sub-02", "sub-03", "sub-04", "sub-05", "sub-06"]:
+for snum in ["sub01", "sub02", "sub03", "sub04", "sub05", "sub06"]:
     func_mask_tw1 = nib.load(f"{m_dir}/network_masks/{snum}_T1w_res-func_desc-bold_mask.nii.gz")
 
     for val, roi_name in roi_dict.items():
