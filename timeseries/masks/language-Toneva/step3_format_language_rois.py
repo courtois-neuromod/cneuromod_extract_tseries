@@ -42,12 +42,12 @@ for snum in ["sub-01", "sub-02", "sub-03", "sub-04", "sub-05", "sub-06"]:
 
     for val, roi_name in roi_dict.items():
         mask_t1w = nib.load(
-            f"{lang_dir}/tpl-sub{snum}T1w/tpl-sub{snum}T1w_res-anat_"
+            f"{lang_dir}/tpl-{snum}T1w/tpl-{snum}T1w_res-anat_"
             f"atlas-langToneva_label-{roi_name}_mask.nii.gz"
         )
 
         rs_mask_t1w = resample_to_img(mask_t1w, func_mask_tw1, interpolation="nearest")
         rs_mask_t1w.to_filename(
-            f"{lang_dir}/tpl-sub{snum}T1w/tpl-sub{snum}T1w_res-func_"
+            f"{lang_dir}/tpl-{snum}T1w/tpl-{snum}T1w_res-func_"
             f"atlas-langToneva_label-{roi_name}_mask.nii.gz"
         )
