@@ -12,11 +12,11 @@ for s in range(1, 7):
 
     mask_mni_func = nib.load(
         f"{func_path}/sub-{snum}_MNI152NLin2009cAsym_res-"
-        "func_desc-func-brain_mask.nii.gz"
+        "func_desc-bold_mask.nii.gz"
     )
     mask_mni_GM = nib.load(
         f"{mask_path}/sub-{snum}_space-MNI152NLin2009cAsym_"
-        "label-GM_probseg_FSLinear.nii.gz"
+        "label-GM_desc-FSLinear_probseg.nii.gz"
     )
 
     # export binary GM mask at anatomical resolution w template naming
@@ -26,7 +26,7 @@ for s in range(1, 7):
             (mask_mni_GM.get_fdata() > 0.2).astype("uint8"),
         ),
         f"{mask_path}/tpl-MNI152NLin2009cAsym_sub-{snum}"
-        "_res-anat_label-GM_desc-from-FS_dseg.nii.gz",
+        "_res-anat_label-GM_desc-fromFS_dseg.nii.gz",
     )
 
     mask_mni_rs = nib.squeeze_image(
@@ -49,13 +49,13 @@ for s in range(1, 7):
         #mask_mni_rec,
         mask_mni_tr,
         f"{mask_path}/tpl-MNI152NLin2009cAsym_sub-{snum}"
-        "_res-func_label-GM_desc-from-FS_dseg.nii.gz"
+        "_res-func_label-GM_desc-fromFS_dseg.nii.gz"
     )
 
 
     mask_t1w_func = nib.load(
         f"{func_path}/sub-{snum}_T1w_res-func_desc-"
-        "func-brain_mask.nii.gz"
+        "bold_mask.nii.gz"
     )
     mask_t1w_GM = nib.load(
         f"{mask_path}/sub-{snum}_space-T1w_label-GM_dseg.nii.gz"
@@ -64,7 +64,7 @@ for s in range(1, 7):
     nib.save(
         mask_t1w_GM,
         f"{mask_path}/tpl-sub{snum}T1w"
-        "_res-anat_label-GM_desc-from-FS_dseg.nii.gz",
+        "_res-anat_label-GM_desc-fromFS_dseg.nii.gz",
     )
 
     mask_t1w_fl = new_img_like(
@@ -95,5 +95,5 @@ for s in range(1, 7):
         #mask_t1w_rec,
         mask_t1w_tr,
         f"{mask_path}/tpl-sub{snum}T1w"
-        "_res-func_label-GM_desc-from-FS_dseg.nii.gz"
+        "_res-func_label-GM_desc-fromFS_dseg.nii.gz"
     )

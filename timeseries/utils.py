@@ -114,7 +114,7 @@ def make_parcel(
 def merge_masks(
     epi_mask: Nifti1Image,
     gm_path: Path,
-    voxelwise: bool,
+    resample_gm: bool,
 )-> Nifti1Image:
     """.
 
@@ -124,8 +124,8 @@ def merge_masks(
     gm_mask_nii = nib.load(gm_path)
 
     # use wider GM mask to extract parcel signal
-    if not voxelwise:
-        # resample MNI grey matter template mask to subject's functional mask
+    if resample_gm:
+        # resample template grey matter mask to subject's functional mask
         gm_mask_nii = new_img_like(
             gm_mask_nii,
             get_data(gm_mask_nii).astype(np.float64),

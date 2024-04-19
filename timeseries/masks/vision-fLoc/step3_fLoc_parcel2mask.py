@@ -60,7 +60,7 @@ for sub in range(1, 7):
     parcel_list = glob.glob(
         "/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries/"
         f"masks/vision-fLoc/tpl-sub{sub_num}T1w/"
-        f"tpl-sub{sub_num}T1w_res-anat_atlas-vision-fLoc-kanwisher_desc-*_pseg-mask.nii"
+        f"tpl-sub{sub_num}T1w_res-anat_atlas-fLocVisionKanwisher_label-*_pseg.nii"
     )
 
     for parcel_path in parcel_list:
@@ -75,12 +75,12 @@ for sub in range(1, 7):
             dtype="uint8",
         )
 
-        pname = parcel_path.split('/')[-1].split("_")[-2]
+        pname = parcel_path.split('/')[-1].split("Kanwisher_")[-1].split("_pseg")[0]
 
         mpath = Path(
             "/home/mstlaure/projects/rrg-pbellec/mstlaure/"
             f"cneuromod_extract_tseries/masks/vision-fLoc/tpl-sub{sub_num}T1w/"
-            f"tpl-sub{sub_num}/tpl-sub{sub_num}T1w_res-func_atlas-vision-fLoc-"
-            f"kanwisher_{pname}_mask.nii.gz"
+            f"tpl-sub{sub_num}/tpl-sub{sub_num}T1w_res-func_atlas-fLocVision"
+            f"Kanwisher_{pname}_mask.nii.gz"
         )
         nib.save(rs_parcel, mpath)

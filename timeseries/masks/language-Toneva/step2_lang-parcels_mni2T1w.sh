@@ -11,18 +11,18 @@ SPREPDIR="/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries
 for SUBNUM in 01 02 03 04 05 06
 do
   antsApplyTransforms --default-value 0 --dimensionality 3 --float 0 \
-  --input ${PARCELPATH}/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-func_atlas-language-Toneva_desc-8_dseg.nii.gz \
+  --input ${PARCELPATH}/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-func_atlas-langToneva_desc-8_dseg.nii.gz \
   --interpolation NearestNeighbor \
-  --output ${PARCELPATH}/tpl-sub${SUBNUM}T1w/tpl-sub${SUBNUM}T1w_res-anat_atlas-language-Toneva_desc-8_dseg.nii.gz \
+  --output ${PARCELPATH}/tpl-sub${SUBNUM}T1w/tpl-sub${SUBNUM}T1w_res-anat_atlas-langToneva_desc-8_dseg.nii.gz \
   --reference-image ${SPREPDIR}/sub-${SUBNUM}/anat/sub-${SUBNUM}_desc-preproc_T1w.nii.gz \
   --transform ${SPREPDIR}/sub-${SUBNUM}/anat/sub-${SUBNUM}_from-MNI152NLin2009cAsym_to-T1w_mode-image_xfm.h5
 
   for PNAME in pCingulate dmpfc PostTemp AntTemp AngularG IFG MFG IFGorb
   do
     antsApplyTransforms --default-value 0 --dimensionality 3 --float 0 \
-    --input ${PARCELPATH}/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-func_atlas-language-Toneva_desc-${PNAME}_mask.nii.gz \
+    --input ${PARCELPATH}/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-func_atlas-langToneva_label-${PNAME}_mask.nii.gz \
     --interpolation NearestNeighbor \
-    --output ${PARCELPATH}/tpl-sub${SUBNUM}T1w/tpl-sub${SUBNUM}T1w_res-anat_atlas-language-Toneva_desc-${PNAME}_mask.nii.gz \
+    --output ${PARCELPATH}/tpl-sub${SUBNUM}T1w/tpl-sub${SUBNUM}T1w_res-anat_atlas-langToneva_label-${PNAME}_mask.nii.gz \
     --reference-image ${SPREPDIR}/sub-${SUBNUM}/anat/sub-${SUBNUM}_desc-preproc_T1w.nii.gz \
     --transform ${SPREPDIR}/sub-${SUBNUM}/anat/sub-${SUBNUM}_from-MNI152NLin2009cAsym_to-T1w_mode-image_xfm.h5
   done

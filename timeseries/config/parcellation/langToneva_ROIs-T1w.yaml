@@ -2,10 +2,12 @@
 
 space: T1w
 use_template_gm: False
-gm_path: ./atlases/tpl-sub*T1w/tpl-sub*T1w_res-func_label-GM_desc-from-FS_dseg.nii.gz
+resample_gm: False
+gm_path: ./atlases/tpl-sub*T1w/tpl-sub*T1w_res-func_label-GM_desc-fromFS_dseg.nii.gz
 
-use_template_parcel: False
-parcellation: ./atlases/tpl-sub*T1w/tpl-sub*T1w_res-anat_atlas-language-Toneva_desc-8_dseg.nii.gz
-
-parcel_name: language-Toneva_8ROIs
 parcel_type: dseg
+use_template_parcel: False
+parcellation: ./atlases/tpl-sub*T1w/tpl-sub*T1w_res-anat_atlas-langToneva_desc-8_dseg.nii.gz
+
+parcel_name: langToneva
+desc: 8

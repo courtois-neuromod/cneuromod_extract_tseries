@@ -2,10 +2,12 @@
 
 space: MNI152NLin2009cAsym
 use_template_gm: True
+resample_gm: True
 gm_path: ./atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_label-GM_probseg.nii.gz
 
+parcel_type: dseg
 use_template_parcel: True
 parcellation: ./atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_atlas-Schaefer2018_desc-1000Parcels7Networks_dseg.nii.gz
 
-parcel_name: Schaefer18_1000N7
-parcel_type: dseg
+parcel_name: Schaefer18
+desc: 1000Parcels7Networks

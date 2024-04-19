@@ -63,31 +63,29 @@ class ExtractionAnalysis:
     def set_paths(self: "ExtractionAnalysis") -> None:
         """.
 
-        Set analysis mask and output paths.
+        Set analysis masks, parcellations and output paths.
         """
         # Set mask paths
         # Grey matter mask(s) (template or subject-specific)
         self.gm_path = None if self.config.gm_path is None else self._prep_paths(
             self.config.gm_path, self.config.use_template_gm, "grey matter mask")
-        # Parcellation(s) (template or subject-specific)
+
+        # Parcellation(s)/ROI mask(s). Template or subject-specific
         self.parcellation_path = self._prep_paths(
             self.config.parcellation,
             self.config.use_template_parcel,
             "parcellation",
         )
 
-        # Set output paths
-        self.timeseries_dir = Path(
+        # Set output path
+        self.output_dir = Path(
             f"{self.config.output_dir}/{self.config.dset_name}/"
-            f"{self.config.parcel_name}/timeseries"
+            f"{self.config.parcel_name}_{self.config.desc}"
         ).resolve()
-        self.timeseries_dir.mkdir(parents=True, exist_ok=True)
-        # save timeseries-specific masks for reconstruction & visualization
-        self.mask_dir = Path(
-            f"{self.config.output_dir}/{self.config.dset_name}/"
-            f"{self.config.parcel_name}/subject_masks"
-        ).resolve()
-        self.mask_dir.mkdir(exist_ok=True, parents=True)
+        for s in self.subjects:
+            Path(
+                f"{self.output_dir}/sub-{s}/func"
+            ).mkdir(parents=True, exist_ok=True)
 
 
     def _prep_paths(
@@ -213,11 +211,11 @@ class ExtractionAnalysis:
         """.
         Generates subject EPI mask from all task run masks,
         confined by a grey matter mask if one is specified.
-        Resamples parcellation atlas to the EPI space.
-        Returns subject-specific parcellation and EPI mask.
+        Resamples parcellation atlas / ROI mask to the EPI space.
+        Returns subject-specific parcellation / ROI mask and EPI mask.
 
         For voxelwise extractions from a binary mask
-        (self.config.parcel_type == mask), the parcellation is confined by
+        (self.config.parcel_type == mask), the extraction is confined by
         the specified grey matter mask.
         """
         subject_epi_mask = self.make_subject_EPImask(
@@ -225,11 +223,12 @@ class ExtractionAnalysis:
             mask_list,
         )
 
-        m_type = "ROImask" if self.config.parcel_type == "mask" else "parcellation"
+        l_type = 'label-' if self.config.parcel_type == "mask" else "desc-"
         subject_parcel_path = Path(
-            f"{self.mask_dir}/sub-{subject}_{self.config.dset_name}"
-            f"_{self.config.space}_{self.config.parcel_name}_"
-            f"{m_type}.nii.gz"
+            f"{self.output_dir}/sub-{subject}/func/sub-{subject}_"
+            f"task-{self.config.dset_name}_space-{self.config.space}_"
+            f"atlas-{self.config.parcel_name}_{l_type}{self.config.desc}_"
+            f"{self.config.parcel_type}.nii.gz"
         )
         if subject_parcel_path.exists():
             print(
@@ -243,6 +242,7 @@ class ExtractionAnalysis:
                 parcellation = nib.load(
                     self.parcellation_path[f"sub-{subject}"]
                 )
+
             subject_parcel = utils.make_parcel(
                 parcellation,
                 subject_epi_mask,
@@ -269,10 +269,11 @@ class ExtractionAnalysis:
         mask if one is specified (self.gm_path != None),
         either subject-specific or from a standard template.
         """
-        m_type = "func" if self.gm_path is None else "func+GM"
+        m_type = "bold" if self.gm_path is None else "boldGMOverlap"
         subject_mask_path = (
-            f"{self.mask_dir}/sub-{subject}_{self.config.dset_name}"
-            f"_{self.config.space}_{m_type}_mask.nii.gz"
+            f"{self.output_dir}/sub-{subject}/func/sub-{subject}_"
+            f"task-{self.config.dset_name}_space-{self.config.space}_"
+            f"label-{m_type}_mask.nii.gz"
         )
 
         if Path(subject_mask_path).exists():
@@ -313,7 +314,7 @@ class ExtractionAnalysis:
                 subject_epi_mask = utils.merge_masks(
                     subject_epi_mask,
                     subject_gm_path,
-                    self.config.parcel_type == "mask",
+                    self.config.resample_gm,
                 )
 
             nib.save(subject_epi_mask, subject_mask_path)
@@ -348,12 +349,12 @@ class ExtractionAnalysis:
                 standardize=False,
             )
 
-        ts_type = 'voxel' if self.config.parcel_type == 'mask' else 'parcel'
+        l_type = 'label-' if self.config.parcel_type == 'mask' else 'desc-'
         subj_tseries_path = (
-            f"{self.timeseries_dir}/"
-            f"sub-{subject}_{self.config.dset_name}_{self.config.space}"
-            f"_{self.config.parcel_name}_{self.strategy['name']}"
-            f"_{ts_type}wise_BOLDtimeseries.h5"
+            f"{self.output_dir}/sub-{subject}/func/"
+            f"sub-{subject}_task-{self.config.dset_name}_"
+            f"space-{self.config.space}_atlas-{self.config.parcel_name}_"
+            f"{l_type}{self.config.desc}_timeseries.h5"
         )
         processed_run_list = []
         if Path(subj_tseries_path).exists():
