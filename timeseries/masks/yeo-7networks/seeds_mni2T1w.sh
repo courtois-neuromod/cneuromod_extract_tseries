@@ -6,7 +6,8 @@ module load ants/2.3.5
 # https://neurostars.org/t/how-to-transform-mask-from-mni-to-native-space-using-fmriprep-outputs/2880/8
 
 SEEDPATH="/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries/masks/yeo_networks/seed_masks"  # /path/to/infile_MNI.nii
-SPREPDIR="/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries/data/friends.fmriprep/sourcedata/smriprep"
+#SPREPDIR="/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries/data/friends.fmriprep/sourcedata/smriprep"
+SPREPDIR="/home/mstlaure/projects/rrg-pbellec/mstlaure/things_memory_results/data/things.fmriprep/sourcedata/smriprep"
 
 for PNAME in default-mode dorsal_attention fronto-parietal sensorimotor ventral_attention visual
 do

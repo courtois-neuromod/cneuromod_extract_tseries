@@ -38,7 +38,7 @@ m_dir = Path(
 ).resolve()
 
 for snum in ["sub-01", "sub-02", "sub-03", "sub-04", "sub-05", "sub-06"]:
-    func_mask_tw1 = nib.load(f"{m_dir}/binary_masks/{snum}_func-mask_T1w.nii.gz")
+    func_mask_tw1 = nib.load(f"{m_dir}/network_masks/{snum}_T1w_res-func_desc-bold_mask.nii.gz")
 
     for val, roi_name in roi_dict.items():
         mask_t1w = nib.load(
