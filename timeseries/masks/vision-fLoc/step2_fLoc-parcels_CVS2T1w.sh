@@ -1,3 +1,5 @@
+module load python/3.7.9
+
 module load StdEnv/2020
 module load gcc/9.3.0
 module load fsl/6.0.3
@@ -5,7 +7,7 @@ module load fsl/6.0.3
 module load freesurfer/7.1.1
 module load ants/2.3.5
 
-source /project/rrg-pbellec/mstlaure/.virtualenvs/things_memory_results/bin/activate
+#source /project/rrg-pbellec/mstlaure/.virtualenvs/things_memory_results/bin/activate
 
 # Loading the fsl module sets up $FSLDIR, no need to define it
 
@@ -26,7 +28,9 @@ source /project/rrg-pbellec/mstlaure/.virtualenvs/things_memory_results/bin/acti
 #mni152reg --s cvs_avg35
 
 PARCELDIR="/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries/masks/vision-fLoc"
-SPREPDIR="/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries/data/friends.fmriprep/sourcedata/smriprep"
+#SPREPDIR="/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries/data/friends.fmriprep/sourcedata/smriprep"
+SPREPDIR="/home/mstlaure/projects/rrg-pbellec/mstlaure/things_memory_results/data/things.fmriprep/sourcedata/smriprep"
+
 
 for PARAM in bodyEBA faceFFA faceOFA facepSTS sceneMPA sceneOPA scenePPA
 do
