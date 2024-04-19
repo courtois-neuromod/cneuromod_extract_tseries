@@ -34,7 +34,7 @@ roi_dict = {
 
 # TODO : update to permanent file...
 m_dir = Path(
-    "../../../masks/yeo_networks/"
+    "../../../masks/yeo-7net/"
 ).resolve()
 
 for snum in ["sub-01", "sub-02", "sub-03", "sub-04", "sub-05", "sub-06"]:
