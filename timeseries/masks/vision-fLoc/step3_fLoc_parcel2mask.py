@@ -20,7 +20,7 @@ for sub in range(1, 7):
     found_mask_list = sorted(
         glob.glob(
             "/home/mstlaure/projects/rrg-pbellec/mstlaure/"
-            "things_memory_results/data/friends.fmriprep2"
+            "friends_algonauts/data/friends.fmriprep2"
             f"/sub-{sub_num}/ses-*/func/*T1w*_mask.nii.gz",
             ),
         )
@@ -33,7 +33,7 @@ for sub in range(1, 7):
 
         bpath = sorted(glob.glob(
             "/home/mstlaure/projects/rrg-pbellec/mstlaure/"
-            "things_memory_results/data/friends.fmriprep2"
+            "friends_algonauts/data/friends.fmriprep2"
             f"/{s}/{ses}/func/{identifier}"
             f"*T1w*_desc-preproc_*bold.nii.gz"
         ))
