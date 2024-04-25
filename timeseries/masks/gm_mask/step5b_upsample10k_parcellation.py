@@ -1,5 +1,6 @@
 import glob
 from pathlib import Path
+import argparse
 
 import nibabel as nib
 import nilearn
@@ -38,15 +39,8 @@ parcellation = nib.load(
     "tpl-MNI152NLin2009cAsym_res-02_atlas-Schaefer2018_"
     "desc-1000Parcels7Networks_dseg.nii.gz"
 )
-mask_from_shaefer = nib.nifti1.Nifti1Image(
-    (parcellation.get_fdata() != 0.0).astype(int),
-    affine=parcellation.affine,
-    dtype="uint8",
-)
-#roi_list = [x for x in np.unique(parcellation.get_fdata()) if x > 0.0]
 
 snum = args.subject
-
 gm_mask_path = Path(
     f"{out_path}/tpl-MNI152NLin2009cAsym_sub-{snum}_task-friends_season-06_"
     "label-bold_mask.nii.gz"
@@ -111,36 +105,38 @@ gm_func_mask = nib.nifti1.Nifti1Image(
     dtype="uint8",
 )
 
-confounds, _ = nilearn.interfaces.fmriprep.load_confounds(
-    bold_list,
-    **LOAD_CONFOUNDS_PARAMS,
-)
-denoised_bold_list = []
-for i, file_path in tqdm(enumerate(bold_list)):
-    brain_masker = NiftiMasker(
-        #mask_img=dset_func_mask,
-        mask_img=gm_func_mask,
-        #mask_img=mask_from_shaefer,
-        detrend=False,
-        standardize="zscore_sample",
-        #smoothing_fwhm=5,
-        smoothing_fwhm=8,
-    )
-    brain_timeseries = brain_masker.fit_transform(
-        file_path,
-        confounds=confounds[i],
-    )
-    denoised_brain = brain_masker.inverse_transform(
-        brain_timeseries,
-    )
-    denoised_bold_list.append(denoised_brain)
 
 # Ward parcellation without clusters...
 wpath = Path(
     f"{out_path}/tpl-MNI152NLin2009cAsym_sub-{snum}_res-func_"
     "atlas-10kparcels_desc-Ward_dseg.nii.gz"
 )
+
 if not wpath.exists():
+    confounds, _ = nilearn.interfaces.fmriprep.load_confounds(
+        bold_list,
+        **LOAD_CONFOUNDS_PARAMS,
+    )
+    denoised_bold_list = []
+    for i, file_path in tqdm(enumerate(bold_list)):
+        brain_masker = NiftiMasker(
+            #mask_img=dset_func_mask,
+            mask_img=gm_func_mask,
+            #mask_img=mask_from_shaefer,
+            detrend=False,
+            standardize="zscore_sample",
+            #smoothing_fwhm=5,
+            smoothing_fwhm=8,
+        )
+        brain_timeseries = brain_masker.fit_transform(
+            file_path,
+            confounds=confounds[i],
+        )
+        denoised_brain = brain_masker.inverse_transform(
+            brain_timeseries,
+        )
+        denoised_bold_list.append(denoised_brain)
+
     ward = Parcellations(
         method="ward",
         n_parcels=10000,
@@ -157,27 +153,8 @@ if not wpath.exists():
 else:
     ward_labels_img = nib.load(wpath)
 
-rpath = Path(
-    f"{out_path}/tpl-MNI152NLin2009cAsym_sub-{snum}_res-func_"
-    "atlas-10kparcels_desc-ReNA_dseg.nii.gz"
-)
-if not rpath.exists():
-    rena = Parcellations(
-        method="rena",
-        n_parcels=10000,
-        mask=gm_func_mask,
-        #mask=mask_from_shaefer,
-        standardize=False,
-        smoothing_fwhm=None,
-        detrend=False,
-        verbose=1,
-    )
-    rena.fit(denoised_bold_list)
-    rena_labels_img = rena.labels_img_
-    rena_labels_img.to_filename(rpath)
 
-
-# Extract some descriptors, assign 10k parcels to Schaefer18_1000Parcels7Networks
+# Extract descriptors, assign 10k parcels to Schaefer18_1000Parcels7Networks
 flat_parcellation = parcellation_rs.get_fdata().reshape((-1))
 
 roi_list = [x for x in np.unique(ward_labels_img.get_fdata()) if x > 0.0]
