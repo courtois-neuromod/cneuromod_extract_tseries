@@ -45,47 +45,43 @@ gm_mask_path = Path(
     f"{out_path}/tpl-MNI152NLin2009cAsym_sub-{snum}_task-friends_season-06_"
     "label-bold_mask.nii.gz"
 )
-if not gm_mask_path.exists():
-    found_masks = sorted(
-        glob.glob(
-            f"{bold_path}/sub-{snum}/"
-            "ses-*/func/*task-s06e*space-MNI152NLin2009cAsym_desc-brain_mask.nii.gz",
+
+found_masks = sorted(
+    glob.glob(
+        f"{bold_path}/sub-{snum}/"
+        "ses-*/func/*task-s06e*space-MNI152NLin2009cAsym_desc-brain_mask.nii.gz",
+))
+
+bold_list = []
+mask_list = []
+for fm in found_masks:
+    identifier = fm.split('/')[-1].split('_space')[0]
+    sub, ses = identifier.split('_')[:2]
+
+    bpath = sorted(glob.glob(
+        f"{bold_path}/{sub}/{ses}/func/{identifier}"
+        "_space-MNI152NLin2009cAsym_desc-preproc_bold.nii.gz"
     ))
 
-    bold_list = []
-    mask_list = []
-    for fm in found_masks:
-        identifier = fm.split('/')[-1].split('_space')[0]
-        sub, ses = identifier.split('_')[:2]
+    if len(bpath) == 1 and Path(bpath[0]).exists():
+        bold_list.append(bpath[0])
+        mask_list.append(fm)
 
-        bpath = sorted(glob.glob(
-            f"{bold_path}/{sub}/{ses}/func/{identifier}"
-            "_space-MNI152NLin2009cAsym_desc-preproc_bold.nii.gz"
-        ))
-
-        if len(bpath) == 1 and Path(bpath[0]).exists():
-            bold_list.append(bpath[0])
-            mask_list.append(fm)
-
-    dset_func_mask = compute_multi_epi_mask(
-        mask_list,
-        lower_cutoff=0.2,
-        upper_cutoff=0.85,
-        connected=True,
-        opening=False,  # we should be using fMRIPrep masks
-        threshold=0.5,
-        target_affine=None,
-        target_shape=None,
-        exclude_zeros=False,
-        n_jobs=1,
-        memory=None,
-        verbose=0,
-    )
-
-    dset_func_mask.to_filename(gm_mask_path)
-
-else:
-    dset_func_mask = nib.load(gm_mask_path)
+dset_func_mask = compute_multi_epi_mask(
+    mask_list,
+    lower_cutoff=0.2,
+    upper_cutoff=0.85,
+    connected=True,
+    opening=False,  # we should be using fMRIPrep masks
+    threshold=0.5,
+    target_affine=None,
+    target_shape=None,
+    exclude_zeros=False,
+    n_jobs=1,
+    memory=None,
+    verbose=0,
+)
+dset_func_mask.to_filename(gm_mask_path)
 
 
 # already matching...
@@ -111,7 +107,6 @@ wpath = Path(
     f"{out_path}/tpl-MNI152NLin2009cAsym_sub-{snum}_res-func_"
     "atlas-10kparcels_desc-Ward_dseg.nii.gz"
 )
-
 if not wpath.exists():
     confounds, _ = nilearn.interfaces.fmriprep.load_confounds(
         bold_list,
