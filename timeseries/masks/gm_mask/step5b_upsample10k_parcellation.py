@@ -120,12 +120,9 @@ if not wpath.exists():
     denoised_bold_list = []
     for i, file_path in tqdm(enumerate(bold_list)):
         brain_masker = NiftiMasker(
-            #mask_img=dset_func_mask,
             mask_img=gm_func_mask,
-            #mask_img=mask_from_shaefer,
             detrend=False,
             standardize="zscore_sample",
-            #smoothing_fwhm=5,
             smoothing_fwhm=8,
         )
         brain_timeseries = brain_masker.fit_transform(
@@ -141,7 +138,6 @@ if not wpath.exists():
         method="ward",
         n_parcels=10000,
         mask=gm_func_mask,
-        #mask=mask_from_shaefer,
         standardize=False,
         smoothing_fwhm=None,
         detrend=False,
@@ -217,7 +213,6 @@ if not subparcel_path.exists():
 
 
 # Recursive binary parcellation within Schaefer1000...
-#cluster_label_list = []
 for r in roi_list:
     out_file = Path(
         f"{out_path}/temp/tpl-MNI152NLin2009cAsym_sub-{snum}_res-func_"
@@ -237,7 +232,6 @@ for r in roi_list:
             roi_mask,
             denoised_bold_list,
         )
-        #cluster_label_list.append(rena_labels)
         np.save(out_file, rena_labels)
 
     cluster_label_list = [np.load(x) for x in sorted(glob.glob(
