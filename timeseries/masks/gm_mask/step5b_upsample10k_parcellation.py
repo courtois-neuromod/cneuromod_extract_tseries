@@ -75,22 +75,24 @@ for fm in found_masks:
         bold_list.append(bpath[0])
         mask_list.append(fm)
 
-dset_func_mask = compute_multi_epi_mask(
-    mask_list,
-    lower_cutoff=0.2,
-    upper_cutoff=0.85,
-    connected=True,
-    opening=False,  # we should be using fMRIPrep masks
-    threshold=0.5,
-    target_affine=None,
-    target_shape=None,
-    exclude_zeros=False,
-    n_jobs=1,
-    memory=None,
-    verbose=0,
-)
-dset_func_mask.to_filename(gm_mask_path)
-
+if not gm_mask_path.exists():
+    dset_func_mask = compute_multi_epi_mask(
+        mask_list,
+        lower_cutoff=0.2,
+        upper_cutoff=0.85,
+        connected=True,
+        opening=False,  # we should be using fMRIPrep masks
+        threshold=0.5,
+        target_affine=None,
+        target_shape=None,
+        exclude_zeros=False,
+        n_jobs=1,
+        memory=None,
+        verbose=0,
+    )
+    dset_func_mask.to_filename(gm_mask_path)
+else:
+    dset_func_mask = nib.load(gm_mask_path)
 
 # already matching...
 parcellation_rs = resample_to_img(
