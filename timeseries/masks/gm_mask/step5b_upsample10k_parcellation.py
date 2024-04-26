@@ -10,6 +10,7 @@ from nilearn.maskers import NiftiMasker
 from nilearn.masking import compute_multi_epi_mask
 from nilearn.regions import Parcellations
 import numpy as np
+import pandas as pd
 from tqdm import tqdm
 
 
