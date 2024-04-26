@@ -114,20 +114,26 @@ if not wpath.exists():
     )
     denoised_bold_list = []
     for i, file_path in tqdm(enumerate(bold_list)):
-        brain_masker = NiftiMasker(
-            mask_img=gm_func_mask,
-            detrend=False,
-            standardize="zscore_sample",
-            smoothing_fwhm=8,
+        identifier = file_path.split('/')[-1].split('_desc')[0]
+        fpath = Path(
+            f"{out_path}/temp/{identifier}_desc-denoised_bold.nii.gz"
         )
-        brain_timeseries = brain_masker.fit_transform(
-            file_path,
-            confounds=confounds[i],
-        )
-        denoised_brain = brain_masker.inverse_transform(
-            brain_timeseries,
-        )
-        denoised_bold_list.append(denoised_brain)
+        if not fpath.exists():
+            brain_masker = NiftiMasker(
+                mask_img=gm_func_mask,
+                detrend=False,
+                standardize="zscore_sample",
+                smoothing_fwhm=8,
+            )
+            brain_timeseries = brain_masker.fit_transform(
+                file_path,
+                confounds=confounds[i],
+            )
+            denoised_brain = brain_masker.inverse_transform(
+                brain_timeseries,
+            )
+            denoised_brain.to_filename(fpath)
+        denoised_bold_list.append(fpath)
 
     ward = Parcellations(
         method="ward",
