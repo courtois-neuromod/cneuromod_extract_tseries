@@ -20,6 +20,13 @@ parser.add_argument(
     type=str,
     help="Subject to use (e.g. '01').",
 )
+parser.add_argument(
+    "--season",
+    type=str,
+    default="06",
+    help="two-digit season number, eg. 06",
+)
+args =
 args = parser.parse_args()
 
 LOAD_CONFOUNDS_PARAMS = {
@@ -42,15 +49,16 @@ parcellation = nib.load(
 )
 
 snum = args.subject
+season = args.season
 gm_mask_path = Path(
-    f"{out_path}/tpl-MNI152NLin2009cAsym_sub-{snum}_task-friends_season-06_"
+    f"{out_path}/tpl-MNI152NLin2009cAsym_sub-{snum}_task-friends_season-{season}_"
     "label-bold_mask.nii.gz"
 )
 
 found_masks = sorted(
     glob.glob(
         f"{bold_path}/sub-{snum}/"
-        "ses-*/func/*task-s06e*space-MNI152NLin2009cAsym_desc-brain_mask.nii.gz",
+        f"ses-*/func/*task-s{season}e*space-MNI152NLin2009cAsym_desc-brain_mask.nii.gz",
 ))
 
 bold_list = []
