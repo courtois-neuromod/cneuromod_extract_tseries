@@ -26,7 +26,6 @@ parser.add_argument(
     default="06",
     help="two-digit season number, eg. 06",
 )
-args =
 args = parser.parse_args()
 
 LOAD_CONFOUNDS_PARAMS = {
