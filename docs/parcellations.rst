@@ -29,6 +29,12 @@ e.g. ``atlases/tpl-sub0*T1w/tpl-sub*T1w_res-func_label-GM_desc-fromFS_dseg.nii.g
 Individual grey matter masks warped to MNI space are also available under
 ``atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_sub-*_res-func_label-GM_desc-fromFS_dseg.nii.gz``
 
+Individual 10k-parcel parcellations performed with the Ward parcellation within this grey matter mask in MNI space
+also provides features that cover the entire brain at a resolution that is lower than EPI voxels. Each 10k parcel
+is nested within the Schaefer18_1000Parcels7Networks parcel with which is shares the most voxels, for a nested hierarchical parcellation.
+Note however that some unassigned parcels fall within the cerebellum or subcortical grey matter structures, regions not covered by the Schaefer parcellation. \
+e.g., ``atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_sub-*_res-func_atlas-Ward_desc-10k_dseg.nii.gz``
+
 
 **Language ROI masks (n=8) from Mariya Toneva and Leila Wehbe**
 

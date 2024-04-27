@@ -115,7 +115,7 @@ gm_func_mask = nib.nifti1.Nifti1Image(
 # Ward parcellation without clusters...
 wpath = Path(
     f"{out_path}/tpl-MNI152NLin2009cAsym_sub-{snum}_res-func_"
-    "atlas-10kparcels_desc-Ward_dseg.nii.gz"
+    "atlas-Ward_desc-10k_dseg.nii.gz"
 )
 if not wpath.exists():
     confounds, _ = nilearn.interfaces.fmriprep.load_confounds(
@@ -179,7 +179,7 @@ idx_df = pd.DataFrame(
     columns=["10kParcel", "vox_count", "schaefer18_1kParcel7Net"],
 )
 idx_df.to_csv(
-    f"{out_path}/tpl-MNI152NLin2009cAsym_sub-{snum}_atlas-10kparcels_desc-Ward_dseg.tsv",
+    f"{out_path}/tpl-MNI152NLin2009cAsym_sub-{snum}_atlas-Ward_desc-10k_dseg.tsv",
     sep = "\t", header=True, index=False,
 )
 
