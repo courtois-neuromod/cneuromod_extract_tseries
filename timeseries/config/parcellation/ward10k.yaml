@@ -7,7 +7,7 @@ gm_path: ./atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_sub-*_res-fun
 
 parcel_type: dseg
 use_template_parcel: False
-parcellation: ./atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_sub-*_res-func_atlas-Ward_desc-10k_dseg.nii.gz"
+parcellation: ./atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_sub-*_res-func_atlas-Ward_desc-10k_dseg.nii.gz
 
 parcel_name: Ward
 desc: 10k

@@ -26,14 +26,15 @@ Subject-specific masks that include cortical and subcortical grey matter
 were created from Freesurfer segmentation (aseg.mgz) in T1w space. \
 e.g. ``atlases/tpl-sub0*T1w/tpl-sub*T1w_res-func_label-GM_desc-fromFS_dseg.nii.gz``
 
-Individual grey matter masks warped to MNI space are also available under
+Individual grey matter masks warped to MNI space are also available as
 ``atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_sub-*_res-func_label-GM_desc-fromFS_dseg.nii.gz``
 
-Individual 10k-parcel parcellations performed with the Ward parcellation within this grey matter mask in MNI space
-also provides features that cover the entire brain at a resolution that is lower than EPI voxels. Each 10k parcel
+Individual 10k-parcel parcellations performed with the Ward parcellation algorithm within individual grey matter masks in MNI space
+also provide features that provide full brain coverage at a lower resolution than EPI voxels. Each 10k parcel
 is nested within the Schaefer18_1000Parcels7Networks parcel with which is shares the most voxels, for a nested hierarchical parcellation.
 Note however that some unassigned parcels fall within the cerebellum or subcortical grey matter structures, regions not covered by the Schaefer parcellation. \
-e.g., ``atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_sub-*_res-func_atlas-Ward_desc-10k_dseg.nii.gz``
+e.g., ``atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_sub-*_res-func_atlas-Ward_desc-10k_dseg.nii.gz``. The nested assignment to larger Shaefer18-1000Parcels7Networks is
+detailed in ``atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_sub-01_atlas-Ward_desc-10k_dseg.tsv``.
 
 
 **Language ROI masks (n=8) from Mariya Toneva and Leila Wehbe**
