@@ -22,19 +22,12 @@ Those include:
 
 **Individual grey matter masks**
 
-Subject-specific masks that include cortical and subcortical grey matter
-were created from Freesurfer segmentation (aseg.mgz) in T1w space. \
-e.g. ``atlases/tpl-sub0*T1w/tpl-sub*T1w_res-func_label-GM_desc-fromFS_dseg.nii.gz``
-
-Individual grey matter masks warped to MNI space are also available as
-``atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_sub-*_res-func_label-GM_desc-fromFS_dseg.nii.gz``
-
-Individual 10k-parcel parcellations performed with the Ward parcellation algorithm within individual grey matter masks in
-subject (T1w) or MNI space also provide features that cover the entire brain at a resolution lower than EPI voxels. Each 10k parcel
-is nested within the Schaefer18_1000Parcels7Networks parcel with which is shares the most voxels, for a nested hierarchical parcellation.
-Note that, in T1w space, the Schaefer parcellation was warped to subject space to support this hierarchical assignment.
-Also, some unassigned parcels fall within the cerebellum or subcortical grey matter structures, regions not covered by the Schaefer parcellation. \
-e.g., ``atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_sub-*_res-func_atlas-Ward_desc-10k_dseg.nii.gz``, ``atlases/tpl-sub*T1w/tpl-sub*T1w_res-func_atlas-Ward_desc-10k_dseg.nii.gz``. The nested assignment to larger Shaefer18-1000Parcels7Networks is
+* Subject-specific masks that include cortical and subcortical grey matter were created from Freesurfer segmentation (aseg.mgz) in T1w space. E.g. ``atlases/tpl-sub0*T1w/tpl-sub*T1w_res-func_label-GM_desc-fromFS_dseg.nii.gz``
+* Individual grey matter masks warped to MNI space are also available as ``atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_sub-*_res-func_label-GM_desc-fromFS_dseg.nii.gz``
+* Individual 10k-parcel parcellations performed with the Ward algorithm within individual grey matter masks in
+subject (T1w) or MNI space also provide features that cover the entire brain at a resolution lower than EPI voxels. Each of the 10k parcels
+is nested within the Schaefer18_1000Parcels7Networks parcel with which is shares the most voxels, for a nested hierarchical parcellation. Note that, in T1w space, the Schaefer parcellation was warped to subject space to support this hierarchical assignment.
+Also, some unassigned parcels fall within the cerebellum or subcortical grey matter structures, regions not covered by the Schaefer parcellation. E.g., ``atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_sub-*_res-func_atlas-Ward_desc-10k_dseg.nii.gz``, ``atlases/tpl-sub*T1w/tpl-sub*T1w_res-func_atlas-Ward_desc-10k_dseg.nii.gz``. The nested assignment to larger Shaefer18-1000Parcels7Networks is
 detailed in ``atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_sub-*_atlas-Ward_desc-10k_dseg.tsv`` and ``atlases/tpl-sub*T1w/tpl-sub*T1w_atlas-Ward_desc-10k_dseg.tsv``.
 
 
