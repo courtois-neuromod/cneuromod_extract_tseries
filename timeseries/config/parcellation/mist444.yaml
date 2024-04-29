@@ -2,10 +2,12 @@
 
 space: MNI152NLin2009cAsym
 use_template_gm: True
+resample_gm: True
 gm_path: ./atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_label-GM_probseg.nii.gz
 
+parcel_type: dseg
 use_template_parcel: True
 parcellation: ./atlases/tpl-MNI152NLin2009bAsym/tpl-MNI152NLin2009bAsym_res-03_atlas-BASC_desc-444_dseg.nii.gz
 
-parcel_name: MIST_444
-parcel_type: dseg
+parcel_name: MIST
+desc: 444

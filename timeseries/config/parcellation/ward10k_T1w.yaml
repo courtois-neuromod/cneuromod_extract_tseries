@@ -5,9 +5,9 @@ use_template_gm: False
 resample_gm: False
 gm_path: ./atlases/tpl-sub*T1w/tpl-sub*T1w_res-func_label-GM_desc-fromFS_dseg.nii.gz
 
-parcel_type: mask
+parcel_type: dseg
 use_template_parcel: False
-parcellation: ./atlases/tpl-sub*T1w/tpl-sub*T1w_res-func_atlas-yeo7networks_label-defaultMode_mask.nii.gz
+parcellation: ./atlases/tpl-sub*T1w/tpl-sub*T1w_res-func_atlas-Ward_desc-10k_dseg.nii.gz
 
-parcel_name: yeo7networks
-desc: defaultMode
+parcel_name: Ward
+desc: 10k

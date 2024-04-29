@@ -67,7 +67,7 @@ lang_parcels_mni = nib.nifti1.Nifti1Image(
 
 lang_parcels_mni.to_filename(
     f"{lang_dir}/tpl-MNI152NLin2009cAsym/"
-    "tpl-MNI152NLin2009cAsym_res-func_atlas-language-Toneva_desc-8_dseg.nii.gz"
+    "tpl-MNI152NLin2009cAsym_res-func_atlas-langToneva_desc-8_dseg.nii.gz"
 )
 
 
@@ -85,6 +85,6 @@ for val, roi_name in roi_dict.items():
     mask_nii.to_filename(
         Path(
             f"{lang_dir}/tpl-MNI152NLin2009cAsym/"
-            f"tpl-MNI152NLin2009cAsym_res-func_atlas-language-Toneva_desc-{roi_name}_mask.nii.gz"
+            f"tpl-MNI152NLin2009cAsym_res-func_atlas-langToneva_label-{roi_name}_mask.nii.gz"
         )
     )

@@ -25,7 +25,7 @@ matter indices.
 matrices to warp grey matter masks from T1w to MNI space for each subject.
 * ``step4_anat2EPI_GM-masks.py``. Script downsamples subject grey matter masks
 in T1w and MNI space from anatomical to functional (EPI) resolution.
-
+* ``step5_upsample10k_parcellation.py``. Script applies Ward parcellation algorithm within grey matter mask to produce 10k parcels in MNI or T1w space, and assigns each of them to the Schaefer18_1000Parcels7Networks parcel (MNI space, or warped to subject space, depending) with which is shares the most voxels.
 
 
 **2. fLoc Visual Localizer**
@@ -33,9 +33,9 @@ in T1w and MNI space from anatomical to functional (EPI) resolution.
 Source: ``./timeseries/vision-fLoc`` \
 Scripts:
 
-* ``split_fLoc_CVSparcels_perROI.py``. Script takes group parcels from the [Kanwisher lab](https://web.mit.edu/bcs/nklab/GSS.shtml#download) in cvs_avg35 space and generates a separate binary mask for each ROI.
-* ``fLoc-parcels_CVS2T1w.sh``. Script takes group parcels in cvs_avg35 space, warps them to MNI space, then warps them to individual (T1w) space for each subject (result is probabilistic mask).
-* ``fLoc_parcel2mask.py``. Script resamples subject-space probabilistic parcels to the subject's EPI (functional) space, thresholds the parcels to obtain binary masks.
+* ``step1_split_fLoc_CVSparcels_perROI.py``. Script takes group parcels from the [Kanwisher lab](https://web.mit.edu/bcs/nklab/GSS.shtml#download) in cvs_avg35 space and generates a separate binary mask for each ROI.
+* ``step2_fLoc-parcels_CVS2T1w.sh``. Script takes group parcels in cvs_avg35 space, warps them to MNI space, then warps them to individual (T1w) space for each subject (result is probabilistic mask).
+* ``step3_fLoc_parcel2mask.py``. Script resamples subject-space probabilistic parcels to the subject's EPI (functional) space, thresholds the parcels to obtain binary masks.
 
 
 **3. Eight Language ROIs (from Toneva & Wehbe)**

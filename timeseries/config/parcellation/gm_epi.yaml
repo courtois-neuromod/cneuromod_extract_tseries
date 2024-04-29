@@ -7,7 +7,7 @@ gm_path: ./atlases/tpl-sub*T1w/tpl-sub*T1w_res-func_label-GM_desc-fromFS_dseg.ni
 
 parcel_type: mask
 use_template_parcel: False
-parcellation: ./atlases/tpl-sub*T1w/tpl-sub*T1w_res-func_atlas-yeo7networks_label-defaultMode_mask.nii.gz
+parcellation: ./atlases/tpl-sub*T1w/tpl-sub*T1w_res-func_label-GM_desc-fromFS_dseg.nii.gz
 
-parcel_name: yeo7networks
-desc: defaultMode
+parcel_name: Freesurfer
+desc: GM_res-func

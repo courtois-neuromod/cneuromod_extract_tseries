@@ -2,10 +2,12 @@
 
 space: T1w
 use_template_gm: False
-gm_path: ./atlases/tpl-sub*T1w/tpl-sub*T1w_res-func_label-GM_desc-from-FS_dseg.nii.gz
+resample_gm: False
+gm_path: ./atlases/tpl-sub*T1w/tpl-sub*T1w_res-func_label-GM_desc-fromFS_dseg.nii.gz
 
-use_template_parcel: False
-parcellation: ./atlases/tpl-sub*T1w/tpl-sub*T1w_res-func_atlas-vision-fLoc-kanwisher_desc-face-FFA_mask.nii.gz
-
-parcel_name: vision-fLoc-kanwisher_face-FFA
 parcel_type: mask
+use_template_parcel: False
+parcellation: ./atlases/tpl-sub*T1w/tpl-sub*T1w_res-func_atlas-fLocVisionKanwisher_label-faceFFA_mask.nii.gz
+
+parcel_name: fLocVisionKanwisher
+desc: faceFFA

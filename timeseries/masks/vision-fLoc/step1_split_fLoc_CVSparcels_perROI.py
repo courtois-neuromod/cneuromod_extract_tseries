@@ -122,9 +122,9 @@ def split_rois(in_dir, out_dir):
                 bilat_array.astype(float), affine=c_affine
             )
 
-            nib.save(left_mask, f'{out_dir}/tpl-CVSavg35_atlas-vision-fLoc-kanwisher_desc-{c}-{roi}-L_mask.nii')
-            nib.save(right_mask, f'{out_dir}/tpl-CVSavg35_atlas-vision-fLoc-kanwisher_desc-{c}-{roi}-R_mask.nii')
-            nib.save(bilat_mask, f'{out_dir}/tpl-CVSavg35_atlas-vision-fLoc-kanwisher_desc-{c}-{roi}_mask.nii')
+            nib.save(left_mask, f'{out_dir}/tpl-CVSavg35_atlas-fLocVisionKanwisher_label-{c}{roi}_desc-L_mask.nii')
+            nib.save(right_mask, f'{out_dir}/tpl-CVSavg35_atlas-fLocVisionKanwisher_label-{c}{roi}_desc-R_mask.nii')
+            nib.save(bilat_mask, f'{out_dir}/tpl-CVSavg35_atlas-fLocVisionKanwisher_label-{c}{roi}_mask.nii')
 
 
 if __name__ == '__main__':

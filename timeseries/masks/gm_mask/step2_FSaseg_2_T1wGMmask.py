@@ -55,4 +55,4 @@ for s in range(1, 7):
         affine=mask_FS_aseg.affine,
         dtype=np.float64,
     )
-    nib.save(mask_nii_float, f"{mask_path}/sub-{snum}_space-T1w_label-GM_dseg_FLOAT.nii.gz")
+    nib.save(mask_nii_float, f"{mask_path}/sub-{snum}_space-T1w_label-GM_desc-float_dseg.nii.gz")

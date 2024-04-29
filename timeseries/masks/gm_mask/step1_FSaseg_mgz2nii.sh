@@ -1,10 +1,12 @@
 
+module load StdEnv/2020
 module load freesurfer/7.1.1
 
 # Instructions to convert .mgz freesurfer files to .nii.gz
 # https://neurostars.org/t/freesurfer-mgz-to-nifti/21647
 
-INDIR="/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries/data/friends.fmriprep/sourcedata/smriprep/sourcedata/freesurfer"
+INDIR="/home/mstlaure/projects/rrg-pbellec/mstlaure/things_memory_results/data/things.fmriprep/sourcedata/smriprep/sourcedata/freesurfer"
+#INDIR="/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries/data/friends.fmriprep/sourcedata/smriprep/sourcedata/freesurfer"
 OUTDIR="/home/mstlaure/projects/rrg-pbellec/mstlaure/cneuromod_extract_tseries/masks/gm-masks/freesurfer"
 
 for SUBNUM in 01 02 03 04 05 06
