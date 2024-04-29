@@ -21,6 +21,12 @@ parser.add_argument(
     help="Subject to use (e.g. '01').",
 )
 parser.add_argument(
+    "--space",
+    type=str,
+    choices=["MNI152NLin2009cAsym", "T1w"],
+    help="EPI space. Choose either MNI152NLin2009cAsym or T1w",
+)
+parser.add_argument(
     "--season",
     type=str,
     default="06",
@@ -41,25 +47,47 @@ bold_path = Path(
 atlas_path = Path("../../../atlases").resolve()
 out_path = Path("../../../masks/gm-masks/parcellation").resolve()
 
-parcellation = nib.load(
-    f"{atlas_path}/tpl-MNI152NLin2009cAsym/"
-    "tpl-MNI152NLin2009cAsym_res-02_atlas-Schaefer2018_"
-    "desc-1000Parcels7Networks_dseg.nii.gz"
-)
-
 snum = args.subject
 season = args.season
-gm_mask_path = Path(
-    f"{out_path}/tpl-MNI152NLin2009cAsym_sub-{snum}_task-friends_season-{season}_"
-    "label-bold_mask.nii.gz"
-)
+space = args.space
+
+if space == "MNI152NLin2009cAsym":
+    parcellation = nib.load(
+        f"{atlas_path}/tpl-MNI152NLin2009cAsym/"
+        "tpl-MNI152NLin2009cAsym_res-02_atlas-Schaefer2018_"
+        "desc-1000Parcels7Networks_dseg.nii.gz"
+    )
+    func_mask_path = Path(
+        f"{out_path}/tpl-MNI152NLin2009cAsym_sub-{snum}_task-friends_season-{season}_"
+        "label-bold_mask.nii.gz"
+    )
+    gm_mask = nib.load(
+        f"{atlas_path}/tpl-MNI152NLin2009cAsym/"
+        f"tpl-MNI152NLin2009cAsym_sub-{snum}_res-func_"
+        "label-GM_desc-fromFS_dseg.nii.gz"
+    )
+
+else:
+    parcellation = nib.load(
+        f"{atlas_path}/tpl-sub{snum}T1w/"
+        f"tpl-sub{snum}T1w_res-anat_atlas-Schaefer2018_"
+        "desc-1000Parcels7Networks_dseg.nii.gz"
+    )
+    func_mask_path = Path(
+        f"{out_path}/tpl-sub{snum}T1w_task-friends_season-{season}_"
+        "label-bold_mask.nii.gz"
+    )
+    gm_mask = nib.load(
+        f"{atlas_path}/tpl-sub{snum}T1w/"
+        f"tpl-sub{snum}T1w_res-func_"
+        "label-GM_desc-fromFS_dseg.nii.gz"
+    )
 
 found_masks = sorted(
     glob.glob(
         f"{bold_path}/sub-{snum}/"
-        f"ses-*/func/*task-s{season}e*space-MNI152NLin2009cAsym_desc-brain_mask.nii.gz",
+        f"ses-*/func/*task-s{season}e*space-{space}_desc-brain_mask.nii.gz",
 ))
-
 bold_list = []
 mask_list = []
 for fm in found_masks:
@@ -68,14 +96,14 @@ for fm in found_masks:
 
     bpath = sorted(glob.glob(
         f"{bold_path}/{sub}/{ses}/func/{identifier}"
-        "_space-MNI152NLin2009cAsym_desc-preproc_bold.nii.gz"
+        f"_space-{space}_desc-preproc_bold.nii.gz"
     ))
 
     if len(bpath) == 1 and Path(bpath[0]).exists():
         bold_list.append(bpath[0])
         mask_list.append(fm)
 
-if not gm_mask_path.exists():
+if not func_mask_path.exists():
     dset_func_mask = compute_multi_epi_mask(
         mask_list,
         lower_cutoff=0.2,
@@ -90,33 +118,33 @@ if not gm_mask_path.exists():
         memory=None,
         verbose=0,
     )
-    dset_func_mask.to_filename(gm_mask_path)
+    dset_func_mask.to_filename(func_mask_path)
 else:
-    dset_func_mask = nib.load(gm_mask_path)
+    dset_func_mask = nib.load(func_mask_path)
 
-# already matching...
+# already matching in MNI space but not in T1w space...
 parcellation_rs = resample_to_img(
     parcellation, dset_func_mask, interpolation="nearest",
 )
-roi_list = [x for x in np.unique(parcellation_rs.get_fdata()) if x > 0.0]
+#roi_list = [x for x in np.unique(parcellation_rs.get_fdata()) if x > 0.0]
 
-gm_mask = nib.load(
-    f"{atlas_path}/tpl-MNI152NLin2009cAsym/"
-    f"tpl-MNI152NLin2009cAsym_sub-{snum}_res-func_"
-    "label-GM_desc-fromFS_dseg.nii.gz"
-)
 gm_func_mask = nib.nifti1.Nifti1Image(
     (gm_mask.get_fdata()*dset_func_mask.get_fdata()).astype(int),
     affine=dset_func_mask.affine,
     dtype="uint8",
 )
 
-
 # Ward parcellation without clusters...
-wpath = Path(
-    f"{out_path}/tpl-MNI152NLin2009cAsym_sub-{snum}_res-func_"
-    "atlas-Ward_desc-10k_dseg.nii.gz"
-)
+if space == "MNI152NLin2009cAsym":
+    wpath = Path(
+        f"{out_path}/tpl-MNI152NLin2009cAsym_sub-{snum}_res-func_"
+        "atlas-Ward_desc-10k_dseg.nii.gz"
+    )
+else:
+    wpath = Path(
+        f"{out_path}/tpl-sub{snum}T1w_res-func_"
+        "atlas-Ward_desc-10k_dseg.nii.gz"
+    )
 if not wpath.exists():
     confounds, _ = nilearn.interfaces.fmriprep.load_confounds(
         bold_list,
@@ -126,7 +154,7 @@ if not wpath.exists():
     for i, file_path in tqdm(enumerate(bold_list)):
         identifier = file_path.split('/')[-1].split('_desc')[0]
         fpath = Path(
-            f"{out_path}/temp/{identifier}_desc-denoised_bold.nii.gz"
+            f"{out_path}/temp/{identifier}_space-{space}_desc-denoised_bold.nii.gz"
         )
         if not fpath.exists():
             brain_masker = NiftiMasker(
@@ -179,7 +207,7 @@ idx_df = pd.DataFrame(
     columns=["10kParcel", "vox_count", "schaefer18_1kParcel7Net"],
 )
 idx_df.to_csv(
-    f"{out_path}/tpl-MNI152NLin2009cAsym_sub-{snum}_atlas-Ward_desc-10k_dseg.tsv",
+    f"{out_path}/tpl-sub{snum}T1w_atlas-Ward_desc-10k_dseg.tsv",
     sep = "\t", header=True, index=False,
 )
 
