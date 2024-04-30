@@ -25,7 +25,7 @@ matter indices.
 matrices to warp grey matter masks from T1w to MNI space for each subject.
 * ``step4_anat2EPI_GM-masks.py``. Script downsamples subject grey matter masks
 in T1w and MNI space from anatomical to functional (EPI) resolution.
-* ``step5_upsample10k_parcellation.py``. Script applies Ward parcellation algorithm within grey matter mask to produce 10k parcels in MNI or T1w space, and assigns each of them to the Schaefer18_1000Parcels7Networks parcel (MNI space, or warped to subject space, depending) with which is shares the most voxels.
+* ``step5_downsample_parcellation.py``. Script applies Ward parcellation algorithm within grey matter mask to produce a specified number of parcels (e.g., 10k) in MNI or T1w space, and assigns each of them to the Schaefer18_1000Parcels7Networks parcel (MNI space, or warped to subject space, depending) with which is shares the most voxels.
 
 
 **2. fLoc Visual Localizer**

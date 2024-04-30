@@ -18,12 +18,19 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--subject",
     type=str,
+    required=True,
     help="Subject to use (e.g. '01').",
 )
 parser.add_argument(
     "--space",
     type=str,
     choices=["MNI152NLin2009cAsym", "T1w"],
+    help="EPI space. Choose either MNI152NLin2009cAsym or T1w",
+)
+parser.add_argument(
+    "--nparcels",
+    type=int,
+    required=True,
     help="EPI space. Choose either MNI152NLin2009cAsym or T1w",
 )
 parser.add_argument(
@@ -50,6 +57,7 @@ out_path = Path("../../../masks/gm-masks/parcellation").resolve()
 snum = args.subject
 season = args.season
 space = args.space
+nparcels = args.nparcels
 
 if space == "MNI152NLin2009cAsym":
     parcellation = nib.load(
@@ -138,12 +146,12 @@ gm_func_mask = nib.nifti1.Nifti1Image(
 if space == "MNI152NLin2009cAsym":
     wpath = Path(
         f"{out_path}/tpl-MNI152NLin2009cAsym_sub-{snum}_res-func_"
-        "atlas-Ward_desc-10k_dseg.nii.gz"
+        f"atlas-Ward_desc-{nparcels}_dseg.nii.gz"
     )
 else:
     wpath = Path(
         f"{out_path}/tpl-sub{snum}T1w_res-func_"
-        "atlas-Ward_desc-10k_dseg.nii.gz"
+        f"atlas-Ward_desc-{nparcels}_dseg.nii.gz"
     )
 if not wpath.exists():
     confounds, _ = nilearn.interfaces.fmriprep.load_confounds(
@@ -175,7 +183,7 @@ if not wpath.exists():
 
     ward = Parcellations(
         method="ward",
-        n_parcels=10000,
+        n_parcels=nparcels,
         mask=gm_func_mask,
         standardize=False,
         smoothing_fwhm=None,
@@ -207,7 +215,7 @@ idx_df = pd.DataFrame(
     columns=["10kParcel", "vox_count", "schaefer18_1kParcel7Net"],
 )
 idx_df.to_csv(
-    f"{out_path}/tpl-sub{snum}T1w_atlas-Ward_desc-10k_dseg.tsv",
+    f"{out_path}/tpl-sub{snum}T1w_atlas-Ward_desc-{nparcels}_dseg.tsv",
     sep = "\t", header=True, index=False,
 )
 

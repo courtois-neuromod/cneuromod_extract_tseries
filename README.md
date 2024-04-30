@@ -37,9 +37,12 @@ Project Organization
     │   │   │   └── scrubbing.2+gsr.yaml
     │   │   │       
     │   │   ├── parcellation
-    │   │   │   ├── vision.yaml
-    │   │   │   ├── audio.yaml
-    │   │   │   ├── language.yaml
+    │   │   │   ├── fLocFFA.yaml
+    │   │   │   ├── langToneva_AngularG.yaml
+    │   │   │   ├── npythyV1.yaml
+    │   │   │   ├── ward10k_T1w.yaml
+    │   │   │   ├── yeo7nets_DMN.yaml
+    │   │   │   ├── schaefer1000.yaml
     │   │   │   └── mist444.yaml
     │   │   │
     │   │   └── base.yaml
