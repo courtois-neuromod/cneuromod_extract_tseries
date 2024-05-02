@@ -189,7 +189,7 @@ if __name__ == "__main__":
         episode = bold.split("/")[-1].split("_")[2].split("-")[-1]
         # masked dim = (TR, voxels)
         clean_bold = denoise_bold(
-            args, bold, tpl_mask, confound_list[i], smoothing_fwhm=args.fwhm,
+            args, bold, tpl_mask, confound_list[i], fwhm=args.fwhm,
         )
         save_clean(args, episode, clean_bold, out_file)
 
