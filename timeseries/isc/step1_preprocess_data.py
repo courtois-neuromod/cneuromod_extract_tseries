@@ -185,7 +185,7 @@ if __name__ == "__main__":
 
     bold_list, confound_list, tpl_mask, out_file = get_lists(args)
 
-    for i, bold in tqdm(enumerate(), desc="denoising bold"):
+    for i, bold in tqdm(enumerate(bold_list), desc="denoising bold"):
         episode = bold.split("/")[-1].split("_")[2].split("-")[-1]
         # masked dim = (TR, voxels)
         clean_bold = denoise_bold(
