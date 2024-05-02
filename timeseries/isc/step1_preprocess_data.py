@@ -112,8 +112,8 @@ def get_lists(args):
     dn = "Simple" if args.use_simple else ""
     Path(f"{args.odir}/input").mkdir(parents=True, exist_ok=True)
     out_file = Path(
-        f"{args.odir}/input/sub-{args.subject}_task-friends_"
-        f"space_{args.space}_desc-fwhm{args.fwhm}{dn}_bold.h5"
+        f"{args.odir}/input/sub-{args.subject}_task-friends_space_{args.space}_"
+        f"season-{args.season}_desc-fwhm{args.fwhm}{dn}_bold.h5"
     )
 
     return bold_list, confound_list, tpl_mask, out_file
