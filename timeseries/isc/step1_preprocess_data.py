@@ -75,7 +75,6 @@ def get_arguments():
     )
     parser.add_argument(
         "--use_simple",
-        type=bool,
         default=False,
         action="store_true",
         help="If True, use load_confound simple denoising strategy",
