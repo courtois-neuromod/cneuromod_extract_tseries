@@ -63,6 +63,8 @@ import nibabel as nib
 from nilearn.masking import unmask
 import numpy as np
 from scipy.spatial.distance import squareform
+from tqdm import tqdm
+
 logger = logging.getLogger(__name__)
 
 
@@ -113,12 +115,14 @@ def build_dset(args):
 
     dn = "Simple" if args.use_simple else ""
     for s in args.subjects:
+        print(s)
         ipath = Path(
             f"{args.idir}/input/sub-{s}_task-friends_space_{args.space}_"
             f"season-{args.season}_desc-fwhm{args.fwhm}{dn}_bold.h5"
         )
         s_data = h5py.File(ipath, "r")
         for epi in list(s_data.keys()):
+            print(epi)
             if epi not in all_epis:
                 all_epis[epi] = {
                     s: np.array(s_data[epi]).shape[0]
@@ -134,7 +138,7 @@ def build_dset(args):
         )]
 
     data_list = []
-    for i, s in enumerate(args.subjects):
+    for i, s in tqdm(enumerate(args.subjects), desc="building data array"):
         s_data = h5py.File(
             f"{args.idir}/input/sub-{s}_task-friends_space_{args.space}_"
             f"season-{args.season}_desc-fwhm{args.fwhm}{dn}_bold.h5",
