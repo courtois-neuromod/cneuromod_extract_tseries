@@ -70,7 +70,7 @@ def get_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--subjects",
-        type=list,
+        nargs='+',
         required=True,
         help="List of subjects to include. E.g., [01,02,03]",
     )
