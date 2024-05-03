@@ -143,7 +143,7 @@ def build_dset(args):
             f"{args.idir}/input/sub-{s}_task-friends_space_{args.space}_"
             f"season-{args.season}_desc-fwhm{args.fwhm}{dn}_bold.h5",
             "r")
-        sub_array = [np.array(s_data[x]).astype("float32") for x in epi_list]
+        sub_array = [np.array(s_data[x]) for x in epi_list]
 
         data_list.append(np.concatenate(sub_array, axis=0))
 

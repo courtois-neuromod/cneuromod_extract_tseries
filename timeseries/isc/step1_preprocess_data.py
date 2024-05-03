@@ -23,11 +23,6 @@ LOAD_CONFOUNDS_PARAMS = {
     "demean": True,
 }
 
-COMP_ARGS = {
-    "compression": "gzip",
-    "compression_opts": 4,
-}
-
 
 def get_arguments():
     parser = argparse.ArgumentParser()
@@ -145,7 +140,7 @@ def denoise_bold(args, scan, mask, confounds, fwhm):
 
     cleaned = masker.fit_transform(scan, confounds=confounds)
     #return masker.inverse_transform(cleaned)
-    return cleaned
+    return cleaned.astype("float32")
 
 
 def _subset_confounds(tsv):
@@ -175,7 +170,6 @@ def save_clean(args, episode, clean_bold, out_file):
         dset = f.create_dataset(
             episode,
             data=clean_bold,
-            **COMP_ARGS,
         )
 
 
