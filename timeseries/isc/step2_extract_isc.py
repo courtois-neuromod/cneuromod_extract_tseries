@@ -125,7 +125,7 @@ def build_dset(args):
                 }
             else:
                 all_epis[epi][s] = np.array(s_data[epi]).shape[0]
-        ipath.close()
+        s_data.close()
 
     epi_list = [
         k for k, v in all_epis.items() if np.logical_and(
@@ -139,12 +139,12 @@ def build_dset(args):
             f"{args.idir}/input/sub-{s}_task-friends_space_{args.space}_"
             f"season-{args.season}_desc-fwhm{args.fwhm}{dn}_bold.h5",
             "r")
-        sub_array = [np.array(s_data[x]) for x in epi_list]
+        sub_array = [np.array(s_data[x]).astype("float32") for x in epi_list]
 
         data_list.append(np.concatenate(sub_array, axis=0))
 
-    data_array = np.concatenate(data_list, axis=2)
-    data_array[np.isnan(data_array)] = 0
+    data_array = np.stack(data_list, axis=2)
+    data_array[np.isnan(data_array)] = 0.0
 
     return data_array
 
