@@ -146,7 +146,7 @@ def build_dset(args):
         sub_array = [np.array(s_data[x]) for x in epi_list]
         data_sub = np.concatenate(sub_array, axis=0)
 
-        jump = 1000
+        jump = 10000
         for i in range(0, data_sub.shape[1], jump):
             if i not in data_dict:
                 data_dict[i] = [data_sub[:, i:i+jump]]
