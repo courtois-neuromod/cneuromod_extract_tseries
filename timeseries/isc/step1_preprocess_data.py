@@ -42,7 +42,7 @@ def get_arguments():
         "--mdir",
         type=str,
         required=True,
-        help="absolute path to mask file",
+        help="absolute path to atlas directory",
     )
     parser.add_argument(
         "--odir",

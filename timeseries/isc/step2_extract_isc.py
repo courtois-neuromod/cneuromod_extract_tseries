@@ -74,7 +74,7 @@ def get_arguments():
         "--subjects",
         nargs='+',
         required=True,
-        help="List of subjects to include. E.g., [01,02,03]",
+        help='List of subjects to include. E.g., "01 02 03"',
     )
     parser.add_argument(
         "--idir",
@@ -137,20 +137,30 @@ def build_dset(args):
             len(np.unique([v[x] for x in list(v.keys())]).tolist()) == 1,
         )]
 
-    data_list = []
+    data_dict = {}
     for i, s in tqdm(enumerate(args.subjects), desc="building data array"):
         s_data = h5py.File(
             f"{args.idir}/input/sub-{s}_task-friends_space_{args.space}_"
             f"season-{args.season}_desc-fwhm{args.fwhm}{dn}_bold.h5",
             "r")
         sub_array = [np.array(s_data[x]) for x in epi_list]
+        data_sub = np.concatenate(sub_array, axis=0)
 
-        data_list.append(np.concatenate(sub_array, axis=0))
+        jump = 1000
+        for i in range(0, data_sub.shape[1], jump):
+            if i not in data_dict:
+                data_dict[i] = [data_sub[:, i:i+jump]]
+            else:
+                data_dict[i].append(data_sub[:, i:i+jump])
 
-    data_array = np.stack(data_list, axis=2)
-    data_array[np.isnan(data_array)] = 0.0
+        #data_list.append(np.concatenate(sub_array, axis=0))
 
-    return data_array
+    for i in sorted(list(data_dict.keys())):
+        data_array = np.stack(data_dict[i], axis=2)
+        data_array[np.isnan(data_array)] = 0.0
+        data_dict[i] = data_array
+
+    return data_dict
 
 
 def array_correlation(x, y, axis=0):
@@ -573,10 +583,15 @@ if __name__ == "__main__":
 
     args = get_arguments()
 
-    data_array = build_dset(args)
-    isc_results = isc(data_array, pairwise=False)
+    data_dict = build_dset(args)
+    isc_results = [
+        isc(data_dict[x], pairwise=False) for x in sorted(list(data_dict.keys()))
+    ]
 
-    save_isc(args, isc_results)
+    save_isc(
+        args,
+        np.concatenate(isc_results, axis=1)
+    )
 
 
 # import glob
