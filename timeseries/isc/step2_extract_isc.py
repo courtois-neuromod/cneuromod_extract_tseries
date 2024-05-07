@@ -585,7 +585,9 @@ if __name__ == "__main__":
 
     data_dict = build_dset(args)
     isc_results = [
-        isc(data_dict[x], pairwise=False) for x in sorted(list(data_dict.keys()))
+        isc(data_dict[x], pairwise=False) for x in tqdm(
+            sorted(list(data_dict.keys())), desc= "computing correlations",
+        )
     ]
 
     save_isc(
