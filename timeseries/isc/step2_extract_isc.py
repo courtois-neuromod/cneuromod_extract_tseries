@@ -149,6 +149,7 @@ def get_epilist(args):
 def build_dset(args, idx, jump, epi_list):
 
     data_list = []
+    dn = "Simple" if args.use_simple else ""
     for i, s in tqdm(enumerate(args.subjects), desc="building data array"):
         s_data = h5py.File(
             f"{args.idir}/input/sub-{s}_task-friends_space_{args.space}_"
