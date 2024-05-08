@@ -109,9 +109,13 @@ def get_arguments():
     return parser.parse_args()
 
 
-def build_dset(args):
-
+def get_epilist(args):
+    """
+    Compile a list of runs for which the number of TRs is the same across
+    all listed subjects
+    """
     all_epis = {}
+    vox_num = None
 
     dn = "Simple" if args.use_simple else ""
     for s in args.subjects:
@@ -123,6 +127,8 @@ def build_dset(args):
         s_data = h5py.File(ipath, "r")
         for epi in list(s_data.keys()):
             print(epi)
+            if vox_num is None:
+                vox_num = np.array(s_data[epi]).shape[1]
             if epi not in all_epis:
                 all_epis[epi] = {
                     s: np.array(s_data[epi]).shape[0]
@@ -137,30 +143,26 @@ def build_dset(args):
             len(np.unique([v[x] for x in list(v.keys())]).tolist()) == 1,
         )]
 
-    data_dict = {}
+    return epi_list, vox_num
+
+
+def build_dset(args, idx, jump, epi_list):
+
+    data_list = []
     for i, s in tqdm(enumerate(args.subjects), desc="building data array"):
         s_data = h5py.File(
             f"{args.idir}/input/sub-{s}_task-friends_space_{args.space}_"
             f"season-{args.season}_desc-fwhm{args.fwhm}{dn}_bold.h5",
             "r")
-        sub_array = [np.array(s_data[x]) for x in epi_list]
-        data_sub = np.concatenate(sub_array, axis=0)
+        sub_array = [np.array(s_data[x])[:, idx:idx+jump] for x in epi_list]
 
-        jump = 10000
-        for i in range(0, data_sub.shape[1], jump):
-            if i not in data_dict:
-                data_dict[i] = [data_sub[:, i:i+jump]]
-            else:
-                data_dict[i].append(data_sub[:, i:i+jump])
+        data_list.append(np.concatenate(sub_array, axis=0))
+        s_data.close()
 
-        #data_list.append(np.concatenate(sub_array, axis=0))
+    data_array = np.stack(data_list, axis=2)
+    data_array[np.isnan(data_array)] = 0.0
 
-    for i in sorted(list(data_dict.keys())):
-        data_array = np.stack(data_dict[i], axis=2)
-        data_array[np.isnan(data_array)] = 0.0
-        data_dict[i] = data_array
-
-    return data_dict
+    return data_array
 
 
 def array_correlation(x, y, axis=0):
@@ -583,11 +585,14 @@ if __name__ == "__main__":
 
     args = get_arguments()
 
-    data_dict = build_dset(args)
+    epi_list, vox_num = get_epilist(args)
+
+    jump = 5000
     isc_results = [
-        isc(data_dict[x], pairwise=False) for x in tqdm(
-            sorted(list(data_dict.keys())), desc= "computing correlations",
-        )
+        isc(
+            build_dset(args, idx, jump, epi_list),
+            pairwise=False,
+        ) for idx in range(0, vox_num, jump)
     ]
 
     save_isc(
