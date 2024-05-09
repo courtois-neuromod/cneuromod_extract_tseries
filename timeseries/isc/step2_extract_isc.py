@@ -143,6 +143,7 @@ def get_epilist(args):
             len(np.unique([v[x] for x in list(v.keys())]).tolist()) == 1,
         )]
 
+    print(f"Voxel count: {vox_num}")
     return epi_list, vox_num
 
 
@@ -575,7 +576,7 @@ def save_isc(args, isc_results):
     dn = "Simple" if args.use_simple else ""
     for i, snum in enumerate(args.subjects):
         nib.save(
-            unmask(isc_imgs[i, :], tpl_mask),
+            unmask(isc_results[i, :], tpl_mask),
             f"{args.idir}/output/sub-{snum}_task-friends_space_{args.space}_"
             f"season-{args.season}_stats-ISC_desc-fwhm{args.fwhm}{dn}_"
             "statseries.nii.gz",
