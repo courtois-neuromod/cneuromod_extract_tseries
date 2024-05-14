@@ -95,12 +95,6 @@ def get_arguments():
         help="smoothing kernel full-width at half-maximum in mm",
     )
     parser.add_argument(
-        "--season",
-        type=str,
-        default="06",
-        help="two-digit season number, eg. 06",
-    )
-    parser.add_argument(
         "--use_simple",
         default=False,
         action="store_true",
@@ -109,56 +103,75 @@ def get_arguments():
     return parser.parse_args()
 
 
-def get_epilist(args):
+def get_segments(args):
     """
-    Compile a list of runs for which the number of TRs is the same across
-    all listed subjects
+    Compile a dictionary of runs to process, and their length (TR)
+    for each subject.
     """
-    all_epis = {}
+    all_segments = {}
     vox_num = None
 
     dn = "Simple" if args.use_simple else ""
     for s in args.subjects:
         print(s)
         ipath = Path(
-            f"{args.idir}/input/sub-{s}_task-friends_space_{args.space}_"
-            f"season-{args.season}_desc-fwhm{args.fwhm}{dn}_bold.h5"
+            f"{args.idir}/input/sub-{s}_task-movie10_space_{args.space}_"
+            f"desc-fwhm{args.fwhm}{dn}_bold.h5"
         )
         s_data = h5py.File(ipath, "r")
-        for epi in list(s_data.keys()):
-            print(epi)
-            if vox_num is None:
-                vox_num = np.array(s_data[epi]).shape[1]
-            if epi not in all_epis:
-                all_epis[epi] = {
-                    s: np.array(s_data[epi]).shape[0]
-                }
-            else:
-                all_epis[epi][s] = np.array(s_data[epi]).shape[0]
+        for movie in list(s_data.keys()):
+            if movie not in all_segments:
+                all_segments[movie] = {}
+
+            for seg in list(s_data[movie].keys()):
+                print(movie, seg)
+                if vox_num is None:
+                    vox_num = np.array(s_data[movie][seg]).shape[1]
+                if seg not in all_segments[movie]:
+                    all_segments[movie][seg] = {
+                        s: np.array(s_data[movie][seg]).shape[0]
+                    }
+                else:
+                    all_segments[movie][seg][s] = np.array(
+                        s_data[movie][seg]
+                    ).shape[0]
         s_data.close()
 
-    # keep episodes for which # TRs matches for all subjects
-    epi_list = [
-        k for k, v in all_epis.items() if np.logical_and(
-            sorted(v.keys()) == args.subjects,
-            len(np.unique([v[x] for x in list(v.keys())]).tolist()) == 1,
-        )]
+    for movie in list(all_segments.keys()):
+        for seg in list(all_segments[movie].keys()):
+            all_segments[movie][seg] = int(np.min(
+                [v for k, v in all_segments[movie][seg].items()]
+            ))
+    # yikes...
+    for movie in ["figures", "life"]:
+        for seg in list(all_segments[f"{movie}_run-1"].keys()):
+            true_min = int(np.min([
+                all_segments[f"{movie}_run-1"][seg],
+                all_segments[f"{movie}_run-2"][seg],
+            ]))
+            all_segments[f"{movie}_run-1"][seg] = true_min
+            all_segments[f"{movie}_run-2"][seg] = true_min
 
     print(f"Voxel count: {vox_num}")
-    return epi_list, vox_num
+    return all_segments, vox_num
 
 
-def build_dset(args, idx, jump, epi_list):
+def build_dset(args, all_segments, movie):
 
-    data_list = []
     dn = "Simple" if args.use_simple else ""
+
+    print(movie)
+    data_list = []
     for i, s in tqdm(enumerate(args.subjects), desc="building data array"):
         s_data = h5py.File(
-            f"{args.idir}/input/sub-{s}_task-friends_space_{args.space}_"
-            f"season-{args.season}_desc-fwhm{args.fwhm}{dn}_bold.h5",
+            f"{args.idir}/input/sub-{s}_task-movie10_space_{args.space}_"
+            f"desc-fwhm{args.fwhm}{dn}_bold.h5",
             "r")
-        sub_array = [np.array(s_data[x])[:, idx:idx+jump] for x in epi_list]
-
+        sub_array = [
+            np.array(
+                s_data[movie][k]
+            )[:v, :] for k, v in all_segments[movie].items()
+        ]
         data_list.append(np.concatenate(sub_array, axis=0))
         s_data.close()
 
@@ -566,7 +579,7 @@ def _threshold_nans(data, tolerate_nans):
     return data, mask
 
 
-def save_isc(args, isc_results):
+def save_isc(args, isc_results, movie):
 
     tpl_mask = nib.load(
         f"{args.idir}/input/tpl-MNI152NLin2009cAsym_"
@@ -578,27 +591,59 @@ def save_isc(args, isc_results):
     for i, snum in enumerate(args.subjects):
         nib.save(
             unmask(isc_results[i, :], tpl_mask),
-            f"{args.idir}/output/sub-{snum}_task-friends_space_{args.space}_"
-            f"season-{args.season}_stats-InterSC_desc-fwhm{args.fwhm}{dn}_"
-            "statseries.nii.gz",
+            f"{args.idir}/output/sub-{snum}_task-{movie}_space_{args.space}_"
+            f"stats-InterSC_desc-fwhm{args.fwhm}{dn}_statseries.nii.gz",
         )
+
+
+def intra_subcorr(args, vox_num, all_segments):
+
+    tpl_mask = nib.load(
+        f"{args.idir}/input/tpl-MNI152NLin2009cAsym_"
+        "res-02_desc-brain_mask.nii.gz"
+    )
+    dn = "Simple" if args.use_simple else ""
+    jump = 10000
+
+    for movie in ["figures", "life"]:
+        dset_1 = build_dset(args, all_segments, f"{movie}_run-1")
+        dset_2 = build_dset(args, all_segments, f"{movie}_run-2")
+
+        for i, snum in enumerate(args.subjects):
+            s_dset_1 = dset_1[:, :, i]
+            s_dset_2 = dset_2[:, :, i]
+            full_dset = np.stack([s_dset_1, s_dset_2], axis=2)
+
+            isc_results = [
+                isc(
+                    full_dset[:, idx:idx+jump, :], pairwise=False
+                ) for idx in range(0, vox_num, jump)
+            ]
+            nib.save(
+                unmask(np.concatenate(isc_results, axis=-1), tpl_mask),
+                f"{args.idir}/output/sub-{snum}_task-{movie}_space_"
+                f"{args.space}_stats-IntraSC_desc-fwhm{args.fwhm}{dn}_"
+                "statseries.nii.gz",
+            )
 
 
 if __name__ == "__main__":
 
     args = get_arguments()
 
-    epi_list, vox_num = get_epilist(args)
+    all_segments, vox_num = get_segments(args)
 
-    jump = 5000
-    isc_results = [
-        isc(
-            build_dset(args, idx, jump, epi_list),
-            pairwise=False,
-        ) for idx in range(0, vox_num, jump)
-    ]
+    # compute inter-subject correlations per movie
+    jump = 10000
+    for movie in list(all_segments.keys()):
+        mv_dset = build_dset(args, all_segments, movie)
+        isc_results = [
+            isc(
+                mv_dset[:, idx:idx+jump, :],
+                pairwise=False,
+            ) for idx in range(0, vox_num, jump)
+        ]
+        save_isc(args, np.concatenate(isc_results, axis=1), movie)
 
-    save_isc(
-        args,
-        np.concatenate(isc_results, axis=1)
-    )
+    # compute intra-subject correlations within figures and life movie repeats
+    intra_subcorr(args, vox_num, all_segments)
