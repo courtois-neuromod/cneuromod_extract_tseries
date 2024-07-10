@@ -16,7 +16,7 @@ Available Parcellations
 
 2. Subject-specific parcellations
 ---------------------------------
-For each subject, individual ROI masks and parcellations are saved under ``atlases/tpl-sub0*T1w/``
+For each subject, individual ROI masks and parcellations in native space are saved under ``atlases/tpl-sub0*T1w/``
 
 Those include:
 
@@ -44,6 +44,9 @@ For each subject, language ROIS were warped from standard MNI space to
 individual space. These ROIs are based on the work of Fedorenko et al. 2010
 and Binder et al., 2009, as explained `here <https://www.biorxiv.org/content/10.1101/2020.09.28.316935v4>`_
 
+ROI masks are also available in MNI space in a format compatible with all 6 subjects.
+E.g., ``atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-func_atlas-langToneva_label-AntTemp_mask.nii.gz``
+
 
 **Yeo networks (n=6) derived from seed functional connectivity**
 
@@ -56,12 +59,14 @@ Networks include:
 * Ventral attention network
 * Visual network
 
-E.g., ``atlases/tpl-sub0*T1w/tpl-sub*T1w_res-func_atlas-yeo7networks_label-defaultMode_mask.nii.gz``
-
 Networks are based on `Yeo et al., 2011 <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3174820/>`_
 For each subject, each network was derived by averaging the signal within a
 seed parcel (MIST-ROI atlas), and by correlating its activation with the
-rest of the brain using resting state runs from the hcptrt dataset.
+rest of the brain using resting state runs from the hcptrt dataset. Network masks are available in
+MNI and native (T1w) space for all subjects.
+
+E.g., ``atlases/tpl-sub0*T1w/tpl-sub*T1w_res-func_atlas-yeo7networks_label-defaultMode_mask.nii.gz``,
+``atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_sub-0*_res-func_atlas-yeo7networks_label-defaultMode_mask.nii.gz``
 
 
 **Early visual ROIs derived from retinotopy**
@@ -70,11 +75,13 @@ ROIs include:
 
 * V1, V2, V3, V3a, V3b, VO1, VO2, hV4, LO1, LO2, TO1 and TO2
 
-E.g., ``atlases/tpl-sub0*T1w/tpl-sub*T1w_res-func_atlas-retinoVisionNpythy_label-V1_mask.nii.gz``
-
-For three subjects (sub-01, sub-02 and sub-03) who completed a retinotopy task,
+For four subjects (sub-01, sub-02, sub-03 and sub-05) who completed a retinotopy task,
 ROI masks from the early visual cortex were derived from their population
 receptive fields and from group priors using the `Neuropythy toolbox <https://github.com/noahbenson/neuropythy>`_.
+ROI masks are available in MNI and native (T1w) space for the four subjects who completed the retinotopy task.
+
+E.g., ``atlases/tpl-sub0*T1w/tpl-sub*T1w_res-{anat, func}_atlas-retinoVisionNpythy_label-V1_mask.nii.gz``,
+``atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_sub-0*_res-{func, anat}_atlas-retinoVisionNpythy_label-V1_mask.nii.gz``
 
 
 **Higher visual ROIs derived from fLoc**
@@ -92,12 +99,17 @@ ROIs include:
 For three subjects (sub-01, sub-02 and sub-03) who completed the fLoc task,
 ROI masks from higher level visual areas with face, scene and
 body preferences were identified with a combination of group priors and their
-own data.
+own data. Binary ROI masks are available in MNI and native (T1w) space.
 
-E.g., ``atlases/tpl-sub0*T1w/tpl-sub*T1w_res-func_atlas-fLocVisionTask_label-faceFFA_mask.nii.gz``
+E.g., ``atlases/tpl-sub0*T1w/tpl-sub*T1w_res-func_atlas-fLocVisionTask_label-faceFFA_mask.nii.gz``,
+``atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_sub-0*_res-func_atlas-fLocVisionTask_label-faceFFA_mask.nii.gz``
 
 For all subjects, group parcels of regions with face, scene and
 body preferences identified by the `Kanwisher lab <https://web.mit.edu/bcs/nklab/GSS.shtml#download>`_ were also warped into
 single-subject space.
 
 E.g., ``atlases/tpl-sub0*T1w/tpl-sub*T1w_res-func_atlas-fLocVisionKanwisher_label-faceFFA_mask.nii.gz``
+
+The Kanwisher lab parcels are also available in MNI space in a standardized format that fits all subjects.
+
+E.g., ``atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-func_atlas-fLocVisionKanwisher_label-faceFFA_mask.nii.gz``

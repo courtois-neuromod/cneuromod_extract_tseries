@@ -36,9 +36,20 @@ Scripts:
 * ``step1_split_fLoc_CVSparcels_perROI.py``. Script takes group parcels from the [Kanwisher lab](https://web.mit.edu/bcs/nklab/GSS.shtml#download) in cvs_avg35 space and generates a separate binary mask for each ROI.
 * ``step2_fLoc-parcels_CVS2T1w.sh``. Script takes group parcels in cvs_avg35 space, warps them to MNI space, then warps them to individual (T1w) space for each subject (result is probabilistic mask).
 * ``step3_fLoc_parcel2mask.py``. Script resamples subject-space probabilistic parcels to the subject's EPI (functional) space, thresholds the parcels to obtain binary masks.
+* ``step4_T1w2MNI_taslROIs.sh``. Script warps visual ROIs derived from the fLoc task from individual (T1w) to MNI space (anatomical resolution).
+* ``step5_anat2EPI_MNIrois.py``. Script resamples visual ROI masks in MNI space from anatomical to functiona (EPI) resolution. Two sets of masks are resampled: those from the Kanwisher lab derived from group data, and those derived from the subject's own fLoc data.
 
 
-**3. Eight Language ROIs (from Toneva & Wehbe)**
+**3. Retinotopy Visual Localizer**
+
+Source: ``./timeseries/vision-retino`` \
+Scripts:
+
+* ``step1_retino_T1w2MNI.sh``. Script takes visual ROI masks produced from subject's retinotopy data with the NeuroPythy toolbox, and warps them from individual (T1w) to MNI space (anatomical resolution).
+* ``step2_anat2epi_retinoROIS.py``. Script resamples visual ROI masks in MNI space from anatomical to functiona (EPI) resolution.
+
+
+**4. Eight Language ROIs (from Toneva & Wehbe)**
 
 Source: ``./timeseries/language-Toneva`` \
 Scripts:
@@ -48,7 +59,7 @@ Scripts:
 * ``step3_format_language_rois.py``. Script resamples binary masks in individual T1w space from anatomical to functional (EPI) resolution. Output is final binary masks in EPI space.
 
 
-**4. Six of seven Yeo et al. 2011 networks from functional connectivity**
+**5. Six of seven Yeo et al. 2011 networks from functional connectivity**
 
 Source: ``./timeseries/yeo-7networks`` \
 Scripts:
@@ -60,4 +71,4 @@ Scripts:
 TODO: Audio: Maelle used MIST (MNI space) \
 TODO: Vale's methods, use Federenko parcels from prob of 200 subjects and intersect w subjects' story > math map from hcptrt. \
 TODO: the retino ROIs are from the retinotopy project, already binary masks in EPI space from Neuropythy output \
-TODO Vision: retino, use group atlas for 3 remaining subjects?
+TODO Vision: retino, use group atlas for 2 remaining subjects?
