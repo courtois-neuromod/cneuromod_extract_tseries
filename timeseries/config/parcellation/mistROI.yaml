@@ -7,7 +7,7 @@ gm_path: ./atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_label-
 
 parcel_type: dseg
 use_template_parcel: True
-parcellation: ./atlases/tpl-MNI152NLin2009bAsym/tpl-MNI152NLin2009bAsym_res-03_atlas-MIST_desc-ROI_dseg.nii.gz
+parcellation: ./atlases/tpl-MNI152NLin2009bSym/tpl-MNI152NLin2009bSym_res-03_atlas-MIST_desc-ROI_dseg.nii.gz
 
 parcel_name: MIST
 desc: ROI
