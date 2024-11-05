@@ -415,18 +415,18 @@ class ExtractionAnalysis:
         """
         img_temp = None
         if 'part-mag' in img:
-            img_temp = f"{self.output_dir}/sub-{subject}/func/{
-                os.path.basename(img).replace('_part-mag', '')}"
+            img_temp = f"{self.output_dir}/sub-{subject}/func/{os.path.basename(
+                img).replace('_part-mag', '')}"
             conf = img.replace(
                 f"_space-{self.config.space}_desc-preproc_part-mag_bold.nii.gz",
                 "_desc-confounds_part-mag_timeseries.tsv",
             )
-            conf_temp = f"{self.output_dir}/sub-{subject}/func/{
-                os.path.basename(conf).replace('_part-mag', '')}"
+            conf_temp = f"{self.output_dir}/sub-{subject}/func/{os.path.basename(
+                conf).replace('_part-mag', '')}"
             subprocess.run(
                 f"cp {conf} {conf_temp}", shell = True, executable="/bin/bash",
             )
-            
+
         denoised_img = utils.denoise_nifti_voxel(
             self.strategy,
             subject_mask,
