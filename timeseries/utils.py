@@ -7,7 +7,6 @@ from nilearn.interfaces import fmriprep
 from nilearn.interfaces.bids import parse_bids_filename
 from nilearn.image import (
     get_data,
-    load_img,
     math_img,
     new_img_like,
     resample_to_img,
@@ -158,6 +157,7 @@ def denoise_nifti_voxel(
     standardize: str,
     smoothing_fwhm: float,
     img: str,
+    img_nm: Optional[str]
 ) -> Nifti1Image:
     """Denoise voxel level data per nifti image.
     Adapted from https://github.com/SIMEXP/giga_connectome/blob/22a4ae09f647870d576ead2a73799007c1f8159d/giga_connectome/denoise.py#L91C1-L138C1
@@ -175,13 +175,16 @@ def denoise_nifti_voxel(
         Smoothing kernel size in mm.
     img : str
         Path to the nifti image to denoise.
+    img_nm : str
+        Nifti path to match temporary confound file renamed without 'part-mag'.
 
     Returns
     -------
     Nifti1Image
         Denoised nifti image.
     """
-    cf, sm = strategy["function"](img, **strategy["parameters"])
+    img_no_mag = img if img_nm is None else img_nm
+    cf, sm = strategy["function"](img_no_mag, **strategy["parameters"])
     if _check_exclusion(cf, sm):
         return None
 
