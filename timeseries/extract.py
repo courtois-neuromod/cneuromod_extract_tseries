@@ -1,15 +1,9 @@
 from typing import List, Tuple, Dict, Union
-import glob
+import glob, os, subprocess
 from pathlib import Path
 
 import h5py
 import nibabel as nib
-from nilearn.image import (
-    get_data,
-    math_img,
-    new_img_like,
-    resample_to_img,
-)
 from nilearn.maskers import NiftiLabelsMasker, NiftiMapsMasker, NiftiMasker
 from nilearn.masking import compute_multi_epi_mask
 import numpy as np
@@ -390,6 +384,7 @@ class ExtractionAnalysis:
                 if not f"{specifier}_timeseries" in processed_runs:
                     time_series = self.get_tseries(
                         img,
+                        subject,
                         subject_epi_mask,
                         atlas_masker,
                     )
@@ -410,6 +405,7 @@ class ExtractionAnalysis:
     def get_tseries(
         self: "ExtractionAnalysis",
         img: str,
+        subject: str,
         subject_mask: nib.nifti1.Nifti1Image,
         atlas_masker: Union[NiftiLabelsMasker, NiftiMapsMasker, NiftiMasker],
     ) -> np.array:
@@ -417,13 +413,32 @@ class ExtractionAnalysis:
 
         Extract timeseries from denoised volume.
         """
+        img_temp = None
+        if 'part-mag' in img:
+            img_temp = f"{self.output_dir}/sub-{subject}/func/{
+                os.path.basename(img).replace('_part-mag', '')}"
+            conf = img.replace(
+                f"_space-{self.config.space}_desc-preproc_part-mag_bold.nii.gz",
+                "_desc-confounds_part-mag_timeseries.tsv",
+            )
+            conf_temp = f"{self.output_dir}/sub-{subject}/func/{
+                os.path.basename(conf).replace('_part-mag', '')}"
+            subprocess.run(
+                f"cp {conf} {conf_temp}", shell = True, executable="/bin/bash",
+            )
+            
         denoised_img = utils.denoise_nifti_voxel(
             self.strategy,
             subject_mask,
             self.standardize,
             self.config.smoothing_fwhm,
             img,
+            img_temp,
         )
+        if 'part-mag' in img:
+            subprocess.run(
+                f"rm -f {conf_temp}", shell = True, executable="/bin/bash",
+            )
 
         if not denoised_img:
             print(f"{img} : no volume after scrubbing")
