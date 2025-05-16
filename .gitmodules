@@ -1,0 +1,4 @@
+[submodule "atlases"]
+	path = atlases
+	url = git@github.com:courtois-neuromod/anat.atlases.git
+	datalad-url = git@github.com:courtois-neuromod/anat.atlases.git
