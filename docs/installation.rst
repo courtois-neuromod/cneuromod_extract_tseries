@@ -110,7 +110,7 @@ To download a single subject's preprocessed data (e.g., sub-01 data), do
 
 .. code-block::
 
-  datalad get -r sub-01/*
+  datalad get sub-01/*
 
 
 5. Setting up the virtual environment
