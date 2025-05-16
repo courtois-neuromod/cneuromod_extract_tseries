@@ -57,7 +57,7 @@ Download the content of the ``atlases`` submodule (altases, binary masks and par
     datalad get *       # 1st time pulls submodule content from github, including file symlinks (no image files downloaded)    
     datalad get *       # 2nd time downloads the image files from the S3 store using symlinks
 
-Rather than downloading the entire content of the atlases submodule, you can instead pull specific files, or a subset of the files, with a more targeted use of the ``datalad get`` command. For example,
+Rather than downloading the entire content of the ``atlases`` submodule, you can instead pull specific files, or a subset of files, with a more targeted use of the ``datalad get`` command. For example,
 
 .. code-block::
     
@@ -83,7 +83,7 @@ to the dataset.
 Install the dataset repository as a submodule named ``<dataset_name>.fmriprep``.
 The default location is under ``cneuromod_extract_tseries/data``
 
-For example, to install the Friends dataset,
+For example, to install the ``Friends`` dataset,
 
 .. code-block::
 
