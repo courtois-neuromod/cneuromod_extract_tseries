@@ -40,6 +40,34 @@ Clone the current code repository from GitHub.
     cd cneuromod_extract_tseries
 
 
+Specify your CNeuroMod login credentials (see Step 1) as environment variables in your
+``bash`` console. Use the **access_key** and **secret_key** you received when granted access
+to the dataset.
+
+.. code-block::
+
+  export AWS_ACCESS_KEY_ID=<s3_access_key>  AWS_SECRET_ACCESS_KEY=<s3_secret_key>
+
+
+Download the content of the ``atlases`` submodule (altases, binary masks and parcellations) from the NeuroMod Amazon S3 fileserver.
+
+.. code-block::
+
+    cd atlases          # after cloning the main repo, the submodule will appear empty
+    datalad get *       # 1st time pulls submodule content from github, including file symlinks (no image files downloaded)    
+    datalad get *       # 2nd time downloads the image files from the S3 store using symlinks
+
+Rather than downloading the entire content of the atlases submodule, you can instead pull specific files, or a subset of the files, with a more targeted use of the ``datalad get`` command. For example,
+
+.. code-block::
+    
+    # download all of sub-01's image files in native (T1w) space
+    datalad get tpl-sub01T1w/*         
+
+    # download sub-05's binary mask of V1 defined functionally with retinotopy in MNI (2009cAsym) space 
+    datalad get tpl-tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_sub-05_res-func_atlas-retinoVisionNpythy_label-V1_mask.nii.gz
+
+
 4. Installing the dataset(s)
 ----------------------------
 Specify your CNeuroMod login credentials as environment variables in your
@@ -52,15 +80,15 @@ to the dataset.
 
   export AWS_ACCESS_KEY_ID=<s3_access_key>  AWS_SECRET_ACCESS_KEY=<s3_secret_key>
 
-Install the dataset repository as ``<dataset_name>.fmriprep``.
-The default location is within ``cneuromod_extract_tseries/data``
+Install the dataset repository as a submodule named ``<dataset_name>.fmriprep``.
+The default location is under ``cneuromod_extract_tseries/data``
 
-E.g.,
+For example, to install the Friends dataset,
 
 .. code-block::
 
   cd data
-  datalad install git@github.com:courtois-neuromod/friends.fmriprep.git
+  datalad install -d ../ -s git@github.com:courtois-neuromod/friends.fmriprep.git ./friends.fmriprep
   cd friends.fmriprep
 
 By default, the latest stable (recommended) release will be installed.
@@ -72,13 +100,13 @@ to the appropriate tag/branch.
   git checkout rel/2022
 
 Pull the dataset repository's data from the server.
-To download the entire dataset recursively, do
+To download the entire dataset, do
 
 .. code-block::
 
-  datalad get -r *
+  datalad get *
 
-To download a single subject's preprocessed data (e.g., sub-01), do
+To download a single subject's preprocessed data (e.g., sub-01 data), do
 
 .. code-block::
 
