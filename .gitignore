@@ -88,6 +88,8 @@ target/
 # Output files
 outputs/*
 data/*
+isc/*
+atlases_backups/*
 masks/*
 !*/.gitkeep
 env/*
