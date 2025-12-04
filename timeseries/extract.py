@@ -413,36 +413,13 @@ class ExtractionAnalysis:
 
         Extract timeseries from denoised volume.
         """
-        img_temp = None
-        if 'part-mag' in img:
-            img_temp = str(Path(
-                f"{self.output_dir}/sub-{subject}/func/"
-                f"{os.path.basename(img).replace('_part-mag', '')}",
-            ))
-            conf = img.replace(
-                f"_space-{self.config.space}_desc-preproc_part-mag_bold.nii.gz",
-                "_desc-confounds_part-mag_timeseries.tsv",
-            )
-            conf_temp = str(Path(
-                f"{self.output_dir}/sub-{subject}/func/"
-                f"{os.path.basename(conf).replace('_part-mag', '')}",
-            ))
-            subprocess.run(
-                f"cp {conf} {conf_temp}", shell = True, executable="/bin/bash",
-            )
-
         denoised_img = utils.denoise_nifti_voxel(
             self.strategy,
             subject_mask,
             self.standardize,
             self.config.smoothing_fwhm,
             img,
-            img_temp,
         )
-        if 'part-mag' in img:
-            subprocess.run(
-                f"rm -f {conf_temp}", shell = True, executable="/bin/bash",
-            )
 
         if not denoised_img:
             print(f"{img} : no volume after scrubbing")
