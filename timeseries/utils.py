@@ -114,6 +114,7 @@ def merge_masks(
     epi_mask: Nifti1Image,
     gm_path: Path,
     resample_gm: bool,
+    use_func_mask: bool,
 )-> Nifti1Image:
     """.
 
@@ -141,14 +142,15 @@ def merge_masks(
         gm_mask = binary_closing(gm_mask, iterations=2)
         gm_mask_nii = new_img_like(gm, gm_mask)
 
-    # combine both functional and grey matter masks into one
-    subject_mask_nii = math_img(
-        "img1 & img2",
-        img1=epi_mask,
-        img2=gm_mask_nii,
-    )
-
-    return subject_mask_nii
+    if use_func_mask:
+        # combine both functional and grey matter masks into one
+        return math_img(
+            "img1 & img2",
+            img1=epi_mask,
+            img2=gm_mask_nii,
+        )
+    else:
+        return gm_mask_nii
 
 
 def denoise_nifti_voxel(

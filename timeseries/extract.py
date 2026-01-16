@@ -61,7 +61,7 @@ class ExtractionAnalysis:
         """
         # Set mask paths
         # Grey matter mask(s) (template or subject-specific)
-        self.gm_path = None if self.config.gm_path is None else self._prep_paths(
+        self.gm_path = self._prep_paths(
             self.config.gm_path, self.config.use_template_gm, "grey matter mask")
 
         # Parcellation(s)/ROI mask(s). Template or subject-specific
@@ -72,6 +72,9 @@ class ExtractionAnalysis:
         )
 
         # Set output path
+        if self.config.save_to_root:
+            self.output_dir = Path(self.config.output_dir).resolve()
+        else:
         self.output_dir = Path(
             f"{self.config.output_dir}/{self.config.dset_name}/"
             f"{self.config.parcel_name}_{self.config.desc}"
@@ -240,10 +243,7 @@ class ExtractionAnalysis:
             subject_parcel = utils.make_parcel(
                 parcellation,
                 subject_epi_mask,
-                np.logical_and(
-                    self.config.parcel_type == 'mask',
-                    self.gm_path is not None,
-                ),
+                self.config.mask_parcel,
             )
             nib.save(subject_parcel, subject_parcel_path)
 
@@ -259,15 +259,15 @@ class ExtractionAnalysis:
 
         Generate subject-specific EPI mask from all task runs.
 
-        Combine the task-derived EPI functional mask with a grey matter
-        mask if one is specified (self.gm_path != None),
-        either subject-specific or from a standard template.
+        Combine the task-derived EPI functional mask with a grey matter (GM) mask
+        if self.config.build_func_mask is True, otherwise use the GM mask alone.
+        GM mask is either subject-specific or from a standard template.
         """
-        m_type = "bold" if self.gm_path is None else "boldGMOverlap"
+        m_type = "boldGMIntersect" if self.config.build_func_mask else "GM"
         subject_mask_path = (
             f"{self.output_dir}/sub-{subject}/func/sub-{subject}_"
             f"task-{self.config.dset_name}_space-{self.config.space}_"
-            f"label-{m_type}_mask.nii.gz"
+            f"label-{m_type}_desc-{self.config.gm_name}_mask.nii.gz"
         )
 
         if Path(subject_mask_path).exists():
@@ -277,40 +277,44 @@ class ExtractionAnalysis:
             subject_epi_mask = nib.load(subject_mask_path)
 
         else:
-            """
-            Generate multi-session grey matter subject mask
-            Parameters from
-            https://github.com/SIMEXP/giga_connectome/blob/main/giga_connectome/mask.py
-            """
-            subject_epi_mask = compute_multi_epi_mask(
-                mask_list,
-                lower_cutoff=0.2,
-                upper_cutoff=0.85,
-                connected=True,
-                opening=False,  # we should be using fMRIPrep masks
-                threshold=0.5,
-                target_affine=None,
-                target_shape=None,
-                exclude_zeros=False,
-                n_jobs=1,
-                memory=None,
-                verbose=0,
-            )
-            print(
-                f"Group EPI mask affine:\n{subject_epi_mask.affine}"
-                f"\nshape: {subject_epi_mask.shape}"
-            )
+            subject_gm_path = self.gm_path if self.config.use_template_gm else self.gm_path[f"sub-{subject}"]
 
-            if self.gm_path is not None:
-                subject_gm_path = self.gm_path if self.config.use_template_gm else self.gm_path[f"sub-{subject}"]
-
-                # merge functional mask from subject's epi files w grey matter mask
-                subject_epi_mask = utils.merge_masks(
-                    subject_epi_mask,
-                    subject_gm_path,
-                    self.config.resample_gm,
+            if self.config.build_func_mask:
+                """
+                Generate multi-session grey matter subject mask
+                Parameters from
+                https://github.com/SIMEXP/giga_connectome/blob/main/giga_connectome/mask.py
+                """
+                subject_epi_mask = compute_multi_epi_mask(
+                    mask_list,
+                    lower_cutoff=0.2,
+                    upper_cutoff=0.85,
+                    connected=True,
+                    opening=False,  # we should be using fMRIPrep masks
+                    threshold=0.5,
+                    target_affine=None,
+                    target_shape=None,
+                    exclude_zeros=False,
+                    n_jobs=1,
+                    memory=None,
+                    verbose=0,
+                )
+                print(
+                    f"Group EPI mask affine:\n{subject_epi_mask.affine}"
+                    f"\nshape: {subject_epi_mask.shape}"
                 )
 
+            else:
+                subject_epi_mask = nib.load(mask_list[0])
+
+            # reconcile GM mask with functional mask from subject's epi file(s) 
+            subject_epi_mask = utils.merge_masks(
+                subject_epi_mask,
+                subject_gm_path,
+                self.config.resample_gm,
+                self.config.build_func_mask,
+            )
+                
             nib.save(subject_epi_mask, subject_mask_path)
 
         return subject_epi_mask
