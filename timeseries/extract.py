@@ -75,10 +75,10 @@ class ExtractionAnalysis:
         if self.config.save_to_root:
             self.output_dir = Path(self.config.output_dir).resolve()
         else:
-        self.output_dir = Path(
-            f"{self.config.output_dir}/{self.config.dset_name}/"
-            f"{self.config.parcel_name}_{self.config.desc}"
-        ).resolve()
+            self.output_dir = Path(
+                f"{self.config.output_dir}/{self.config.dset_name}/"
+                f"{self.config.parcel_name}_{self.config.desc}"
+            ).resolve()
         for s in self.subjects:
             Path(
                 f"{self.output_dir}/sub-{s}/func"
