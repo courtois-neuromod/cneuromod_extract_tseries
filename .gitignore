@@ -94,3 +94,4 @@ masks/*
 !*/.gitkeep
 env/*
 slurm_files/*
+dev_space/*
