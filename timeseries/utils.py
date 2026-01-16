@@ -104,7 +104,7 @@ def make_parcel(
     if gm_masking:
         subject_parcel = new_img_like(
             epi_mask,
-            (get_data(subject_parcel)*get_data(epi_mask)).astype("int64"),
+            (get_data(subject_parcel)*get_data(epi_mask)).astype("int32"),
         )
 
     return subject_parcel
