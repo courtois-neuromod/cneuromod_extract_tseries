@@ -1,4 +1,4 @@
 # @package _global_
 
 data_dir: ./data
-dset_name: emotionsvideos
+dset_name: hcptrt
