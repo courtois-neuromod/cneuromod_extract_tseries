@@ -4,9 +4,13 @@ space: MNI152NLin2009cAsym
 use_template_gm: False
 resample_gm: False
 gm_path: ./atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_sub-*_res-func_label-GM_desc-fromFS_dseg.nii.gz
+gm_name: indivGMfromFS
+
+build_func_mask: True
 
 parcel_type: dseg
 use_template_parcel: True
+mask_parcel: True
 parcellation: ./atlases/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-func_atlas-langToneva_desc-8_dseg.nii.gz
 
 parcel_name: langToneva
