@@ -9,7 +9,7 @@ defaults:
 
 smoothing_fwhm: 5.0
 
-save_to_root: False
+save_to_root: True
 output_dir: ./outputs
 compression: gzip
 compression_opts: 4
